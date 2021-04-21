@@ -50,14 +50,17 @@ class Transceiver(object):
         input_stream = ctx.socket(zmq.SUB)
         input_stream.setsockopt(zmq.RCVTIMEO, 500)
         input_stream.connect(self.input_stream_url)
-        input_stream.setsockopt(zmq.SUBSCRIBE, '')
+        input_stream.setsockopt_string(zmq.SUBSCRIBE, "")
 
         _logger.info(f'Binding output stream to {self.output_stream_url}.')
         output_stream = ctx.socket(zmq.PUB)
         output_stream.bind(self.output_stream_url)
 
         while self.run_thread:
-            image_metadata = input_stream.recv()
+            try:
+                image_metadata = input_stream.recv()
+            except zmq.Again:
+                continue
 
             message = self.processing_func(image_metadata)
 
