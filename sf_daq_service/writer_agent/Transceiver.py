@@ -6,10 +6,6 @@ import zmq
 
 _logger = logging.getLogger('BufferAgent')
 
-OP_CONTINUE = 0
-OP_START = 1
-OP_END = 2
-
 
 class ImageMetadata(Structure):
     _pack_ = 1
@@ -19,16 +15,20 @@ class ImageMetadata(Structure):
                 ("is_good_image", c_uint32)]
 
 
-class StoreStream(Structure):
+class WriteMetadata(Structure):
     _pack_ = 1
-    _fields_ = [("image_metadata", ImageMetadata),
-                ("run_id", c_uint64),
+    _fields_ = [("run_id", c_uint64),
                 ("i_image", c_uint32),
                 ("n_image", c_uint32),
                 ("image_y_size", c_uint32),
                 ("image_x_size", c_uint32),
-                ("op_code", c_uint32),
                 ("bits_per_pixel", c_uint32)]
+
+
+class StoreStreamMessage(Structure):
+    _pack_ = 1
+    _fields_ = [("image_meta", ImageMetadata),
+                ("writer_meta", WriteMetadata)]
 
 
 class Transceiver(object):
@@ -58,7 +58,7 @@ class Transceiver(object):
         while True:
             image_metadata = input_stream.recv()
 
-            store_metadata = self.processing_func(image_metadata)
+            message = self.processing_func(image_metadata)
 
-            if store_metadata:
-                output_stream.send(store_metadata)
+            if message:
+                output_stream.send(message)
