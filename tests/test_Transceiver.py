@@ -4,7 +4,7 @@ from time import sleep
 import zmq
 
 from sf_daq_service.writer_agent.BufferWriterAgent import ImageMetadata, WriterStreamMessage, WriteMetadata
-from sf_daq_service.writer_agent.Transceiver import Transceiver
+from sf_daq_service.common.Transceiver import Transceiver
 
 
 class TestTransceiver(unittest.TestCase):
@@ -27,7 +27,6 @@ class TestTransceiver(unittest.TestCase):
 
         def process_message(recv_bytes: bytes):
             nonlocal i_image
-            # self.assertEqual(image_meta.pulse_id, i_image)
             image_meta = ImageMetadata.from_buffer_copy(recv_bytes)
 
             write_meta = WriteMetadata(
