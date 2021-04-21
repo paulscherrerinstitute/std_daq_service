@@ -43,22 +43,6 @@ class Transceiver(object):
         transceiver_thread.daemon = True
         transceiver_thread.start()
 
-    def start_run(self, output_stream, start_stream_request):
-        # End run message resets the state of the writer before sending a write request.
-        # In case the writer is not in the expected state, this fixes it.
-        self.end_run()
-
-        _logger.info(f'Sending start run_id {start_stream_request.run_id}.')
-        output_stream.send(start_stream_request)
-
-        self.last_run_id = start_stream_request.run_id
-
-    def end_run(self, output_stream, stop_stream_request):
-        _logger.info(f'Sending stop run_id {self.last_run_id}.')
-        output_stream.send(stop_stream_request)
-
-        self.last_run_id = None
-
     def run_transceiver(self):
         ctx = zmq.Context()
 
@@ -74,13 +58,7 @@ class Transceiver(object):
         while True:
             image_metadata = input_stream.recv()
 
-            op_code, store_metadata = self.processing_func(image_metadata)
-
-            if op_code == OP_START:
-                self.start_run(output_stream, store_metadata)
+            store_metadata = self.processing_func(image_metadata)
 
             if store_metadata:
                 output_stream.send(store_metadata)
-
-            if op_code == OP_END:
-                self.end_run(output_stream, store_metadata)
