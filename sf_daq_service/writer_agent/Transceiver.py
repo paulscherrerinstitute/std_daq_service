@@ -1,34 +1,8 @@
 import logging
-from _ctypes import Structure
-from ctypes import c_uint64, c_uint32
 from threading import Thread
 import zmq
 
-_logger = logging.getLogger('BufferAgent')
-
-
-class ImageMetadata(Structure):
-    _pack_ = 1
-    _fields_ = [("pulse_id", c_uint64),
-                ("frame_index", c_uint64),
-                ("daq_rec", c_uint32),
-                ("is_good_image", c_uint32)]
-
-
-class WriteMetadata(Structure):
-    _pack_ = 1
-    _fields_ = [("run_id", c_uint64),
-                ("i_image", c_uint32),
-                ("n_image", c_uint32),
-                ("image_y_size", c_uint32),
-                ("image_x_size", c_uint32),
-                ("bits_per_pixel", c_uint32)]
-
-
-class WriterStreamMessage(Structure):
-    _pack_ = 1
-    _fields_ = [("image_meta", ImageMetadata),
-                ("write_meta", WriteMetadata)]
+_logger = logging.getLogger('Transceiver')
 
 
 class Transceiver(object):
@@ -44,28 +18,35 @@ class Transceiver(object):
         self.transceiver_thread.start()
 
     def run_transceiver(self):
-        ctx = zmq.Context()
+        try:
+            ctx = zmq.Context()
 
-        _logger.info(f'Connecting input stream to {self.input_stream_url}.')
-        input_stream = ctx.socket(zmq.SUB)
-        input_stream.setsockopt(zmq.RCVTIMEO, 500)
-        input_stream.connect(self.input_stream_url)
-        input_stream.setsockopt_string(zmq.SUBSCRIBE, "")
+            _logger.info(f'Connecting input stream to {self.input_stream_url}.')
+            input_stream = ctx.socket(zmq.SUB)
+            input_stream.setsockopt(zmq.RCVTIMEO, 500)
+            input_stream.connect(self.input_stream_url)
+            input_stream.setsockopt_string(zmq.SUBSCRIBE, "")
 
-        _logger.info(f'Binding output stream to {self.output_stream_url}.')
-        output_stream = ctx.socket(zmq.PUB)
-        output_stream.bind(self.output_stream_url)
+            _logger.info(f'Binding output stream to {self.output_stream_url}.')
+            output_stream = ctx.socket(zmq.PUB)
+            output_stream.bind(self.output_stream_url)
 
-        while self.run_thread:
-            try:
-                image_metadata = input_stream.recv()
-            except zmq.Again:
-                continue
+            while self.run_thread:
+                try:
+                    recv_bytes = input_stream.recv()
+                except zmq.Again:
+                    continue
 
-            message = self.processing_func(image_metadata)
+                message = self.processing_func(recv_bytes)
 
-            if message:
-                output_stream.send(message)
+                if message:
+                    output_stream.send(message)
+
+            _logger.info('Transceiver stopping on request.')
+
+        except Exception as e:
+            _logger.exception("Transceiver error", e)
+            raise KeyboardInterrupt
 
     def stop(self):
         self.run_thread = False
