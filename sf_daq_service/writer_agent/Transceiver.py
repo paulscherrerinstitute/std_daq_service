@@ -25,10 +25,10 @@ class WriteMetadata(Structure):
                 ("bits_per_pixel", c_uint32)]
 
 
-class StoreStreamMessage(Structure):
+class WriterStreamMessage(Structure):
     _pack_ = 1
     _fields_ = [("image_meta", ImageMetadata),
-                ("writer_meta", WriteMetadata)]
+                ("write_meta", WriteMetadata)]
 
 
 class Transceiver(object):
@@ -39,15 +39,16 @@ class Transceiver(object):
 
         self.last_run_id = None
 
-        transceiver_thread = Thread(target=self.run_transceiver)
-        transceiver_thread.daemon = True
-        transceiver_thread.start()
+        self.run_thread = True
+        self.transceiver_thread = Thread(target=self.run_transceiver)
+        self.transceiver_thread.start()
 
     def run_transceiver(self):
         ctx = zmq.Context()
 
         _logger.info(f'Connecting input stream to {self.input_stream_url}.')
         input_stream = ctx.socket(zmq.SUB)
+        input_stream.setsockopt(zmq.RCVTIMEO, 500)
         input_stream.connect(self.input_stream_url)
         input_stream.setsockopt(zmq.SUBSCRIBE, '')
 
@@ -55,10 +56,14 @@ class Transceiver(object):
         output_stream = ctx.socket(zmq.PUB)
         output_stream.bind(self.output_stream_url)
 
-        while True:
+        while self.run_thread:
             image_metadata = input_stream.recv()
 
             message = self.processing_func(image_metadata)
 
             if message:
                 output_stream.send(message)
+
+    def stop(self):
+        self.run_thread = False
+        self.transceiver_thread.join()
