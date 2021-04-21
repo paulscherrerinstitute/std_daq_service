@@ -3,7 +3,7 @@ from time import sleep
 
 import zmq
 
-from sf_daq_service.writer_agent.BufferWriterAgent import ImageMetadata, WriterStreamMessage, WriteMetadata
+from sf_daq_service.writer_agent.format import ImageMetadata, WriterStreamMessage, WriteMetadata
 from sf_daq_service.common.Transceiver import Transceiver
 
 
