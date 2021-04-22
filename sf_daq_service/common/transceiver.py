@@ -6,10 +6,10 @@ _logger = logging.getLogger('Transceiver')
 
 
 class Transceiver(object):
-    def __init__(self, input_stream_url, output_stream_url, processing_func):
+    def __init__(self, input_stream_url, output_stream_url, on_message_function):
         self.input_stream_url = input_stream_url
         self.output_stream_url = output_stream_url
-        self.processing_func = processing_func
+        self.on_message_function = on_message_function
 
         self.last_run_id = None
 
@@ -37,7 +37,7 @@ class Transceiver(object):
                 except zmq.Again:
                     continue
 
-                message = self.processing_func(recv_bytes)
+                message = self.on_message_function(recv_bytes)
 
                 if message:
                     output_stream.send(message)
@@ -45,7 +45,7 @@ class Transceiver(object):
             _logger.info('Transceiver stopping on request.')
 
         except Exception as e:
-            _logger.exception("Transceiver error", e)
+            _logger.exception("Transceiver error.")
             raise KeyboardInterrupt
 
     def stop(self):
