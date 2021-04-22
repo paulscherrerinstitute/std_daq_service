@@ -50,7 +50,7 @@ class BrokerListener(object):
 
             def process_async():
                 try:
-                    self.on_message_function(request)
+                    result = self.on_message_function(request)
 
                 except Exception as ex:
                     _logger.exception("Error while running the request in the service.")
@@ -59,7 +59,7 @@ class BrokerListener(object):
                     connection.add_callback_threadsafe(reject_request_f)
 
                 else:
-                    confirm_request_f = partial(self._confirm_request, body, method_frame.delivery_tag)
+                    confirm_request_f = partial(self._confirm_request, body, method_frame.delivery_tag, result)
                     connection.add_callback_threadsafe(confirm_request_f)
 
             thread = Thread(target=process_async)
