@@ -1,4 +1,3 @@
-import argparse
 import json
 import logging
 
@@ -8,7 +7,7 @@ from pika import BlockingConnection, ConnectionParameters, BasicProperties
 
 from sf_daq_service.common import broker_config
 
-_logger = logging.getLogger("start_service")
+_logger = logging.getLogger("BrokerListener")
 
 
 class BrokerListener(object):
@@ -94,27 +93,3 @@ class BrokerListener(object):
     def _reject_request(self, body, delivery_tag, message=None):
         self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
         self._update_status(body, broker_config.ACTION_REQUEST_FAIL, message)
-
-
-def start(broker_service):
-    parser = argparse.ArgumentParser(description='Broker service starter.')
-
-    parser.add_argument("service_name", type=str, help="Name of the service")
-    parser.add_argument("--broker_url", default=broker_config.DEFAULT_BROKER_URL,
-                        help="Address of the broker to connect to.")
-    parser.add_argument("--log_level", default="INFO",
-                        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
-                        help="Log level to use.")
-
-    args = parser.parse_args()
-
-    _logger.setLevel(args.log_level)
-    logging.getLogger("pika").setLevel(logging.WARNING)
-
-    _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
-
-    listener = BrokerListener(broker_url=args.broker_url,
-                              service_name=args.service_name,
-                              on_message_function=broker_service.on_broker_message)
-
-    listener.start_consuming()
