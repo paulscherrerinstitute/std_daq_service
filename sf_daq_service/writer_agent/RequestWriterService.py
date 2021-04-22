@@ -15,6 +15,7 @@ class RequestWriterService(object):
         self.write_request = None
         self.request = None
         self.request_completed = Event()
+        self.request_result = None
 
         self.i_image = None
 
@@ -22,16 +23,21 @@ class RequestWriterService(object):
         if self.request is None:
             return None
 
+        image_meta = ImageMetadata.from_buffer_copy(recv_bytes)
+
         if self.i_image is None:
             self.i_image = 0
-
-        image_meta = ImageMetadata.from_buffer_copy(recv_bytes)
+            self.request_result = {
+                'start_pulse_id': image_meta.pulse_id,
+                'n_images': self.request['n_images']
+            }
 
         write_meta = WriteMetadata(self.request["run_id"],
                                    self.i_image,
                                    self.request["n_images"])
 
         if self.i_image + 1 == self.request["n_images"]:
+            self.request_result["end_pulse_id"] = image_meta.pulse_id
             self._complete_request()
 
         return WriterStreamMessage(image_meta, write_meta)
@@ -42,11 +48,14 @@ class RequestWriterService(object):
         self.request_completed.set()
 
     def on_broker_message(self, request):
-        self._wait_on_request(request)
+        self._set_request_and_wait(request)
         self.request_completed.clear()
 
-    def _wait_on_request(self, request):
+        return self.request_result
+
+    def _set_request_and_wait(self, request):
         _logger.info(f"Starting to work on request {request}")
+        self.request_result = None
         self.request = request
         self.request_completed.wait()
 
