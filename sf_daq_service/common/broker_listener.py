@@ -115,5 +115,6 @@ def start(broker_service):
 
     listener = BrokerListener(broker_url=args.broker_url,
                               service_name=args.service_name,
-                              on_message_function=broker_service.on_message)
+                              on_message_function=broker_service.on_broker_message)
+
     listener.start_consuming()
