@@ -12,15 +12,5 @@ class ImageMetadata(Structure):
                 ("image_x_size", c_uint32),
                 ("bits_per_pixel", c_uint16)]
 
-
-class WriteMetadata(Structure):
-    _pack_ = 1
-    _fields_ = [("run_id", c_uint64),
-                ("i_image", c_uint32),
-                ("n_images", c_uint32)]
-
-
-class WriterStreamMessage(Structure):
-    _pack_ = 1
-    _fields_ = [("image_meta", ImageMetadata),
-                ("write_meta", WriteMetadata)]
+    def as_dict(self):
+        return dict((f, getattr(self, f)) for f, _ in self._fields_)

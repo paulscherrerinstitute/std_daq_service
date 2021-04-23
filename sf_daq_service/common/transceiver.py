@@ -40,7 +40,7 @@ class Transceiver(object):
                 message = self.on_message_function(recv_bytes)
 
                 if message:
-                    output_stream.send(message)
+                    output_stream.send_json(message)
 
             _logger.info('Transceiver stopping on request.')
 

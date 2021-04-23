@@ -5,7 +5,7 @@ from threading import Event
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_listener import BrokerListener
 from sf_daq_service.common.transceiver import Transceiver
-from sf_daq_service.writer_agent.format import ImageMetadata, WriterStreamMessage, WriteMetadata
+from sf_daq_service.writer_agent.format import ImageMetadata
 
 _logger = logging.getLogger('RequestWriteService')
 
@@ -32,15 +32,18 @@ class RequestWriterService(object):
                 'n_images': self.request['n_images']
             }
 
-        write_meta = WriteMetadata(self.request["run_id"],
-                                   self.i_image,
-                                   self.request["n_images"])
+        writer_stream_message = {
+            "output_file": self.request["output_file"],
+            "i_image": self.i_image,
+            "n_images": self.request["n_images"],
+            "image_metadata": image_meta.as_dict()
+        }
 
         if self.i_image + 1 == self.request["n_images"]:
             self.request_result["end_pulse_id"] = image_meta.pulse_id
             self._complete_request()
 
-        return WriterStreamMessage(image_meta, write_meta)
+        return writer_stream_message
 
     def _complete_request(self):
         self.request = None
