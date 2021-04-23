@@ -29,7 +29,8 @@ class RequestWriterService(object):
             self.i_image = 0
             self.request_result = {
                 'start_pulse_id': image_meta.pulse_id,
-                'n_images': self.request['n_images']
+                'n_images': self.request['n_images'],
+                'output_file': self.request["output_file"]
             }
 
         writer_stream_message = {
@@ -67,7 +68,7 @@ if __file__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')
 
     parser.add_argument("service_name", type=str, help="Name of the service")
-    parser.add_argument("--broker_url", default=broker_config.DEFAULT_BROKER_URL,
+    parser.add_argument("--broker_url", default=broker_config.TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
     parser.add_argument("--log_level", default="INFO",
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
