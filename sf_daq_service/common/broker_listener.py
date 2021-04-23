@@ -4,7 +4,6 @@ import logging
 from functools import partial
 from threading import Thread
 from pika import BlockingConnection, ConnectionParameters, BasicProperties
-from pika.exceptions import StreamLostError
 
 from sf_daq_service.common import broker_config
 
@@ -45,7 +44,7 @@ class BrokerListener(object):
     def stop(self):
         self.connection.add_callback_threadsafe(self.channel.stop_consuming)
 
-    def _on_broker_message(self, method_frame, header_frame, body, connection):
+    def _on_broker_message(self, channel, method_frame, header_frame, body):
 
         try:
             self._update_status(body, broker_config.ACTION_REQUEST_START)
@@ -60,11 +59,11 @@ class BrokerListener(object):
                     _logger.exception("Error while running the request in the service.")
 
                     reject_request_f = partial(self._reject_request, body, method_frame.delivery_tag, str(ex))
-                    connection.add_callback_threadsafe(reject_request_f)
+                    self.connection.add_callback_threadsafe(reject_request_f)
 
                 else:
                     confirm_request_f = partial(self._confirm_request, body, method_frame.delivery_tag, result)
-                    connection.add_callback_threadsafe(confirm_request_f)
+                    self.connection.add_callback_threadsafe(confirm_request_f)
 
             thread = Thread(target=process_async)
             thread.daemon = True
