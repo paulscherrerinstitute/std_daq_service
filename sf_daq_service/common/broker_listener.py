@@ -4,6 +4,7 @@ import logging
 from functools import partial
 from threading import Thread
 from pika import BlockingConnection, ConnectionParameters, BasicProperties
+from pika.exceptions import StreamLostError
 
 from sf_daq_service.common import broker_config
 
@@ -40,6 +41,9 @@ class BrokerListener(object):
             self.channel.start_consuming()
         except KeyboardInterrupt:
             self.channel.stop_consuming()
+
+    def stop(self):
+        self.connection.add_callback_threadsafe(self.channel.stop_consuming)
 
     def _on_broker_message(self, method_frame, header_frame, body, connection):
 
