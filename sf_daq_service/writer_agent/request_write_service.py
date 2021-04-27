@@ -43,6 +43,8 @@ class RequestWriterService(object):
         if self.i_image + 1 == self.request["n_images"]:
             self.request_result["end_pulse_id"] = image_meta.pulse_id
             self._complete_request()
+        else:
+            self.i_image += 1
 
         return writer_stream_message
 
