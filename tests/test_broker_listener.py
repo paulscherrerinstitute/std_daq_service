@@ -3,10 +3,9 @@ import unittest
 from threading import Thread
 from time import sleep
 
-from pika import BlockingConnection, ConnectionParameters
-
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_listener import BrokerListener
+from tests.utils import get_test_broker
 
 
 class TestBrokerListener(unittest.TestCase):
@@ -42,18 +41,7 @@ class TestBrokerListener(unittest.TestCase):
             thread.start()
             sleep(0.1)
 
-            connection = BlockingConnection(ConnectionParameters(broker_config.TEST_BROKER_URL))
-            channel = connection.channel()
-
-            channel.exchange_declare(exchange=broker_config.REQUEST_EXCHANGE,
-                                     exchange_type=broker_config.REQUEST_EXCHANGE_TYPE)
-            channel.exchange_declare(exchange=broker_config.STATUS_EXCHANGE,
-                                     exchange_type=broker_config.STATUS_EXCHANGE_TYPE)
-
-            queue = channel.queue_declare(queue="", exclusive=True).method.queue
-            channel.queue_bind(queue=queue,
-                               exchange=broker_config.STATUS_EXCHANGE)
-
+            channel, queue = get_test_broker()
             channel.basic_publish(exchange=broker_config.REQUEST_EXCHANGE,
                                   routing_key=service_name,
                                   body=json.dumps(request).encode())
