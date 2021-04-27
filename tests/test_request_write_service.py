@@ -40,10 +40,6 @@ class TestRequestWriteService(unittest.TestCase):
 
             channel, queue = get_test_broker()
 
-
-
-            sleep(0.1)
-
             def service_thread():
                 nonlocal transceiver
                 nonlocal listener
@@ -63,21 +59,24 @@ class TestRequestWriteService(unittest.TestCase):
 
             thread = Thread(target=service_thread)
             thread.start()
-            sleep(0.5)
+            sleep(0.1)
 
             channel.basic_publish(exchange=broker_config.REQUEST_EXCHANGE,
                                   routing_key=service_name,
                                   body=json.dumps(request).encode())
 
             sleep(0.1)
-            queue
 
             for pulse_id in range(request["n_images"]):
                 sender.send(ImageMetadata(pulse_id, 0, 0, 0))
 
             for pulse_id in range(request["n_images"]):
                 write_message = receiver.recv_json()
+
                 self.assertEqual(write_message["i_image"], write_message["image_metadata"]["pulse_id"])
+                self.assertEqual(write_message["i_image"], pulse_id)
+                self.assertEqual(write_message["output_file"], request["output_file"])
+                # TODO: Test also image metadata.
 
         finally:
             if transceiver is not None:
