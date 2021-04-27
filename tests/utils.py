@@ -1,3 +1,5 @@
+from time import sleep
+
 from pika import BlockingConnection, ConnectionParameters
 
 from sf_daq_service.common import broker_config
@@ -15,5 +17,7 @@ def get_test_broker():
     queue = channel.queue_declare(queue="", exclusive=True).method.queue
     channel.queue_bind(queue=queue,
                        exchange=broker_config.STATUS_EXCHANGE)
+
+    sleep(0.1)
 
     return channel, queue
