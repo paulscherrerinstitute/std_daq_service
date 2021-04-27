@@ -14,10 +14,10 @@ class Transceiver(object):
         self.last_run_id = None
 
         self.run_thread = True
-        self.transceiver_thread = Thread(target=self.run_transceiver)
+        self.transceiver_thread = Thread(target=self._run_transceiver)
         self.transceiver_thread.start()
 
-    def run_transceiver(self):
+    def _run_transceiver(self):
         try:
             ctx = zmq.Context()
 
