@@ -20,4 +20,4 @@ def get_test_broker():
 
     sleep(0.1)
 
-    return channel, queue
+    return connection, channel, queue

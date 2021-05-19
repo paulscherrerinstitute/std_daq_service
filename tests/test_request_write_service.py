@@ -5,7 +5,7 @@ from time import sleep
 import zmq
 
 from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_listener import BrokerListener
+from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
 from sf_daq_service.common.transceiver import Transceiver
 from sf_daq_service.writer_agent.format import ImageMetadata
 from sf_daq_service.writer_agent.request_write_service import RequestWriterService
@@ -26,6 +26,7 @@ class TestRequestWriteService(unittest.TestCase):
 
         transceiver = None
         listener = None
+        client = None
         thread = None
 
         try:
@@ -38,7 +39,7 @@ class TestRequestWriteService(unittest.TestCase):
             receiver.connect(output_stream_url)
             receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
-            channel, queue = get_test_broker()
+            clinet, channel, queue = get_test_broker()
 
             def service_thread():
                 nonlocal transceiver
@@ -51,9 +52,9 @@ class TestRequestWriteService(unittest.TestCase):
                                           output_stream_url=output_stream_url,
                                           on_message_function=service.on_stream_message)
 
-                listener = BrokerListener(broker_url=broker_config.TEST_BROKER_URL,
-                                          service_name=service_name,
-                                          on_message_function=service.on_broker_message)
+                listener = BrokerWorkerListener(broker_url=broker_config.TEST_BROKER_URL,
+                                                service_name=service_name,
+                                                on_message_function=service.on_broker_message)
 
                 listener.start_consuming()
 
@@ -87,3 +88,6 @@ class TestRequestWriteService(unittest.TestCase):
 
             if thread is not None:
                 thread.join()
+
+            if client:
+                client.close()

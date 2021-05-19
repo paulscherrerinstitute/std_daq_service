@@ -4,7 +4,7 @@ from threading import Thread
 from time import sleep
 
 from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_listener import BrokerListener
+from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
 from tests.utils import get_test_broker
 
 
@@ -13,6 +13,7 @@ class TestBrokerListener(unittest.TestCase):
 
         thread = None
         listener = None
+        client = None
 
         try:
             request = {
@@ -34,14 +35,14 @@ class TestBrokerListener(unittest.TestCase):
 
             def listener_thread():
                 nonlocal listener
-                listener = BrokerListener(broker_config.TEST_BROKER_URL, service_name, on_message)
+                listener = BrokerWorkerListener(broker_config.TEST_BROKER_URL, service_name, on_message)
                 listener.start_consuming()
 
             thread = Thread(target=listener_thread)
             thread.start()
             sleep(0.1)
 
-            channel, queue = get_test_broker()
+            client, channel, queue = get_test_broker()
             channel.basic_publish(exchange=broker_config.REQUEST_EXCHANGE,
                                   routing_key=service_name,
                                   body=json.dumps(request).encode())
@@ -77,3 +78,6 @@ class TestBrokerListener(unittest.TestCase):
 
             if thread:
                 thread.join()
+
+            if client:
+                client.close()
