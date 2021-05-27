@@ -4,7 +4,7 @@ from threading import Event
 
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
-from sf_daq_service.common.transceiver import Transceiver
+from sf_daq_service.writer_agent.transceiver import Transceiver
 from sf_daq_service.writer_agent.format import ImageMetadata
 
 _logger = logging.getLogger('RequestWriteService')

@@ -6,7 +6,7 @@ import zmq
 
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
-from sf_daq_service.common.transceiver import Transceiver
+from sf_daq_service.writer_agent.transceiver import Transceiver
 from sf_daq_service.writer_agent.format import ImageMetadata
 from sf_daq_service.writer_agent.request_write_service import RequestWriterService
 from tests.utils import get_test_broker
