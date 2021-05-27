@@ -4,7 +4,7 @@ import logging
 from flask import Flask, request, jsonify
 
 from sf_daq_service.common import broker_config
-from sf_daq_service.rest_proxy.request_factory import build_write_request
+from sf_daq_service.rest.request_factory import build_write_request
 
 _logger = logging.getLogger("RestProxyService")
 

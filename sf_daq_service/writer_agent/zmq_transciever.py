@@ -5,7 +5,7 @@ import zmq
 _logger = logging.getLogger('Transceiver')
 
 
-class Transceiver(object):
+class ZmqTransciever(object):
     def __init__(self, input_stream_url, output_stream_url, on_message_function):
         self.input_stream_url = input_stream_url
         self.output_stream_url = output_stream_url

@@ -7,7 +7,7 @@ from pika import BlockingConnection, ConnectionParameters, BasicProperties
 
 from sf_daq_service.common import broker_config
 
-_logger = logging.getLogger("BrokerListener")
+_logger = logging.getLogger("BrokerWorker")
 
 
 class BrokerWorker(object):
@@ -19,7 +19,7 @@ class BrokerWorker(object):
         self.connection = None
         self.channel = None
 
-    def start_consuming(self):
+    def start(self):
         self.connection = BlockingConnection(ConnectionParameters(self.broker_url))
         self.channel = self.connection.channel()
 
@@ -70,7 +70,7 @@ class BrokerWorker(object):
             thread.start()
 
         except Exception as e:
-            _logger.exception("Error in broker listener.")
+            _logger.exception("Error in broker worker.")
             self._reject_request(body, header_frame.delivery_tag, str(e))
 
     def _update_status(self, body, action, message=None):

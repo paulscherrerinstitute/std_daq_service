@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from sf_daq_service.watcher.status_listener import StatusListener
+from sf_daq_service.watcher.status_aggregator import StatusAggregator
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_listener import BrokerListener
 
@@ -13,15 +13,12 @@ def print_to_console(message):
 
 
 def start_console_output(tag, broker_url):
-    listener = StatusListener(on_status_change_function=print_to_console)
+    aggregator = StatusAggregator(on_status_change_function=print_to_console)
     client = BrokerListener(broker_url=broker_url,
                             tag=tag,
-                            on_message_function=listener.on_broker_message)
+                            on_message_function=aggregator.on_broker_message)
 
-    try:
-        client.start()
-    except KeyboardInterrupt:
-        client.stop()
+    client.start()
 
 
 if __file__ == "__main__":

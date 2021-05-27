@@ -6,9 +6,8 @@ import zmq
 
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_worker import BrokerWorker
-from sf_daq_service.writer_agent.transceiver import Transceiver
-from sf_daq_service.writer_agent.format import ImageMetadata
-from sf_daq_service.writer_agent.service import RequestWriterService
+from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
+from sf_daq_service.writer_agent.start import RequestWriterService, ImageMetadata
 from tests.utils import get_test_broker
 
 
@@ -48,15 +47,15 @@ class TestRequestWriteService(unittest.TestCase):
 
                 service = RequestWriterService()
 
-                transceiver = Transceiver(input_stream_url=input_stream_url,
-                                          output_stream_url=output_stream_url,
-                                          on_message_function=service.on_stream_message)
+                transceiver = ZmqTransciever(input_stream_url=input_stream_url,
+                                             output_stream_url=output_stream_url,
+                                             on_message_function=service.on_stream_message)
 
                 listener = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
                                         service_name=service_name,
                                         on_message_function=service.on_broker_message)
 
-                listener.start_consuming()
+                listener.start()
 
             thread = Thread(target=service_thread)
             thread.start()

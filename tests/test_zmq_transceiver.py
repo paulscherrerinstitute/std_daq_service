@@ -3,8 +3,8 @@ from time import sleep
 
 import zmq
 
-from sf_daq_service.writer_agent.transceiver import Transceiver
-from sf_daq_service.writer_agent.format import ImageMetadata
+from sf_daq_service.writer_agent.start import ImageMetadata
+from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 
 class TestTransceiver(unittest.TestCase):
@@ -48,7 +48,7 @@ class TestTransceiver(unittest.TestCase):
 
                 return writer_stream_message
 
-            transceiver = Transceiver(input_stream_url, output_stream_url, process_message)
+            transceiver = ZmqTransciever(input_stream_url, output_stream_url, process_message)
             sleep(0.3)
 
             for pulse_id in range(request["n_images"]):

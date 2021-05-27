@@ -6,4 +6,10 @@ class BrokerListener(object):
         self.on_message = on_message_function
 
     def start(self):
+        try:
+            pass
+        except KeyboardInterrupt:
+            self.stop()
+
+    def stop(self):
         pass

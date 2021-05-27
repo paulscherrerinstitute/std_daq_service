@@ -1,13 +1,28 @@
 import argparse
 import logging
 from threading import Event
+from _ctypes import Structure
+from ctypes import c_uint64, c_uint32, c_uint16
 
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_worker import BrokerWorker
-from sf_daq_service.writer_agent.transceiver import Transceiver
-from sf_daq_service.writer_agent.format import ImageMetadata
+from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 _logger = logging.getLogger('RequestWriteService')
+
+
+class ImageMetadata(Structure):
+    _pack_ = 1
+    _fields_ = [("pulse_id", c_uint64),
+                ("frame_index", c_uint64),
+                ("daq_rec", c_uint32),
+                ("is_good_image", c_uint16),
+                ("image_y_size", c_uint32),
+                ("image_x_size", c_uint32),
+                ("bits_per_pixel", c_uint16)]
+
+    def as_dict(self):
+        return dict((f, getattr(self, f)) for f, _ in self._fields_)
 
 
 class RequestWriterService(object):
@@ -89,16 +104,16 @@ if __file__ == "__main__":
 
     service = RequestWriterService()
 
-    transceiver = Transceiver(input_stream_url=input_stream,
-                              output_stream_url=output_stream,
-                              on_message_function=service.on_stream_message)
+    transceiver = ZmqTransciever(input_stream_url=input_stream,
+                                 output_stream_url=output_stream,
+                                 on_message_function=service.on_stream_message)
 
     listener = BrokerWorker(broker_url=args.broker_url,
                             service_name=args.service_name,
                             on_message_function=service.on_broker_message)
 
     # Blocking call.
-    listener.start_consuming()
+    listener.start()
 
     transceiver.stop()
     _logger.info(f'Service {args.service_name} stopping.')
