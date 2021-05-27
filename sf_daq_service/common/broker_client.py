@@ -49,7 +49,7 @@ class BrokerClient(object):
     def _on_broker_message(self, channel, method_frame, header_frame, body):
         try:
             request = json.loads(body.decode())
-            self.on_message(header_frame, request)
+            self.on_message(header_frame.correlation_id, header_frame.headers, request)
 
         except Exception as e:
             _logger.exception("Error in broker listener.")
@@ -59,13 +59,15 @@ class BrokerClient(object):
         _logger.info(f'Sending request to tag {tag} with header {header} and message {message}')
 
         body = json.dumps(message).encode()
+        request_id = str(uuid.uuid4())
 
         send_request_f = partial(
             self.channel.basic_publish,
             broker_config.REQUEST_EXCHANGE,
             tag,
             body,
-            BasicProperties(headers=header)
+            BasicProperties(headers=header,
+                            correlation_id=request_id)
         )
 
         self.connection.add_callback_threadsafe(send_request_f)

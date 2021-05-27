@@ -47,7 +47,8 @@ class BrokerWorker(object):
     def _on_broker_message(self, channel, method_frame, header_frame, body):
 
         try:
-            self._update_status(body, broker_config.ACTION_REQUEST_START)
+            request_id = header_frame.correlation_id
+            self._update_status(request_id, body, broker_config.ACTION_REQUEST_START)
 
             request = json.loads(body.decode())
 
@@ -58,11 +59,13 @@ class BrokerWorker(object):
                 except Exception as ex:
                     _logger.exception("Error while running the request in the service.")
 
-                    reject_request_f = partial(self._reject_request, body, method_frame.delivery_tag, str(ex))
+                    reject_request_f = partial(self._reject_request, request_id,
+                                               body, method_frame.delivery_tag, str(ex))
                     self.connection.add_callback_threadsafe(reject_request_f)
 
                 else:
-                    confirm_request_f = partial(self._confirm_request, body, method_frame.delivery_tag, result)
+                    confirm_request_f = partial(self._confirm_request, request_id,
+                                                body, method_frame.delivery_tag, result)
                     self.connection.add_callback_threadsafe(confirm_request_f)
 
             thread = Thread(target=process_async)
@@ -73,7 +76,7 @@ class BrokerWorker(object):
             _logger.exception("Error in broker worker.")
             self._reject_request(body, header_frame.delivery_tag, str(e))
 
-    def _update_status(self, body, action, message=None):
+    def _update_status(self, request_id, body, action, message=None):
 
         status_header = {
             "action": action,
@@ -84,15 +87,16 @@ class BrokerWorker(object):
         self.channel.basic_publish(
             exchange=broker_config.STATUS_EXCHANGE,
             properties=BasicProperties(
-                headers=status_header),
+                headers=status_header,
+                correlation_id=request_id),
             routing_key=self.service_name,
             body=body
         )
 
-    def _confirm_request(self, body, delivery_tag, message=None):
+    def _confirm_request(self, request_id, body, delivery_tag, message=None):
         self.channel.basic_ack(delivery_tag=delivery_tag)
-        self._update_status(body, broker_config.ACTION_REQUEST_SUCCESS, message)
+        self._update_status(request_id, body, broker_config.ACTION_REQUEST_SUCCESS, message)
 
-    def _reject_request(self, body, delivery_tag, message=None):
+    def _reject_request(self, request_id, body, delivery_tag, message=None):
         self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
-        self._update_status(body, broker_config.ACTION_REQUEST_FAIL, message)
+        self._update_status(request_id, body, broker_config.ACTION_REQUEST_FAIL, message)
