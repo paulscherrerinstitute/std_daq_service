@@ -10,7 +10,7 @@ from sf_daq_service.common import broker_config
 _logger = logging.getLogger("BrokerListener")
 
 
-class BrokerWorkerListener(object):
+class BrokerConsumerListener(object):
     def __init__(self, broker_url, service_name, on_message_function):
         self.broker_url = broker_url
         self.service_name = service_name

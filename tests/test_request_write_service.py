@@ -5,7 +5,7 @@ from time import sleep
 import zmq
 
 from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
+from sf_daq_service.common.broker_consumer_client import BrokerConsumerListener
 from sf_daq_service.writer_agent.transceiver import Transceiver
 from sf_daq_service.writer_agent.format import ImageMetadata
 from sf_daq_service.writer_agent.request_write_service import RequestWriterService
@@ -52,9 +52,9 @@ class TestRequestWriteService(unittest.TestCase):
                                           output_stream_url=output_stream_url,
                                           on_message_function=service.on_stream_message)
 
-                listener = BrokerWorkerListener(broker_url=broker_config.TEST_BROKER_URL,
-                                                service_name=service_name,
-                                                on_message_function=service.on_broker_message)
+                listener = BrokerConsumerListener(broker_url=broker_config.TEST_BROKER_URL,
+                                                  service_name=service_name,
+                                                  on_message_function=service.on_broker_message)
 
                 listener.start_consuming()
 

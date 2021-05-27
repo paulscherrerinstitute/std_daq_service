@@ -4,7 +4,7 @@ from threading import Thread
 from time import sleep
 
 from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
+from sf_daq_service.common.broker_consumer_client import BrokerConsumerListener
 from tests.utils import get_test_broker
 
 
@@ -35,7 +35,7 @@ class TestBrokerListener(unittest.TestCase):
 
             def listener_thread():
                 nonlocal listener
-                listener = BrokerWorkerListener(broker_config.TEST_BROKER_URL, service_name, on_message)
+                listener = BrokerConsumerListener(broker_config.TEST_BROKER_URL, service_name, on_message)
                 listener.start_consuming()
 
             thread = Thread(target=listener_thread)
