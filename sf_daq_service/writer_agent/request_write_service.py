@@ -3,7 +3,7 @@ import logging
 from threading import Event
 
 from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_consumer_client import BrokerConsumerListener
+from sf_daq_service.common.broker_worker_client import BrokerWorkerListener
 from sf_daq_service.writer_agent.transceiver import Transceiver
 from sf_daq_service.writer_agent.format import ImageMetadata
 
@@ -93,9 +93,9 @@ if __file__ == "__main__":
                               output_stream_url=output_stream,
                               on_message_function=service.on_stream_message)
 
-    listener = BrokerConsumerListener(broker_url=args.broker_url,
-                                      service_name=args.service_name,
-                                      on_message_function=service.on_broker_message)
+    listener = BrokerWorkerListener(broker_url=args.broker_url,
+                                    service_name=args.service_name,
+                                    on_message_function=service.on_broker_message)
 
     # Blocking call.
     listener.start_consuming()
