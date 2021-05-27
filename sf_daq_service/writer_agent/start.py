@@ -84,6 +84,7 @@ class RequestWriterService(object):
 if __file__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')
 
+    parser.add_argument("service_tag", type=str, help="Where to bind the service")
     parser.add_argument("service_name", type=str, help="Name of the service")
     parser.add_argument("--broker_url", default=broker_config.TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
@@ -109,7 +110,8 @@ if __file__ == "__main__":
                                  on_message_function=service.on_stream_message)
 
     listener = BrokerWorker(broker_url=args.broker_url,
-                            service_name=args.service_name,
+                            tag=args.service_tag,
+                            name=args.service_name,
                             on_message_function=service.on_broker_message)
 
     # Blocking call.

@@ -9,8 +9,10 @@ from sf_daq_service.common.broker_worker import BrokerWorker
 
 class TestBrokerListener(unittest.TestCase):
     def test_broker_listener_workflow(self):
-        service_name = "psi.facility.beamline.profile.echo"
-        request_tag = "psi.facility.beamline.profile.echo"
+        service_name = "noop_worker"
+        service_tag = "psi.facility.beamline.#"
+
+        request_tag = "psi.facility.beamline.profile"
         status_tag = "psi.facility.beamline.#"
 
         sent_request = {
@@ -34,7 +36,8 @@ class TestBrokerListener(unittest.TestCase):
                               on_message_function=on_status_message)
 
         worker = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
-                              service_name=service_name,
+                              tag=service_tag,
+                              name=service_name,
                               on_message_function=on_service_message)
 
         t_client = Thread(target=client.start)
