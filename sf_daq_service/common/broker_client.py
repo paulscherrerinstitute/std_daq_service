@@ -7,10 +7,10 @@ from pika import BlockingConnection, ConnectionParameters, BasicProperties
 
 from sf_daq_service.common import broker_config
 
-_logger = logging.getLogger("BrokerListener")
+_logger = logging.getLogger("BrokerClient")
 
 
-class BrokerListener(object):
+class BrokerClient(object):
     def __init__(self, broker_url, tag, on_message_function):
         self.broker_url = broker_url
         self.tag = tag
