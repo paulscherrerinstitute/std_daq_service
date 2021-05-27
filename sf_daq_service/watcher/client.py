@@ -1,9 +1,9 @@
 import argparse
 import logging
 
-from sf_daq_service.broker_watcher.status_listener import StatusListener
+from sf_daq_service.watcher.status_listener import StatusListener
 from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_listener_client import BrokerListenerClient
+from sf_daq_service.common.broker_listener import BrokerListener
 
 _logger = logging.getLogger("BrokerListenerConsoleClient")
 
@@ -14,9 +14,9 @@ def print_to_console(message):
 
 def start_console_output(tag, broker_url):
     listener = StatusListener(on_status_change_function=print_to_console)
-    client = BrokerListenerClient(broker_url=broker_url,
-                                  tag=tag,
-                                  on_message_function=listener.on_broker_message)
+    client = BrokerListener(broker_url=broker_url,
+                            tag=tag,
+                            on_message_function=listener.on_broker_message)
 
     try:
         client.start()
