@@ -8,8 +8,16 @@ from sf_daq_service.common.broker_client import BrokerClient
 _logger = logging.getLogger("BrokerListenerConsoleClient")
 
 
-def print_to_console(message):
-    print(message)
+def print_to_console(request_id, status):
+    services_output = ""
+    for service_name, statuses in status['services'].items():
+        last_received_status = statuses[-1][0]
+        services_output += f" {service_name}:{last_received_status}"
+
+    request_string = f'{request_id[:4]}..{request_id[-4:]}'
+    combined_output = f'[{request_string}]{services_output}'
+
+    print(combined_output)
 
 
 def start_console_output(tag, broker_url):
