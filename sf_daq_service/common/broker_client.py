@@ -54,7 +54,9 @@ class BrokerClient(object):
         except Exception as e:
             _logger.exception("Error in broker listener.")
 
-    def send_request(self, tag, header, message):
+    def send_request(self, tag, message, header=None):
+
+        header = header or {}
 
         _logger.info(f'Sending request to tag {tag} with header {header} and message {message}')
 

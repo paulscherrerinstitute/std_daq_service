@@ -47,7 +47,7 @@ class TestBrokerListener(unittest.TestCase):
         t_worker.start()
 
         sleep(0.1)
-        client.send_request(request_tag, {}, sent_request)
+        client.send_request(request_tag, sent_request)
         sleep(0.1)
 
         client.stop()
