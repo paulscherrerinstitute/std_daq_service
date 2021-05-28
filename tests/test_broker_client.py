@@ -11,7 +11,6 @@ class TestBrokerListener(unittest.TestCase):
     def test_broker_listener_workflow(self):
         service_name = "noop_worker"
         service_tag = "psi.facility.beamline.#"
-
         request_tag = "psi.facility.beamline.profile"
         status_tag = "psi.facility.beamline.#"
 
