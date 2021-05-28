@@ -1,4 +1,5 @@
 import json
+import tracemalloc
 import unittest
 from threading import Thread
 from time import sleep
@@ -45,15 +46,22 @@ class TestRequestWriteService(unittest.TestCase):
         t_service = Thread(target=listener.start)
         t_service.start()
 
+        def on_status_message(request_id, header, body):
+            nonlocal last_header
+            last_header = header
+        last_header = None
+
         client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
                               status_tag="*",
-                              on_status_message_function=lambda x, y, z: x)
+                              on_status_message_function=on_status_message)
         t_client = Thread(target=client.start)
         t_client.start()
         sleep(0.1)
 
         client.send_request(service_name, request)
         sleep(0.1)
+
+        self.assertEqual(last_header['action'], broker_config.ACTION_REQUEST_START)
 
         for pulse_id in range(request["n_images"]):
             sender.send(ImageMetadata(pulse_id, 0, 0, 0))
@@ -66,7 +74,8 @@ class TestRequestWriteService(unittest.TestCase):
             self.assertEqual(write_message["output_file"], request["output_file"])
             # TODO: Test also image metadata.
 
-        transceiver.stop()
+        sleep(0.1)
+        self.assertEqual(last_header['action'], broker_config.ACTION_REQUEST_SUCCESS)
 
         listener.stop()
         t_service.join()
@@ -74,5 +83,6 @@ class TestRequestWriteService(unittest.TestCase):
         client.stop()
         t_client.join()
 
-        receiver.close()
         sender.close()
+        transceiver.stop()
+        receiver.close()
