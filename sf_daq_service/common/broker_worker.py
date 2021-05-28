@@ -12,9 +12,9 @@ _logger = logging.getLogger("BrokerWorker")
 
 
 class BrokerWorker(object):
-    def __init__(self, broker_url, tag, name, on_message_function):
+    def __init__(self, broker_url, request_tag, name, on_message_function):
         self.broker_url = broker_url
-        self.worker_tag = tag
+        self.request_tag = request_tag
         self.worker_name = name
         self.on_message_function = on_message_function
 
@@ -35,7 +35,7 @@ class BrokerWorker(object):
         self.channel.queue_declare(queue=self.request_queue_name, auto_delete=True, exclusive=True)
         self.channel.queue_bind(queue=self.request_queue_name,
                                 exchange=broker_config.REQUEST_EXCHANGE,
-                                routing_key=self.worker_tag)
+                                routing_key=self.request_tag)
 
         self.channel.basic_qos(prefetch_count=1)
         self.channel.basic_consume(self.request_queue_name, self._on_broker_message)

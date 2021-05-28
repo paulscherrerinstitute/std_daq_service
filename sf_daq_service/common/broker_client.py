@@ -11,9 +11,9 @@ _logger = logging.getLogger("BrokerClient")
 
 
 class BrokerClient(object):
-    def __init__(self, broker_url, tag, on_message_function):
+    def __init__(self, broker_url, status_tag, on_message_function):
         self.broker_url = broker_url
-        self.tag = tag
+        self.status_tag = status_tag
         self.on_message = on_message_function
 
         self.status_queue_name = str(uuid.uuid4())
@@ -34,7 +34,7 @@ class BrokerClient(object):
         self.channel.queue_declare(queue=self.status_queue_name, exclusive=True, auto_delete=True)
         self.channel.queue_bind(queue=self.status_queue_name,
                                 exchange=broker_config.STATUS_EXCHANGE,
-                                routing_key=self.tag)
+                                routing_key=self.status_tag)
 
         self.channel.basic_consume(self.status_queue_name, self._on_broker_message, auto_ack=True)
 

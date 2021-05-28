@@ -110,7 +110,7 @@ if __file__ == "__main__":
                                  on_message_function=service.on_stream_message)
 
     listener = BrokerWorker(broker_url=args.broker_url,
-                            tag=args.service_tag,
+                            request_tag=args.service_tag,
                             name=args.service_name,
                             on_message_function=service.on_broker_message)
 

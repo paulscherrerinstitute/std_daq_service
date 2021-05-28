@@ -32,11 +32,11 @@ class TestBrokerListener(unittest.TestCase):
             return service_message
 
         client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
-                              tag=status_tag,
+                              status_tag=status_tag,
                               on_message_function=on_status_message)
 
         worker = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
-                              tag=service_tag,
+                              request_tag=service_tag,
                               name=service_name,
                               on_message_function=on_service_message)
 

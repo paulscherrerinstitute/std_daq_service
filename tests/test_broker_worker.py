@@ -36,7 +36,7 @@ class TestBrokerListener(unittest.TestCase):
             def listener_thread():
                 nonlocal listener
                 listener = BrokerWorker(broker_config.TEST_BROKER_URL,
-                                        tag=service_name,
+                                        request_tag=service_name,
                                         name=service_name,
                                         on_message_function=on_message)
                 listener.start()

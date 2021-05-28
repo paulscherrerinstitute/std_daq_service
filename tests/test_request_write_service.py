@@ -53,7 +53,7 @@ class TestRequestWriteService(unittest.TestCase):
 
                 listener = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
                                         name=service_name,
-                                        tag=service_name,
+                                        request_tag=service_name,
                                         on_message_function=service.on_broker_message)
 
                 listener.start()
