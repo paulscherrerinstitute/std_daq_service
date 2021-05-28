@@ -68,14 +68,14 @@ class RequestWriterService(object):
         self.i_image = None
         self.request_completed.set()
 
-    def on_broker_message(self, request):
-        self._set_request_and_wait(request)
+    def on_broker_message(self, request_id, request):
+        self._set_request_and_wait(request_id, request)
         self.request_completed.clear()
 
         return self.request_result
 
-    def _set_request_and_wait(self, request):
-        _logger.info(f"Starting to work on request {request}")
+    def _set_request_and_wait(self, request_id, request):
+        _logger.info(f"Starting to work on request_id {request_id}, {request}")
         self.request_result = None
         self.request = request
         self.request_completed.wait()
