@@ -12,11 +12,11 @@ _logger = logging.getLogger("BrokerWorker")
 
 
 class BrokerWorker(object):
-    def __init__(self, broker_url, request_tag, name, on_message_function):
+    def __init__(self, broker_url, request_tag, name, on_request_message_function):
         self.broker_url = broker_url
         self.request_tag = request_tag
         self.worker_name = name
-        self.on_message_function = on_message_function
+        self.on_message_function = on_request_message_function
         _logger.info(f"Starting worker on tag {self.request_tag} with name {self.worker_name}.")
 
         self.request_queue_name = str(uuid.uuid4())

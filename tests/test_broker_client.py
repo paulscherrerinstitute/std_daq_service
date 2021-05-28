@@ -27,18 +27,18 @@ class TestBrokerListener(unittest.TestCase):
 
             status_messages.append((request_id, header, request))
 
-        def on_service_message(request):
+        def on_service_message(request_id, request):
             self.assertEqual(sent_request, request)
             return service_message
 
         client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
                               status_tag=status_tag,
-                              on_message_function=on_status_message)
+                              on_status_message_function=on_status_message)
 
         worker = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
                               request_tag=service_tag,
                               name=service_name,
-                              on_message_function=on_service_message)
+                              on_request_message_function=on_service_message)
 
         t_client = Thread(target=client.start)
         t_client.start()
