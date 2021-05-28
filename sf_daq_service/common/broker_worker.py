@@ -64,7 +64,7 @@ class BrokerWorker(object):
 
             def process_async():
                 try:
-                    result = self.on_message_function(request)
+                    result = self.on_message_function(request_id, request)
 
                 except Exception as ex:
                     _logger.exception("Error while running the request in the service.")
