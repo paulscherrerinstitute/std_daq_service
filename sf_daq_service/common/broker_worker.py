@@ -17,8 +17,10 @@ class BrokerWorker(object):
         self.request_tag = request_tag
         self.worker_name = name
         self.on_message_function = on_message_function
+        _logger.info(f"Starting worker on tag {self.request_tag} with name {self.worker_name}.")
 
         self.request_queue_name = str(uuid.uuid4())
+        _logger.debug(f'Request queue {self.request_queue_name}.')
 
         self.connection = None
         self.channel = None
@@ -41,6 +43,7 @@ class BrokerWorker(object):
         self.channel.basic_consume(self.request_queue_name, self._on_broker_message)
 
         try:
+            _logger.info("Start consuming.")
             self.channel.start_consuming()
         except KeyboardInterrupt:
             self.channel.stop_consuming()
@@ -52,9 +55,12 @@ class BrokerWorker(object):
 
         try:
             request_id = header_frame.correlation_id
+            _logger.info(f"Received request_id {request_id}.")
+
             self._update_status(request_id, body, broker_config.ACTION_REQUEST_START)
 
             request = json.loads(body.decode())
+            _logger.debug(f"Received request {request}")
 
             def process_async():
                 try:
@@ -68,6 +74,8 @@ class BrokerWorker(object):
                     self.connection.add_callback_threadsafe(reject_request_f)
 
                 else:
+                    _logger.info("Request completed successfully.")
+
                     confirm_request_f = partial(self._confirm_request, request_id,
                                                 body, method_frame.delivery_tag, result)
                     self.connection.add_callback_threadsafe(confirm_request_f)
@@ -87,6 +95,8 @@ class BrokerWorker(object):
             "source": self.worker_name,
             "message": message
         }
+
+        _logger.info(f"Updating worker status: {status_header}")
 
         self.channel.basic_publish(
             exchange=broker_config.STATUS_EXCHANGE,
