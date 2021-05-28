@@ -11,10 +11,10 @@ _logger = logging.getLogger("BrokerClient")
 
 
 class BrokerClient(object):
-    def __init__(self, broker_url, status_tag, on_message_function):
+    def __init__(self, broker_url, status_tag, on_status_message_function):
         self.broker_url = broker_url
         self.status_tag = status_tag
-        self.on_message = on_message_function
+        self.on_message = on_status_message_function
 
         self.status_queue_name = str(uuid.uuid4())
         _logger.debug(f"Status queue name: {self.status_queue_name}")
@@ -73,3 +73,5 @@ class BrokerClient(object):
         )
 
         self.connection.add_callback_threadsafe(send_request_f)
+
+        return request_id

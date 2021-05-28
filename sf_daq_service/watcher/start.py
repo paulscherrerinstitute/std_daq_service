@@ -16,7 +16,7 @@ def start_console_output(tag, broker_url):
     aggregator = StatusAggregator(on_status_change_function=print_to_console)
     client = BrokerClient(broker_url=broker_url,
                           status_tag=tag,
-                          on_message_function=aggregator.on_broker_message)
+                          on_status_message_function=aggregator.on_broker_message)
 
     client.start()
 
