@@ -5,10 +5,10 @@ from time import sleep
 import zmq
 
 from sf_daq_service.common import broker_config
+from sf_daq_service.common.broker_client import BrokerClient
 from sf_daq_service.common.broker_worker import BrokerWorker
 from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 from sf_daq_service.writer_agent.start import RequestWriterService, ImageMetadata
-from tests.utils import get_test_broker
 
 
 class TestRequestWriteService(unittest.TestCase):
@@ -23,71 +23,56 @@ class TestRequestWriteService(unittest.TestCase):
             "output_file": "/test/output.h5"
         }
 
-        transceiver = None
-        listener = None
-        client = None
-        thread = None
+        ctx = zmq.Context()
 
-        try:
-            ctx = zmq.Context()
+        sender = ctx.socket(zmq.PUB)
+        sender.bind(input_stream_url)
 
-            sender = ctx.socket(zmq.PUB)
-            sender.bind(input_stream_url)
+        receiver = ctx.socket(zmq.SUB)
+        receiver.connect(output_stream_url)
+        receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
-            receiver = ctx.socket(zmq.SUB)
-            receiver.connect(output_stream_url)
-            receiver.setsockopt_string(zmq.SUBSCRIBE, "")
+        service = RequestWriterService()
 
-            clinet, channel, queue = get_test_broker()
+        transceiver = ZmqTransciever(input_stream_url=input_stream_url,
+                                     output_stream_url=output_stream_url,
+                                     on_message_function=service.on_stream_message)
 
-            def service_thread():
-                nonlocal transceiver
-                nonlocal listener
-                nonlocal service_name
+        listener = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
+                                name=service_name,
+                                request_tag=service_name,
+                                on_request_message_function=service.on_broker_message)
+        t_service = Thread(target=listener.start)
+        t_service.start()
 
-                service = RequestWriterService()
+        client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
+                              status_tag="*",
+                              on_status_message_function=lambda x, y, z: x)
+        t_client = Thread(target=client.start)
+        t_client.start()
+        sleep(0.1)
 
-                transceiver = ZmqTransciever(input_stream_url=input_stream_url,
-                                             output_stream_url=output_stream_url,
-                                             on_message_function=service.on_stream_message)
+        client.send_request(service_name, request)
+        sleep(0.1)
 
-                listener = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
-                                        name=service_name,
-                                        request_tag=service_name,
-                                        on_message_function=service.on_broker_message)
+        for pulse_id in range(request["n_images"]):
+            sender.send(ImageMetadata(pulse_id, 0, 0, 0))
 
-                listener.start()
+        for pulse_id in range(request["n_images"]):
+            write_message = receiver.recv_json()
 
-            thread = Thread(target=service_thread)
-            thread.start()
-            sleep(0.1)
+            self.assertEqual(write_message["i_image"], write_message["image_metadata"]["pulse_id"])
+            self.assertEqual(write_message["i_image"], pulse_id)
+            self.assertEqual(write_message["output_file"], request["output_file"])
+            # TODO: Test also image metadata.
 
-            channel.basic_publish(exchange=broker_config.REQUEST_EXCHANGE,
-                                  routing_key=service_name,
-                                  body=json.dumps(request).encode())
+        transceiver.stop()
 
-            sleep(0.1)
+        listener.stop()
+        t_service.join()
 
-            for pulse_id in range(request["n_images"]):
-                sender.send(ImageMetadata(pulse_id, 0, 0, 0))
+        client.stop()
+        t_client.join()
 
-            for pulse_id in range(request["n_images"]):
-                write_message = receiver.recv_json()
-
-                self.assertEqual(write_message["i_image"], write_message["image_metadata"]["pulse_id"])
-                self.assertEqual(write_message["i_image"], pulse_id)
-                self.assertEqual(write_message["output_file"], request["output_file"])
-                # TODO: Test also image metadata.
-
-        finally:
-            if transceiver is not None:
-                transceiver.stop()
-
-            if listener is not None:
-                listener.stop()
-
-            if thread is not None:
-                thread.join()
-
-            if client:
-                client.close()
+        receiver.close()
+        sender.close()

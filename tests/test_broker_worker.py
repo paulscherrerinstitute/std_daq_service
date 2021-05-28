@@ -4,83 +4,77 @@ from threading import Thread
 from time import sleep
 
 from sf_daq_service.common import broker_config
+from sf_daq_service.common.broker_client import BrokerClient
 from sf_daq_service.common.broker_worker import BrokerWorker
-from tests.utils import get_test_broker
 
 
 class TestBrokerListener(unittest.TestCase):
     def test_basic_workflow(self):
 
-        thread = None
-        listener = None
-        client = None
+        request = {"just": "a", "request": "yeey"}
+        service_name = "testing_service"
+        service_tag = "psi.facility.beamline.#"
+        request_tag = "psi.facility.beamline.profile"
+        status_tag = "psi.facility.beamline.#"
 
-        try:
-            request = {
-                "just": "a",
-                "request": "yeey"
-            }
+        error_message = "This is an expected error. Carry on."
 
-            service_name = "testing_service"
-            error_message = "This is an expected error. Carry on."
+        status_messages = []
 
-            def on_message(received_request):
-                # This is how we test a failing service.
-                if not received_request:
-                    raise ValueError(error_message)
-                else:
-                    self.assertEqual(request, received_request)
+        def on_status_message(request_id, header, received_request):
+            nonlocal sent_request_id
+            nonlocal status_messages
 
-            listener = None
+            self.assertEqual(request_id, sent_request_id)
+            self.assertEqual(header['source'], service_name)
 
-            def listener_thread():
-                nonlocal listener
-                listener = BrokerWorker(broker_config.TEST_BROKER_URL,
-                                        request_tag=service_name,
-                                        name=service_name,
-                                        on_message_function=on_message)
-                listener.start()
+            if received_request:
+                self.assertEqual(request, received_request)
 
-            thread = Thread(target=listener_thread)
-            thread.start()
-            sleep(0.1)
+            status_messages.append(header)
 
-            client, channel, queue = get_test_broker()
-            channel.basic_publish(exchange=broker_config.REQUEST_EXCHANGE,
-                                  routing_key=service_name,
-                                  body=json.dumps(request).encode())
+        def on_request_message(request_id, received_request):
+            nonlocal sent_request_id
 
-            sleep(0.1)
+            self.assertEqual(request_id, sent_request_id)
 
-            def check_status_queue(action, expected_request):
-                method_frame, header_frame, body = channel.basic_get(queue=queue)
-                channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+            # This is how we test a failing service.
+            if not received_request:
+                raise ValueError(error_message)
+            else:
+                self.assertEqual(request, received_request)
 
-                self.assertEqual(json.loads(body.decode()), expected_request)
-                self.assertEqual(header_frame.headers["action"], action)
-                self.assertEqual(header_frame.headers["source"], service_name)
+        worker = BrokerWorker(broker_config.TEST_BROKER_URL,
+                              request_tag=service_tag,
+                              name=service_name,
+                              on_request_message_function=on_request_message)
+        t_worker = Thread(target=worker.start)
+        t_worker.start()
 
-                return header_frame.headers["message"]
+        client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
+                              status_tag=status_tag,
+                              on_status_message_function=on_status_message)
+        t_client = Thread(target=client.start)
+        t_client.start()
 
-            check_status_queue(broker_config.ACTION_REQUEST_START, request)
-            check_status_queue(broker_config.ACTION_REQUEST_SUCCESS, request)
+        sleep(0.1)
 
-            channel.basic_publish(exchange=broker_config.REQUEST_EXCHANGE,
-                                  routing_key=service_name,
-                                  body=json.dumps({}).encode())
+        sent_request_id = client.send_request(request_tag, request)
+        sleep(0.1)
 
-            sleep(0.1)
+        sent_request_id = client.send_request(request_tag, None)
+        sleep(0.1)
 
-            check_status_queue(broker_config.ACTION_REQUEST_START, {})
-            message = check_status_queue(broker_config.ACTION_REQUEST_FAIL, {})
-            self.assertEqual(message, error_message)
+        client.stop()
+        t_client.join()
 
-        finally:
-            if listener:
-                listener.stop()
+        worker.stop()
+        t_worker.join()
 
-            if thread:
-                thread.join()
+        expected_status_actions = [broker_config.ACTION_REQUEST_START,
+                                   broker_config.ACTION_REQUEST_SUCCESS,
+                                   broker_config.ACTION_REQUEST_START,
+                                   broker_config.ACTION_REQUEST_FAIL]
 
-            if client:
-                client.close()
+        for i, expected_action in enumerate(expected_status_actions):
+            self.assertEqual(expected_action, status_messages[i]['action'])
