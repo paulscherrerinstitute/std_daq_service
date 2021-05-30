@@ -7,15 +7,40 @@ from sf_daq_service.common.broker_client import BrokerClient
 
 _logger = logging.getLogger("BrokerListenerConsoleClient")
 
+RESET = u"\u001b[0m"
+
+GREEN_TEXT = u'\u001b[32m'
+YELLOW_TEXT = u'\u001b[33m'
+RED_TEXT = u'\u001b[31m'
+BLACK_TEXT = u'\u001b[31m'
+
+GREEN_BACKGROUND = u'\u001b[42m'
+YELLOW_BACKGROUND = u'\u001b[43;1m'
+RED_BACKGROUND = u'\u001b[41m'
+
+status_symbol_mapping = {
+    broker_config.ACTION_REQUEST_START: BLACK_TEXT + YELLOW_BACKGROUND + '*' + RESET,
+    broker_config.ACTION_REQUEST_SUCCESS: GREEN_BACKGROUND + '+' + RESET,
+    broker_config.ACTION_REQUEST_FAIL: RED_BACKGROUND + '-' + RESET
+}
+
+text_color_mapping = {
+    broker_config.ACTION_REQUEST_START: YELLOW_TEXT,
+    broker_config.ACTION_REQUEST_SUCCESS: GREEN_TEXT,
+    broker_config.ACTION_REQUEST_FAIL: RED_TEXT
+}
 
 def print_to_console(request_id, status):
     services_output = ""
-    for service_name, statuses in status['services'].items():
+    status_indicators = ""
+    for service_name, statuses in sorted(status['services'].items()):
         last_received_status = statuses[-1][0]
-        services_output += f" {service_name}:{last_received_status}"
+
+        status_indicators += status_symbol_mapping[last_received_status]
+        services_output += f" {text_color_mapping[last_received_status]}{service_name}{RESET}"
 
     request_string = f'{request_id[:4]}..{request_id[-4:]}'
-    combined_output = f'[{request_string}]{services_output}'
+    combined_output = f'[{request_string}] [{"".join(status_indicators)}]{services_output}'
 
     print(combined_output)
 

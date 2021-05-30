@@ -5,12 +5,12 @@ from time import sleep
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_client import BrokerClient
 from sf_daq_service.common.broker_worker import BrokerWorker
+from sf_daq_service.watcher.start import print_to_console
 from sf_daq_service.watcher.status_aggregator import StatusAggregator
 
 
 class TestStatusAggregator(unittest.TestCase):
     def test_status_aggregator(self):
-
         header = {
             'source': 'service_1',
             'action': 'action_1',
@@ -26,6 +26,7 @@ class TestStatusAggregator(unittest.TestCase):
             self.assertEqual(status['request'], request)
             self.assertTrue(header['source'] in status['services'])
             last_status = status
+
         last_status = None
 
         aggregator = StatusAggregator(on_status_change_function=on_status_change)
@@ -56,6 +57,9 @@ class TestStatusAggregator(unittest.TestCase):
         def status_change(request_id, status):
             nonlocal status_changes
             status_changes.append((request_id, status))
+
+            print_to_console(request_id, status)
+
         status_changes = []
 
         aggregator = StatusAggregator(on_status_change_function=status_change)
@@ -65,22 +69,30 @@ class TestStatusAggregator(unittest.TestCase):
         t_client = Thread(target=client.start)
         t_client.start()
 
-        worker = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
-                              request_tag=service_tag,
-                              name=service_name,
-                              on_request_message_function=lambda x, y: "result")
-        t_worker = Thread(target=worker.start)
-        t_worker.start()
+        worker_1 = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
+                                request_tag=service_tag,
+                                name=service_name+'_1',
+                                on_request_message_function=lambda x, y: "result")
+        t_worker_1 = Thread(target=worker_1.start)
+        t_worker_1.start()
+
+        worker_2 = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
+                                request_tag=service_tag,
+                                name=service_name+'_2',
+                                on_request_message_function=lambda x, y: "result")
+        t_worker_2 = Thread(target=worker_2.start)
+        t_worker_2.start()
 
         sleep(0.1)
         client.send_request(request_tag, request)
         sleep(0.1)
 
-        self.assertEqual(len(status_changes), 2)
+        self.assertEqual(len(status_changes), 4)
 
-        worker.stop()
-        t_worker.join()
+        worker_1.stop()
+        t_worker_1.join()
+        worker_2.stop()
+        t_worker_2.join()
         sleep(0.1)
         client.stop()
         t_client.join()
-
