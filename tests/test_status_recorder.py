@@ -71,14 +71,14 @@ class TestStatusRecorder(unittest.TestCase):
 
         worker_1 = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
                                 request_tag=service_tag,
-                                name=service_name+'_1',
+                                name=service_name + '_1',
                                 on_request_message_function=lambda x, y: "result")
         t_worker_1 = Thread(target=worker_1.start)
         t_worker_1.start()
 
         worker_2 = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
                                 request_tag=service_tag,
-                                name=service_name+'_2',
+                                name=service_name + '_2',
                                 on_request_message_function=lambda x, y: "result")
         t_worker_2 = Thread(target=worker_2.start)
         t_worker_2.start()
@@ -97,3 +97,25 @@ class TestStatusRecorder(unittest.TestCase):
         client.stop()
         t_client.join()
 
+    def test_cache_max_len(self):
+        def noop(request_id, status):
+            pass
+
+        recorder = StatusRecorder(noop)
+
+        max_request_id = 200
+        for i in range(max_request_id):
+            recorder.on_broker_message(request_id=i,
+                                       header={'source': "service_1",
+                                               'action': broker_config.ACTION_REQUEST_SUCCESS,
+                                               'message': "something"},
+                                       request={})
+
+        self.assertEqual(recorder.cache_length, len(recorder.status))
+
+        for i in range(recorder.cache_length):
+            # We expect the last 'recorder.cache_length' ids to be present in the cache.
+            expected_value = max_request_id - recorder.cache_length + i
+            self.assertEqual(recorder.request_id_buffer[i], expected_value)
+
+            self.assertTrue(expected_value in recorder.status)
