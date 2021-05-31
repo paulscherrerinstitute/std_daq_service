@@ -71,6 +71,7 @@ if __file__ == "__main__":
     _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
 
     start_rest_api(service_name=args.service_name,
-                   broker_url=args.broker_url)
+                   broker_url=args.broker_url,
+                   tag=args.tag)
 
     _logger.info(f'Service {args.service_name} stopping.')
