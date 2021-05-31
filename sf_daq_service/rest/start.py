@@ -4,20 +4,23 @@ import logging
 from flask import Flask, request, jsonify
 
 from sf_daq_service.common import broker_config
+from sf_daq_service.common.broker_client import BrokerClient
 from sf_daq_service.rest.request_factory import build_write_request
+from sf_daq_service.rest.status_aggregator import StatusAggregator
 
 _logger = logging.getLogger("RestProxyService")
 
 
-class BrokerClient(object):
-    def __init__(self, broker_url):
-        self.broker_url = broker_url
+def on_status_message():
+    pass
 
 
-def start_rest_api(service_name, broker_url):
+def start_rest_api(service_name, broker_url, tag):
 
     app = Flask(service_name)
-    broker_client = BrokerClient(broker_url)
+    status_aggregator = StatusAggregator()
+    broker_client = BrokerClient(broker_url, tag,
+                                 on_status_message_function=status_aggregator.on_broker_message)
 
     @app.route("/write", methods=['POST'])
     def write_request():
@@ -39,8 +42,8 @@ def start_rest_api(service_name, broker_url):
 
         header, body = build_write_request(output_file=output_file, n_images=n_images, sources=sources)
 
-        request_id = broker_client.send_request(header, body)
-        broker_response = broker_client.wait_for_response(request_id)
+        request_id = broker_client.send_request(tag, body)
+        broker_response = status_aggregator.wait_for_response(request_id)
 
         # TODO: Convert broker_response to client response.
         response = {"broker": broker_response}
@@ -52,6 +55,8 @@ if __file__ == "__main__":
     parser = argparse.ArgumentParser(description='Rest Proxy Service')
 
     parser.add_argument("service_name", type=str, help="Name of the service")
+    parser.add_argument("tag", type=str, help="Tag on which the proxy listens to statuses and sends requests.")
+
     parser.add_argument("--broker_url", default=broker_config.TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
     parser.add_argument("--log_level", default="INFO",
