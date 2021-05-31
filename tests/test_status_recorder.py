@@ -6,10 +6,10 @@ from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_client import BrokerClient
 from sf_daq_service.common.broker_worker import BrokerWorker
 from sf_daq_service.watcher.start import print_to_console
-from sf_daq_service.watcher.status_aggregator import StatusAggregator
+from sf_daq_service.watcher.status_recorder import StatusRecorder
 
 
-class TestStatusAggregator(unittest.TestCase):
+class TestStatusRecorder(unittest.TestCase):
     def test_status_aggregator(self):
         header = {
             'source': 'service_1',
@@ -29,17 +29,17 @@ class TestStatusAggregator(unittest.TestCase):
 
         last_status = None
 
-        aggregator = StatusAggregator(on_status_change_function=on_status_change)
+        recorder = StatusRecorder(on_status_change_function=on_status_change)
 
-        aggregator.on_broker_message("1", header, request)
+        recorder.on_broker_message("1", header, request)
         header['action'] = 'action_2'
-        aggregator.on_broker_message("1", header, request)
+        recorder.on_broker_message("1", header, request)
 
         self.assertEqual(len(last_status['services'][header['source']]), 2)
 
         request['another'] = 'one'
         header['source'] = 'service_2'
-        aggregator.on_broker_message("2", header, request)
+        recorder.on_broker_message("2", header, request)
 
         self.assertTrue('service_1' not in last_status['services'])
         self.assertTrue('service_2' in last_status['services'])
@@ -62,10 +62,10 @@ class TestStatusAggregator(unittest.TestCase):
 
         status_changes = []
 
-        aggregator = StatusAggregator(on_status_change_function=status_change)
+        recorder = StatusRecorder(on_status_change_function=status_change)
         client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
                               status_tag=status_tag,
-                              on_status_message_function=aggregator.on_broker_message)
+                              on_status_message_function=recorder.on_broker_message)
         t_client = Thread(target=client.start)
         t_client.start()
 
@@ -96,3 +96,4 @@ class TestStatusAggregator(unittest.TestCase):
         sleep(0.1)
         client.stop()
         t_client.join()
+

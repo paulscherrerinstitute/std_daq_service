@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from sf_daq_service.watcher.status_aggregator import StatusAggregator
+from sf_daq_service.watcher.status_recorder import StatusRecorder
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_client import BrokerClient
 
@@ -60,7 +60,7 @@ def print_to_console(request_id, status):
 
 
 def start_console_output(tag, broker_url):
-    aggregator = StatusAggregator(on_status_change_function=print_to_console)
+    aggregator = StatusRecorder(on_status_change_function=print_to_console)
     client = BrokerClient(broker_url=broker_url,
                           status_tag=tag,
                           on_status_message_function=aggregator.on_broker_message)
