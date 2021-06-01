@@ -1,7 +1,6 @@
 
 class StatusAggregator(object):
-    def __init__(self, on_status_change_function):
-        self.on_status_change = on_status_change_function
+    def __init__(self):
         self.status = {}
 
     def on_broker_message(self, request_id, header, request):
@@ -15,8 +14,8 @@ class StatusAggregator(object):
             self.status[request_id]['services'][service_name] = []
 
         self.status[request_id]['services'][service_name].append((header['action'], header['message']))
-
-        self.on_status_change(request_id, self.status[request_id])
+        # TODO: Somehow know when the request is finished, then signal.
 
     def wait_for_response(self, request_id):
+        # TODO: Implement async communication and wait until a status OK has arrived for the requested request_id.
         pass

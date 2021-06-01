@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 
 from sf_daq_service.common import broker_config
 from sf_daq_service.common.broker_client import BrokerClient
-from sf_daq_service.rest.request_factory import build_write_request, build_broker_response
+from sf_daq_service.rest.request_factory import build_write_request, build_broker_response, build_kill_request
 from sf_daq_service.rest.status_aggregator import StatusAggregator
 
 _logger = logging.getLogger("RestProxyService")
@@ -58,6 +58,17 @@ def start_rest_api(service_name, broker_url, tag):
         response = {"request_id": request_id}
 
         return jsonify(response)
+
+    @app.route('/write_kill', methods=['POST'])
+    def write_kill():
+        kill_request = request.json
+
+        if 'request_id' not in kill_request:
+            raise RuntimeError('Mandatory field "request_id" missing.')
+
+        header, body = build_kill_request(kill_request)
+
+        broker_client.kill_request(tag, body, header)
 
 
 if __file__ == "__main__":
