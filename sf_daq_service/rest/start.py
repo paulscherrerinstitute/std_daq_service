@@ -64,10 +64,11 @@ def start_rest_api(service_name, broker_url, tag):
 
         if 'request_id' not in kill_request:
             raise RuntimeError('Mandatory field "request_id" missing.')
+        request_id = kill_request['request_id']
 
         header, body = build_kill_request(kill_request)
 
-        request_id = broker_client.kill_request(tag, body, header)
+        broker_client.kill_request(tag, body, header)
         broker_response = status_aggregator.wait_for_response(request_id)
 
         response = {"request_id": request_id,
