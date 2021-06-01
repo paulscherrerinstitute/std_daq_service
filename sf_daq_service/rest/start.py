@@ -44,7 +44,6 @@ def start_rest_api(service_name, broker_url, tag):
         request_id = broker_client.send_request(tag, body, header)
         broker_response = status_aggregator.wait_for_response(request_id)
 
-        # TODO: Convert broker_response to client response.
         response = {"request_id": request_id,
                     'response': build_broker_response(response=broker_response)}
 
@@ -68,7 +67,13 @@ def start_rest_api(service_name, broker_url, tag):
 
         header, body = build_kill_request(kill_request)
 
-        broker_client.kill_request(tag, body, header)
+        request_id = broker_client.kill_request(tag, body, header)
+        broker_response = status_aggregator.wait_for_response(request_id)
+
+        response = {"request_id": request_id,
+                    'response': build_broker_response(response=broker_response)}
+
+        return jsonify(response)
 
 
 if __file__ == "__main__":
