@@ -12,6 +12,7 @@ _logger = logging.getLogger("BrokerWorker")
 
 
 class BrokerWorker(object):
+    # TODO: Add on_kill_message_function
     def __init__(self, broker_url, request_tag, name, on_request_message_function):
         self.broker_url = broker_url
         self.request_tag = request_tag
