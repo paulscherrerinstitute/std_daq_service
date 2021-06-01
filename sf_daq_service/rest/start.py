@@ -50,6 +50,15 @@ def start_rest_api(service_name, broker_url, tag):
 
         return jsonify(response)
 
+    @app.route('/write_async', methods=['POST'])
+    def write_async_request():
+        header, body = extract_write_request(request.json)
+
+        request_id = broker_client.send_request(tag, body, header)
+        response = {"request_id": request_id}
+
+        return jsonify(response)
+
 
 if __file__ == "__main__":
     parser = argparse.ArgumentParser(description='Rest Proxy Service')
