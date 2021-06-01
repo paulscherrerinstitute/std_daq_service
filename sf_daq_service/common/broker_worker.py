@@ -21,36 +21,53 @@ class BrokerWorker(object):
         _logger.info(f"Starting worker on tag {self.request_tag} with name {self.worker_name}.")
 
         self.request_queue_name = str(uuid.uuid4())
-        _logger.debug(f'Request queue {self.request_queue_name}.')
+        self.kill_queue_name = str(uuid.uuid4())
+        _logger.debug(f'Request queue {self.request_queue_name}, kill queue {self.kill_queue_name}.')
 
         self.connection = None
-        self.channel = None
+        self.request_channel = None
+        self.kill_channel = None
 
     def start(self):
         self.connection = BlockingConnection(ConnectionParameters(self.broker_url))
-        self.channel = self.connection.channel()
 
-        self.channel.exchange_declare(exchange=broker_config.STATUS_EXCHANGE,
-                                      exchange_type=broker_config.STATUS_EXCHANGE_TYPE)
-        self.channel.exchange_declare(exchange=broker_config.REQUEST_EXCHANGE,
-                                      exchange_type=broker_config.REQUEST_EXCHANGE_TYPE)
+        # Request and status exchanges.
+        self.request_channel = self.connection.channel()
 
-        self.channel.queue_declare(queue=self.request_queue_name, auto_delete=True, exclusive=True)
-        self.channel.queue_bind(queue=self.request_queue_name,
-                                exchange=broker_config.REQUEST_EXCHANGE,
-                                routing_key=self.request_tag)
+        self.request_channel.exchange_declare(exchange=broker_config.STATUS_EXCHANGE,
+                                              exchange_type=broker_config.STATUS_EXCHANGE_TYPE)
+        self.request_channel.exchange_declare(exchange=broker_config.REQUEST_EXCHANGE,
+                                              exchange_type=broker_config.REQUEST_EXCHANGE_TYPE)
 
-        self.channel.basic_qos(prefetch_count=1)
-        self.channel.basic_consume(self.request_queue_name, self._on_broker_message)
+        self.request_channel.queue_declare(queue=self.request_queue_name, auto_delete=True, exclusive=True)
+        self.request_channel.queue_bind(queue=self.request_queue_name,
+                                        exchange=broker_config.REQUEST_EXCHANGE,
+                                        routing_key=self.request_tag)
+
+        self.request_channel.basic_qos(prefetch_count=1)
+        self.request_channel.basic_consume(self.request_queue_name, self._on_broker_message)
+
+        # Kill exchange.
+        self.kill_channel = self.connection.channel()
+
+        self.kill_channel.exchange_declare(exchange=broker_config.KILL_EXCHANGE,
+                                           exchange_type=broker_config.KILL_EXCHANGE_TYPE)
+
+        self.kill_channel.queue_declare(self.kill_queue_name, auto_delete=True, exclusive=True)
+        self.kill_channel.queue_bind(queue=self.kill_queue_name,
+                                     exchange=broker_config.KILL_EXCHANGE,
+                                     routing_key=self.request_tag)
+
+        self.kill_channel.basic_consume(self.kill_queue_name, self._on_kill_message, auto_ack=True)
 
         try:
             _logger.info("Start consuming.")
-            self.channel.start_consuming()
+            self.request_channel.start_consuming()
         except KeyboardInterrupt:
-            self.channel.stop_consuming()
+            self.request_channel.stop_consuming()
 
     def stop(self):
-        self.connection.add_callback_threadsafe(self.channel.stop_consuming)
+        self.connection.add_callback_threadsafe(self.request_channel.stop_consuming)
 
     def _on_broker_message(self, channel, method_frame, header_frame, body):
 
@@ -89,6 +106,10 @@ class BrokerWorker(object):
             _logger.exception("Error in broker worker.")
             self._reject_request(body, header_frame.delivery_tag, str(e))
 
+    def _on_kill_message(self, channel, method_frame, header_frame, body):
+        # TODO: Figure out a signalization way.
+        pass
+
     def _update_status(self, request_id, body, action, message=None):
 
         status_header = {
@@ -99,7 +120,7 @@ class BrokerWorker(object):
 
         _logger.info(f"Updating worker status: {status_header}")
 
-        self.channel.basic_publish(
+        self.request_channel.basic_publish(
             exchange=broker_config.STATUS_EXCHANGE,
             properties=BasicProperties(
                 headers=status_header,
@@ -109,9 +130,9 @@ class BrokerWorker(object):
         )
 
     def _confirm_request(self, request_id, body, delivery_tag, message=None):
-        self.channel.basic_ack(delivery_tag=delivery_tag)
+        self.request_channel.basic_ack(delivery_tag=delivery_tag)
         self._update_status(request_id, body, broker_config.ACTION_REQUEST_SUCCESS, message)
 
     def _reject_request(self, request_id, body, delivery_tag, message=None):
-        self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
+        self.request_channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
         self._update_status(request_id, body, broker_config.ACTION_REQUEST_FAIL, message)
