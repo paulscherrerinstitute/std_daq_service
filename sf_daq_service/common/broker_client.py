@@ -30,6 +30,8 @@ class BrokerClient(object):
                                       exchange_type=broker_config.STATUS_EXCHANGE_TYPE)
         self.channel.exchange_declare(exchange=broker_config.REQUEST_EXCHANGE,
                                       exchange_type=broker_config.REQUEST_EXCHANGE_TYPE)
+        self.channel.exchange_declare(exchange=broker_config.KILL_EXCHANGE,
+                                      exchange_type=broker_config.KILL_EXCHANGE_TYPE)
 
         self.channel.queue_declare(queue=self.status_queue_name, exclusive=True, auto_delete=True)
         self.channel.queue_bind(queue=self.status_queue_name,
@@ -76,3 +78,17 @@ class BrokerClient(object):
         self.connection.add_callback_threadsafe(send_request_f)
 
         return request_id
+
+    def kill_request(self, tag, request_id):
+        _logger.info(f'Sending kill request to tag {tag} with request_id {request_id}.')
+
+        kill_request_f = partial(
+            self.channel.basic_publish,
+            broker_config.KILL_EXCHANGE,
+            tag,
+            "",
+            BasicProperties(headers={},
+                            correlation_id=request_id)
+        )
+
+        self.connection.add_callback_threadsafe(kill_request_f)
