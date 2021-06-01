@@ -36,6 +36,7 @@ class BrokerClient(object):
                                 exchange=broker_config.STATUS_EXCHANGE,
                                 routing_key=self.status_tag)
 
+        self.channel.basic_qos(prefetch_count=1)
         self.channel.basic_consume(self.status_queue_name, self._on_broker_message, auto_ack=True)
 
         try:
