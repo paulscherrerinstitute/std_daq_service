@@ -5,11 +5,11 @@ from threading import Thread
 from time import sleep
 import zmq
 
-from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_client import BrokerClient
-from sf_daq_service.common.broker_worker import BrokerWorker
-from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
-from sf_daq_service.writer_agent.start import RequestWriterService, ImageMetadata
+from std_daq_service.common import broker_config
+from std_daq_service.common.broker_client import BrokerClient
+from std_daq_service.common.broker_worker import BrokerWorker
+from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
+from std_daq_service.writer_agent.start import RequestWriterService, ImageMetadata
 
 
 class TestRequestWriteService(unittest.TestCase):

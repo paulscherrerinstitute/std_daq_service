@@ -3,8 +3,8 @@ from time import sleep
 
 import zmq
 
-from sf_daq_service.writer_agent.start import ImageMetadata
-from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
+from std_daq_service.writer_agent.start import ImageMetadata
+from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 
 class TestTransceiver(unittest.TestCase):

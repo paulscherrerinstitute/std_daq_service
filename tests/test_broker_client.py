@@ -2,9 +2,9 @@ import unittest
 from threading import Thread
 from time import sleep
 
-from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_client import BrokerClient
-from sf_daq_service.common.broker_worker import BrokerWorker
+from std_daq_service.common import broker_config
+from std_daq_service.common.broker_client import BrokerClient
+from std_daq_service.common.broker_worker import BrokerWorker
 
 
 class TestBrokerListener(unittest.TestCase):

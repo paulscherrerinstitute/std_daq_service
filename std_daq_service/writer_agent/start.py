@@ -4,9 +4,9 @@ from threading import Event
 from _ctypes import Structure
 from ctypes import c_uint64, c_uint32, c_uint16
 
-from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_worker import BrokerWorker
-from sf_daq_service.writer_agent.zmq_transciever import ZmqTransciever
+from std_daq_service.common import broker_config
+from std_daq_service.common.broker_worker import BrokerWorker
+from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 _logger = logging.getLogger('RequestWriteService')
 

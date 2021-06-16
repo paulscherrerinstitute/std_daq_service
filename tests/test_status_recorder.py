@@ -2,11 +2,11 @@ import unittest
 from threading import Thread
 from time import sleep
 
-from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_client import BrokerClient
-from sf_daq_service.common.broker_worker import BrokerWorker
-from sf_daq_service.watcher.start import print_to_console
-from sf_daq_service.watcher.status_recorder import StatusRecorder
+from std_daq_service.common import broker_config
+from std_daq_service.common.broker_client import BrokerClient
+from std_daq_service.common.broker_worker import BrokerWorker
+from std_daq_service.watcher.start import print_to_console
+from std_daq_service.watcher.status_recorder import StatusRecorder
 
 
 class TestStatusRecorder(unittest.TestCase):

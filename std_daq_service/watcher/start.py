@@ -1,9 +1,9 @@
 import argparse
 import logging
 
-from sf_daq_service.watcher.status_recorder import StatusRecorder
-from sf_daq_service.common import broker_config
-from sf_daq_service.common.broker_client import BrokerClient
+from std_daq_service.watcher.status_recorder import StatusRecorder
+from std_daq_service.common import broker_config
+from std_daq_service.common.broker_client import BrokerClient
 
 _logger = logging.getLogger("BrokerListenerConsoleClient")
 

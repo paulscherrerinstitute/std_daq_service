@@ -5,7 +5,7 @@ from functools import partial
 
 from pika import BlockingConnection, ConnectionParameters, BasicProperties
 
-from sf_daq_service.common import broker_config
+from std_daq_service.common import broker_config
 
 _logger = logging.getLogger("BrokerClient")
 
