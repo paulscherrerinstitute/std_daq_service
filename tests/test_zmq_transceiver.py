@@ -3,7 +3,7 @@ from time import sleep
 
 import zmq
 
-from std_daq_service.writer_agent.start import ImageMetadata
+from std_daq_service.common.protocol import ImageMetadata
 from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 
@@ -56,7 +56,7 @@ class TestTransceiver(unittest.TestCase):
 
             for pulse_id in range(request["n_images"]):
                 write_message = receiver.recv_json()
-                self.assertEqual(write_message["i_image"], write_message["image_metadata"]["pulse_id"])
+                self.assertEqual(write_message["i_image"], write_message["image_metadata"]["id"])
 
         finally:
             if transceiver:

@@ -8,8 +8,9 @@ import zmq
 from std_daq_service.common import broker_config
 from std_daq_service.common.broker_client import BrokerClient
 from std_daq_service.common.broker_worker import BrokerWorker
+from std_daq_service.common.protocol import ImageMetadata
 from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
-from std_daq_service.writer_agent.start import RequestWriterService, ImageMetadata
+from std_daq_service.writer_agent.service import RequestWriterService
 
 
 class TestRequestWriteService(unittest.TestCase):
@@ -69,7 +70,7 @@ class TestRequestWriteService(unittest.TestCase):
         for pulse_id in range(request["n_images"]):
             write_message = receiver.recv_json()
 
-            self.assertEqual(write_message["i_image"], write_message["image_metadata"]["pulse_id"])
+            self.assertEqual(write_message["i_image"], write_message["image_metadata"]["id"])
             self.assertEqual(write_message["i_image"], pulse_id)
             self.assertEqual(write_message["output_file"], request["output_file"])
             # TODO: Test also image metadata.
