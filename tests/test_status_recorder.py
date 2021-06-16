@@ -5,8 +5,8 @@ from time import sleep
 from std_daq_service.common import broker_config
 from std_daq_service.common.broker_client import BrokerClient
 from std_daq_service.common.broker_worker import BrokerWorker
-from std_daq_service.watcher.start import print_to_console
-from std_daq_service.watcher.status_recorder import StatusRecorder
+from std_daq_service.logger.start import print_to_console
+from std_daq_service.logger.status_recorder import StatusRecorder
 
 
 class TestStatusRecorder(unittest.TestCase):

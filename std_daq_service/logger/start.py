@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from std_daq_service.watcher.status_recorder import StatusRecorder
+from std_daq_service.logger.status_recorder import StatusRecorder
 from std_daq_service.common import broker_config
 from std_daq_service.common.broker_client import BrokerClient
 
@@ -69,7 +69,7 @@ def start_console_output(tag, broker_url):
 
 
 if __file__ == "__main__":
-    parser = argparse.ArgumentParser(description='Broker Watcher')
+    parser = argparse.ArgumentParser(description='Broker logger')
 
     parser.add_argument("tag", type=str, default="#", help="Tag to bind to on the status exchange.")
     parser.add_argument("--broker_url", default=broker_config.TEST_BROKER_URL,
