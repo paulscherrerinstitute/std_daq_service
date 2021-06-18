@@ -45,6 +45,8 @@ class TestStatusRecorder(unittest.TestCase):
         self.assertTrue('service_2' in last_status['services'])
 
     def test_BrokerClient_with_status_aggregator(self):
+        # TODO: Fix the resources leak here.
+
         service_name = "noop_worker"
         service_tag = "psi.facility.beamline.#"
         request_tag = "psi.facility.beamline.profile"
