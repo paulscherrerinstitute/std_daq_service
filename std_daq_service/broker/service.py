@@ -11,7 +11,7 @@ _logger = getLogger("BrokerService")
 
 
 class BrokerService(BrokerClientBase):
-    def __init__(self, broker_url, tag, service_name):
+    def __init__(self, broker_url, tag, service_name, request_callback=None, kill_callback=None):
         super().__init__(broker_url=broker_url, tag=tag)
 
         self.service_name = service_name
@@ -20,8 +20,8 @@ class BrokerService(BrokerClientBase):
         self.bind_queue(REQUEST_EXCHANGE, self.tag, self._request_callback, False)
         self.bind_queue(KILL_EXCHANGE, self.tag, self._kill_callback, True)
 
-        self.user_request_callback = None
-        self.user_kill_callback = None
+        self.user_request_callback = request_callback
+        self.user_kill_callback = kill_callback
 
     def _request_callback(self, channel, method_frame, header_frame, body):
 
