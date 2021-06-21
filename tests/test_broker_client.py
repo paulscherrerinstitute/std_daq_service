@@ -2,8 +2,8 @@ import unittest
 from threading import Thread
 from time import sleep
 
-from std_daq_service.common import broker_config
-from std_daq_service.common.broker_client import BrokerClient
+from std_daq_service.broker_client import BrokerClient, TEST_BROKER_URL, ACTION_REQUEST_SUCCESS, \
+    ACTION_REQUEST_START
 from std_daq_service.common.broker_worker import BrokerWorker
 
 
@@ -30,29 +30,25 @@ class TestBrokerListener(unittest.TestCase):
             self.assertEqual(sent_request, request)
             return service_message
 
-        client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
-                              status_tag=status_tag,
-                              on_status_message_function=on_status_message)
+        client = BrokerClient(broker_url=TEST_BROKER_URL,
+                              tag=status_tag,
+                              status_callback=on_status_message)
 
-        worker = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
+        worker = BrokerWorker(broker_url=TEST_BROKER_URL,
                               request_tag=service_tag,
                               name=service_name,
                               on_request_message_function=on_service_message)
-
-        t_client = Thread(target=client.start)
-        t_client.start()
 
         t_worker = Thread(target=worker.start)
         t_worker.start()
 
         sleep(0.1)
-        client.send_request(request_tag, sent_request)
+        client.send_request(sent_request)
         sleep(0.1)
 
         client.stop()
         worker.stop()
 
-        t_client.join()
         t_worker.join()
 
         self.assertEqual(len(status_messages), 2)
@@ -62,8 +58,8 @@ class TestBrokerListener(unittest.TestCase):
             self.assertEqual(received_request_id, request_id)
 
             if i == 0:
-                self.assertEqual(header['action'], broker_config.ACTION_REQUEST_START)
+                self.assertEqual(header['action'], ACTION_REQUEST_START)
             else:
-                self.assertEqual(header['action'], broker_config.ACTION_REQUEST_SUCCESS)
+                self.assertEqual(header['action'], ACTION_REQUEST_SUCCESS)
                 self.assertEqual(header['message'], service_message)
 

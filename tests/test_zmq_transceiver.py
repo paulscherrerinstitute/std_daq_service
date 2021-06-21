@@ -3,7 +3,7 @@ from time import sleep
 
 import zmq
 
-from std_daq_service.common.protocol import ImageMetadata
+from std_daq_service.protocol import ImageMetadata
 from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 
