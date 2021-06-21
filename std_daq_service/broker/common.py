@@ -69,7 +69,7 @@ class BrokerClientBase(object):
 
         self.channel.basic_consume(queue, callback, auto_ack=auto_ack)
 
-    def wait(self):
+    def block(self):
         self.thread.join()
 
     def __del__(self):
