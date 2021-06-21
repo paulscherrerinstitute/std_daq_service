@@ -1,8 +1,8 @@
 import argparse
 import logging
 
-from std_daq_service.common import broker_config
-from std_daq_service.common.broker_worker import BrokerWorker
+from std_daq_service.broker import broker_config
+from std_daq_service.broker.broker_worker import BrokerWorker
 from std_daq_service.writer_agent.service import RequestWriterService
 from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 

@@ -3,8 +3,8 @@ import logging
 
 from flask import Flask, request, jsonify
 
-from std_daq_service.common import broker_config
-from std_daq_service.common.broker_client import BrokerClient
+from std_daq_service.broker import broker_config
+from std_daq_service.broker.client import BrokerClient
 from std_daq_service.rest.request_factory import build_write_request, build_broker_response
 from std_daq_service.rest.status_aggregator import StatusAggregator
 
@@ -35,13 +35,13 @@ def start_rest_api(service_name, broker_url, tag):
     app = Flask(service_name)
     status_aggregator = StatusAggregator()
     broker_client = BrokerClient(broker_url, tag,
-                                 on_status_message_function=status_aggregator.on_broker_message)
+                                 status_callback=status_aggregator.on_broker_message)
 
     @app.route("/write_sync", methods=['POST'])
     def write_sync_request():
-        header, body = extract_write_request(request.json)
+        header, message = extract_write_request(request.json)
 
-        request_id = broker_client.send_request(tag, body, header)
+        request_id = broker_client.send_request(message, header)
         broker_response = status_aggregator.wait_for_response(request_id)
 
         response = {"request_id": request_id,
@@ -51,9 +51,9 @@ def start_rest_api(service_name, broker_url, tag):
 
     @app.route('/write_async', methods=['POST'])
     def write_async_request():
-        header, body = extract_write_request(request.json)
+        header, message = extract_write_request(request.json)
 
-        request_id = broker_client.send_request(tag, body, header)
+        request_id = broker_client.send_request(message, header)
         response = {"request_id": request_id}
 
         return jsonify(response)
@@ -66,7 +66,7 @@ def start_rest_api(service_name, broker_url, tag):
             raise RuntimeError('Mandatory field "request_id" missing.')
         request_id = kill_request['request_id']
 
-        broker_client.kill_request(tag, request_id)
+        broker_client.kill_request(request_id)
         broker_response = status_aggregator.wait_for_response(request_id)
 
         response = {"request_id": request_id,

@@ -4,7 +4,7 @@ from threading import Thread
 
 from pika import BasicProperties
 
-from std_daq_service.common.broker import BrokerClientBase, STATUS_EXCHANGE, REQUEST_EXCHANGE, KILL_EXCHANGE, \
+from std_daq_service.broker.common import BrokerClientBase, STATUS_EXCHANGE, REQUEST_EXCHANGE, KILL_EXCHANGE, \
     ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL
 
 _logger = getLogger("BrokerService")

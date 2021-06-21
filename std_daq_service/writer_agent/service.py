@@ -1,7 +1,7 @@
 from logging import getLogger
 from threading import Event
 
-from std_daq_service.common.protocol import ImageMetadata
+from std_daq_service.protocol import ImageMetadata
 
 _logger = getLogger("RequestWriterService")
 

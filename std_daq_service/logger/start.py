@@ -1,9 +1,8 @@
 import argparse
 import logging
 
+from std_daq_service.broker.client import BrokerClient
 from std_daq_service.logger.status_recorder import StatusRecorder
-from std_daq_service.common import broker_config
-from std_daq_service.common.broker_client import BrokerClient
 
 _logger = logging.getLogger("BrokerListenerConsoleClient")
 
@@ -19,21 +18,21 @@ GREEN_BACKGROUND = u'\u001b[42m'
 YELLOW_BACKGROUND = u'\u001b[43m'
 
 status_symbol_mapping = {
-    broker_config.ACTION_REQUEST_START: BLACK_TEXT + YELLOW_BACKGROUND + '*' + RESET,
-    broker_config.ACTION_REQUEST_SUCCESS: BLACK_TEXT + GREEN_BACKGROUND + '+' + RESET,
-    broker_config.ACTION_REQUEST_FAIL: BLACK_TEXT + RED_BACKGROUND + '-' + RESET
+    ACTION_REQUEST_START: BLACK_TEXT + YELLOW_BACKGROUND + '*' + RESET,
+    ACTION_REQUEST_SUCCESS: BLACK_TEXT + GREEN_BACKGROUND + '+' + RESET,
+    ACTION_REQUEST_FAIL: BLACK_TEXT + RED_BACKGROUND + '-' + RESET
 }
 
 text_color_mapping = {
-    broker_config.ACTION_REQUEST_START: YELLOW_TEXT,
-    broker_config.ACTION_REQUEST_SUCCESS: GREEN_TEXT,
-    broker_config.ACTION_REQUEST_FAIL: RED_TEXT
+    ACTION_REQUEST_START: YELLOW_TEXT,
+    ACTION_REQUEST_SUCCESS: GREEN_TEXT,
+    ACTION_REQUEST_FAIL: RED_TEXT
 }
 
 service_status_order = {
-    broker_config.ACTION_REQUEST_FAIL: 0,
-    broker_config.ACTION_REQUEST_START: 1,
-    broker_config.ACTION_REQUEST_SUCCESS: 2
+    ACTION_REQUEST_FAIL: 0,
+    ACTION_REQUEST_START: 1,
+    ACTION_REQUEST_SUCCESS: 2
 }
 
 
@@ -62,10 +61,10 @@ def print_to_console(request_id, status):
 def start_console_output(tag, broker_url):
     aggregator = StatusRecorder(on_status_change_function=print_to_console)
     client = BrokerClient(broker_url=broker_url,
-                          status_tag=tag,
-                          on_status_message_function=aggregator.on_broker_message)
+                          tag=tag,
+                          status_callback=aggregator.on_broker_message)
 
-    client.start()
+    client.block()
 
 
 if __file__ == "__main__":
