@@ -40,6 +40,10 @@ class BrokerClient(object):
         self._bind_queue(REQUEST_EXCHANGE, tag, self._request_callback, False)
         self._bind_queue(KILL_EXCHANGE, tag, self._kill_callback, True)
 
+        self.user_request_callback = None
+        self.user_kill_callback = None
+        self.user_status_callback = None
+
         def start_consuming():
             try:
                 self.channel.start_consuming()
@@ -65,13 +69,16 @@ class BrokerClient(object):
         self.channel.basic_consume(queue, callback, auto_ack=auto_ack)
 
     def _status_callback(self):
-        pass
+        if self.user_status_callback is None:
+            return
 
     def _request_callback(self):
-        pass
+        if self.user_request_callback is None:
+            pass
 
     def _kill_callback(self):
-        pass
+        if self.user_kill_callback is None:
+            pass
 
     def block(self):
         self.thread.join()
