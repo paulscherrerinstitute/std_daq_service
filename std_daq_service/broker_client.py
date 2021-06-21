@@ -82,24 +82,27 @@ class BrokerClient(object):
         try:
             request_id = header_frame.correlation_id
             delivery_tag = header_frame.delivery_tag
-            self.request_id_cache[request_id] = delivery_tag
             _logger.info(f"Received request_id {request_id} with delivery_tag {delivery_tag}.")
 
             request = json.loads(body.decode())
             _logger.debug(f"Received request {request}")
 
+            self.request_id_cache[request_id] = (delivery_tag, request)
+
             self.user_request_callback(request_id, request)
+
+            if request_id in self.request_id_cache:
+                raise RuntimeError("Request not finalized. Complete or reject request.")
 
         except Exception as e:
             _logger.exception("Error while asking worker to process request.")
+            self.reject_request(request_id, request, str(e))
 
-            self._reject_request(body, header_frame.delivery_tag, str(e))
-
-    def complete_request(self, request_id):
+    def complete_request(self, request_id, message):
         if request_id not in self.request_id_cache:
             raise ValueError("Request_id not present in cache.")
 
-        delivery_tag = self.request_id_cache[request_id]
+        delivery_tag, request = self.request_id_cache[request_id]
         del self.request_id_cache[request_id]
 
         def ack_request_f():
@@ -107,11 +110,11 @@ class BrokerClient(object):
 
         self.connection.add_callback_threadsafe(ack_request_f)
 
-    def reject_request(self, request_id):
+    def reject_request(self, request_id, message):
         if request_id not in self.request_id_cache:
             raise ValueError("Request_id not present in cache.")
 
-        delivery_tag = self.request_id_cache[request_id]
+        delivery_tag, request = self.request_id_cache[request_id]
         del self.request_id_cache[request_id]
 
         def nack_request_f():
@@ -132,12 +135,12 @@ class BrokerClient(object):
         self.connection.add_callback_threadsafe(self.channel.stop_consuming)
         self.thread.join()
 
-    def send_request(self, message, header=None):
+    def send_request(self, request, header=None):
         header = header or {}
 
-        _logger.info(f'Sending request to tag {self.tag} with header {header} and message {message}')
+        _logger.info(f'Sending request to tag {self.tag} with header {header} and message {request}')
 
-        body = json.dumps(message).encode()
+        body = json.dumps(request).encode()
         request_id = str(uuid.uuid4())
         properties = BasicProperties(headers=header, correlation_id=request_id)
 
@@ -161,12 +164,12 @@ class BrokerClient(object):
 
         self.connection.add_callback_threadsafe(kill_request_f)
 
-    def update_status(self, request_id, message, header):
+    def update_request_status(self, request_id, request, header):
 
         _logger.info(f'Updating status to tag {self.tag} with request_id {request_id} '
-                     f'with header {header} and message {message}')
+                     f'with header {header} and message {request}')
 
-        body = json.dumps(message).encode()
+        body = json.dumps(request).encode()
         properties = BasicProperties(headers=header, correlation_id=request_id)
 
         update_status_f = partial(
