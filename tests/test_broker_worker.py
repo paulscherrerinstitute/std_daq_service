@@ -3,7 +3,7 @@ from threading import Thread
 from time import sleep
 
 from std_daq_service.common import broker_config
-from std_daq_service.broker_client import BrokerClient
+from std_daq_service.common.broker_client import BrokerClient
 from std_daq_service.common.broker_worker import BrokerWorker
 
 

@@ -2,7 +2,7 @@ import unittest
 from threading import Thread
 from time import sleep
 
-from std_daq_service.broker_client import BrokerClient, TEST_BROKER_URL, ACTION_REQUEST_SUCCESS, \
+from std_daq_service.common.broker_client import BrokerClient, TEST_BROKER_URL, ACTION_REQUEST_SUCCESS, \
     ACTION_REQUEST_START
 from std_daq_service.common.broker_worker import BrokerWorker
 
