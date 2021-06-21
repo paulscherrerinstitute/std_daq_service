@@ -44,6 +44,8 @@ class BrokerClient(object):
         self.user_kill_callback = None
         self.user_status_callback = None
 
+        self.request_id_cache = {}
+
         def start_consuming():
             try:
                 self.channel.start_consuming()
@@ -72,9 +74,50 @@ class BrokerClient(object):
         if self.user_status_callback is None:
             return
 
-    def _request_callback(self):
+    def _request_callback(self, channel, method_frame, header_frame, body):
+
         if self.user_request_callback is None:
+            return
+
+        try:
+            request_id = header_frame.correlation_id
+            delivery_tag = header_frame.delivery_tag
+            self.request_id_cache[request_id] = delivery_tag
+            _logger.info(f"Received request_id {request_id} with delivery_tag {delivery_tag}.")
+
+            request = json.loads(body.decode())
+            _logger.debug(f"Received request {request}")
+
+            self.user_request_callback(request_id, request)
+
+        except Exception as e:
+            _logger.exception("Error while asking worker to process request.")
+
+            self._reject_request(body, header_frame.delivery_tag, str(e))
+
+    def complete_request(self, request_id):
+        if request_id not in self.request_id_cache:
+            raise ValueError("Request_id not present in cache.")
+
+        delivery_tag = self.request_id_cache[request_id]
+        del self.request_id_cache[request_id]
+
+        def ack_request_f():
             pass
+
+        self.connection.add_callback_threadsafe(ack_request_f)
+
+    def reject_request(self, request_id):
+        if request_id not in self.request_id_cache:
+            raise ValueError("Request_id not present in cache.")
+
+        delivery_tag = self.request_id_cache[request_id]
+        del self.request_id_cache[request_id]
+
+        def nack_request_f():
+            pass
+
+        self.connection.add_callback_threadsafe(nack_request_f)
 
     def _kill_callback(self):
         if self.user_kill_callback is None:
