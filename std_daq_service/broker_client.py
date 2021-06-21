@@ -73,9 +73,13 @@ class BrokerClient(object):
 
         self.channel.basic_consume(queue, callback, auto_ack=auto_ack)
 
-    def _status_callback(self):
+    def _status_callback(self, channel, method_frame, header_frame, body):
         if self.user_status_callback is None:
             return
+
+        request_id = header_frame.correlation_id
+        _logger.info(f"Received status for request_id {request_id}.")
+        _logger.debug()
 
     def _request_callback(self, channel, method_frame, header_frame, body):
 
