@@ -40,7 +40,7 @@ class BrokerService(BrokerClientBase):
                 self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
                     correlation_id=request_id, headers={
                         'action': ACTION_REQUEST_START,
-                        'source': self.client_name,
+                        'source': self.service_name,
                         'message': None
                     }))
 
@@ -49,7 +49,7 @@ class BrokerService(BrokerClientBase):
                 self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
                     correlation_id=request_id, headers={
                         'action': ACTION_REQUEST_SUCCESS,
-                        'source': self.client_name,
+                        'source': self.service_name,
                         'message': result
                     }))
 
@@ -57,11 +57,13 @@ class BrokerService(BrokerClientBase):
 
             except Exception as e:
                 _logger.exception("Error while executing user_request_callback.")
-                self._update_status(request_id, {
-                    'action': ACTION_REQUEST_FAIL,
-                    'source': self.client_name,
-                    'message': str(e)
-                })
+
+                self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
+                    correlation_id=request_id, headers={
+                        'action': ACTION_REQUEST_FAIL,
+                        'source': self.service_name,
+                        'message': str(e)
+                    }))
                 self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
 
         thread = Thread(target=request_f)
