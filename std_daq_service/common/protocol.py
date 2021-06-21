@@ -19,7 +19,9 @@ image_metadata_encoding_mapping = {
 
 class ImageMetadata(Structure):
     _pack_ = 1
-    _fields_ = [("id", c_uint64),
+    _fields_ = [
+                ("version", c_uint64),
+                ("id", c_uint64),
                 ("height", c_uint64),
                 ("width", c_uint64),
 
