@@ -25,7 +25,7 @@ _logger = getLogger("RabbitMQConnection")
 
 
 class BrokerClient(object):
-    def __init__(self, broker_url, tag, status_callback=None, request_callback=None, kill_callback=None):
+    def __init__(self, broker_url, tag):
 
         self.connection = BlockingConnection(ConnectionParameters(broker_url))
         self.channel = self.connection.channel()
@@ -36,14 +36,9 @@ class BrokerClient(object):
         self.channel.exchange_declare(exchange=STATUS_EXCHANGE, exchange_type=STATUS_EXCHANGE_TYPE)
         self.channel.exchange_declare(exchange=KILL_EXCHANGE, exchange_type=KILL_EXCHANGE_TYPE)
 
-        if status_callback is not None:
-            self._bind_queue(STATUS_EXCHANGE, tag, status_callback, True)
-
-        if request_callback is not None:
-            self._bind_queue(REQUEST_EXCHANGE, tag, request_callback, False)
-
-        if kill_callback is not None:
-            self._bind_queue(KILL_EXCHANGE, tag, kill_callback, True)
+        self._bind_queue(STATUS_EXCHANGE, tag, self._status_callback, True)
+        self._bind_queue(REQUEST_EXCHANGE, tag, self._request_callback, False)
+        self._bind_queue(KILL_EXCHANGE, tag, self._kill_callback, True)
 
         def start_consuming():
             try:
@@ -68,6 +63,15 @@ class BrokerClient(object):
                                 routing_key=tag)
 
         self.channel.basic_consume(queue, callback, auto_ack=auto_ack)
+
+    def _status_callback(self):
+        pass
+
+    def _request_callback(self):
+        pass
+
+    def _kill_callback(self):
+        pass
 
     def block(self):
         self.thread.join()
