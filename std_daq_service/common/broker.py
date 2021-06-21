@@ -32,7 +32,7 @@ class BrokerClientBase(object):
 
         self.thread = None
 
-        _logger.info(f"Starting with tag {tag} on broker_url {broker_url}.")
+        _logger.info(f"Starting client with tag {tag} on broker_url {broker_url}.")
 
     def start(self):
         if self.thread is not None:
