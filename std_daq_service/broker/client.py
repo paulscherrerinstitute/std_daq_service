@@ -28,7 +28,11 @@ class BrokerClient(BrokerClientBase):
 
         request_id = header_frame.correlation_id
         _logger.info(f"Received status for request_id {request_id}.")
-        _logger.debug()
+
+        request = json.loads(body.decode())
+        header = header_frame.headers
+
+        self.user_status_callback(request_id, request, header)
 
     def send_request(self, request, header=None):
         header = header or {}
