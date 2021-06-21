@@ -11,7 +11,7 @@ class StatusRecorder(object):
         self.cache_length = MAX_REQUEST_ID_CACHE
         self.request_id_buffer = deque(maxlen=self.cache_length)
 
-    def on_broker_message(self, request_id, header, request):
+    def on_status_message(self, request_id, header, request):
         if request_id not in self.status:
             # Allow a max of MAX_REQUEST_ID_CACHE entries in the cache.
             if len(self.request_id_buffer) == self.cache_length:
