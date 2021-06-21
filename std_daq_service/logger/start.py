@@ -2,6 +2,8 @@ import argparse
 import logging
 
 from std_daq_service.broker.client import BrokerClient
+from std_daq_service.broker.common import ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL, \
+    TEST_BROKER_URL
 from std_daq_service.logger.status_recorder import StatusRecorder
 
 _logger = logging.getLogger("BrokerListenerConsoleClient")
@@ -37,7 +39,6 @@ service_status_order = {
 
 
 def print_to_console(request_id, status):
-
     output_statuses = []
     for service_name, statuses in sorted(status['services'].items()):
         last_received_status = statuses[-1][0]
@@ -59,19 +60,18 @@ def print_to_console(request_id, status):
 
 
 def start_console_output(tag, broker_url):
-    aggregator = StatusRecorder(on_status_change_function=print_to_console)
-    client = BrokerClient(broker_url=broker_url,
-                          tag=tag,
-                          status_callback=aggregator.on_broker_message)
+    print("WTF")
+    recorder = StatusRecorder(on_status_change_function=print_to_console)
 
+    client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=recorder.on_status_message)
     client.block()
 
 
-if __file__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker logger')
 
     parser.add_argument("tag", type=str, default="#", help="Tag to bind to on the status exchange.")
-    parser.add_argument("--broker_url", default=broker_config.TEST_BROKER_URL,
+    parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
     parser.add_argument("--log_level", default="ERROR",
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
@@ -83,4 +83,3 @@ if __file__ == "__main__":
     logging.getLogger("pika").setLevel(logging.WARNING)
 
     start_console_output(tag=args.tag, broker_url=args.broker_url)
-
