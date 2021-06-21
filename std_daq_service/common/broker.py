@@ -17,6 +17,10 @@ REQUEST_EXCHANGE_TYPE = 'topic'
 KILL_EXCHANGE = 'kill'
 KILL_EXCHANGE_TYPE = 'topic'
 
+ACTION_REQUEST_START = "request_start"
+ACTION_REQUEST_SUCCESS = "request_success"
+ACTION_REQUEST_FAIL = "request_fail"
+
 
 class BrokerClientBase(object):
     def __init__(self, broker_url, tag):
