@@ -85,11 +85,11 @@ class BrokerClient(object):
 
         body = json.dumps(message).encode()
         request_id = str(uuid.uuid4())
+        properties = BasicProperties(headers=header, correlation_id=request_id)
 
         send_request_f = partial(
-            self.channel.basic_publish, REQUEST_EXCHANGE, self.tag, body,
-            BasicProperties(headers=header,
-                            correlation_id=request_id)
+            self.channel.basic_publish,
+            REQUEST_EXCHANGE, self.tag, body, properties
         )
 
         self.connection.add_callback_threadsafe(send_request_f)
@@ -99,21 +99,24 @@ class BrokerClient(object):
     def kill_request(self, request_id):
         _logger.info(f'Sending kill request to tag {self.tag} with request_id {request_id}.')
 
+        properties = BasicProperties(headers={}, correlation_id=request_id)
+
         kill_request_f = partial(
-            self.channel.basic_publish, KILL_EXCHANGE, self.tag, "",
-            BasicProperties(headers={},
-                            correlation_id=request_id)
-        )
+            self.channel.basic_publish,
+            KILL_EXCHANGE, self.tag, "", properties)
 
         self.connection.add_callback_threadsafe(kill_request_f)
 
     def update_status(self, request_id, message, header):
 
-        _logger.info(f"Updating worker status: {header}")
+        _logger.info(f'Updating status to tag {self.tag} with request_id {request_id} '
+                     f'with header {header} and message {message}')
+
+        body = json.dumps(message).encode()
         properties = BasicProperties(headers=header, correlation_id=request_id)
 
         update_status_f = partial(
-            self.request_channel.basic_publish,
-            STATUS_EXCHANGE, self.tag, message, properties)
+            self.channel.basic_publish,
+            STATUS_EXCHANGE, self.tag, body, properties)
 
         self.connection.add_callback_threadsafe(update_status_f)
