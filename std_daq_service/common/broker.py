@@ -32,7 +32,7 @@ class BrokerClientBase(object):
 
         self.thread = None
 
-        _logger.info(f"Starting client with tag {tag} on broker_url {broker_url}.")
+        _logger.info(f"Setup client with tag {tag} on broker_url {broker_url}.")
 
     def start(self):
         if self.thread is not None:
@@ -64,6 +64,9 @@ class BrokerClientBase(object):
                                 routing_key=tag)
 
         self.channel.basic_consume(queue, callback, auto_ack=auto_ack)
+
+    def wait(self):
+        self.thread.join()
 
     def __del__(self):
         self.stop()
