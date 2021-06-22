@@ -71,6 +71,3 @@ class BrokerClientBase(object):
 
     def block(self):
         self.thread.join()
-
-    def __del__(self):
-        self.stop()
