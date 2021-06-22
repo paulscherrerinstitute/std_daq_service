@@ -23,6 +23,8 @@ class BrokerService(BrokerClientBase):
         self.user_request_callback = request_callback
         self.user_kill_callback = kill_callback
 
+        self.start()
+
     def _request_callback(self, channel, method_frame, header_frame, body):
 
         if self.user_request_callback is None:
@@ -30,7 +32,7 @@ class BrokerService(BrokerClientBase):
 
         def request_f():
             request_id = header_frame.correlation_id
-            delivery_tag = header_frame.delivery_tag
+            delivery_tag = method_frame.delivery_tag
             _logger.info(f"Received request_id {request_id} with delivery_tag {delivery_tag}.")
 
             request = json.loads(body.decode())
