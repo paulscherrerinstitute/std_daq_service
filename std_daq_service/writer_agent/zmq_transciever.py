@@ -2,16 +2,16 @@ import logging
 from threading import Thread
 import zmq
 
-_logger = logging.getLogger('Transceiver')
+_logger = logging.getLogger('ZmqTransceiver')
 
 
 class ZmqTransciever(object):
-    def __init__(self, input_stream_url, output_stream_url, on_message_function):
+    def __init__(self, input_stream_url, output_stream_url):
         self.input_stream_url = input_stream_url
         self.output_stream_url = output_stream_url
-        self.on_message_function = on_message_function
 
         self.last_run_id = None
+        self._user_message_callback = None
 
         self.run_thread = True
         self.transceiver_thread = Thread(target=self._run_transceiver)
@@ -37,7 +37,10 @@ class ZmqTransciever(object):
                 except zmq.Again:
                     continue
 
-                message = self.on_message_function(recv_bytes)
+                if self._user_message_callback is None:
+                    continue
+
+                message = self._user_message_callback(recv_bytes)
 
                 if message:
                     output_stream.send_json(message)
@@ -47,6 +50,13 @@ class ZmqTransciever(object):
         except Exception as e:
             _logger.exception("Transceiver error.")
             raise KeyboardInterrupt
+
+    def __enter__(self, message_callback):
+        self._user_message_callback = message_callback
+        return self
+
+    def __exit__(self):
+        self._user_message_callback = None
 
     def stop(self):
         self.run_thread = False
