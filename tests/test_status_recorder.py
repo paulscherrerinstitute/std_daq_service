@@ -2,9 +2,8 @@ import unittest
 from threading import Thread
 from time import sleep
 
-from std_daq_service.broker import broker_config
 from std_daq_service.broker.client import BrokerClient
-from std_daq_service.broker.broker_worker import BrokerWorker
+from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_SUCCESS
 from std_daq_service.listener.start import print_to_console
 from std_daq_service.listener.status_recorder import StatusRecorder
 
@@ -65,20 +64,19 @@ class TestStatusRecorder(unittest.TestCase):
         status_changes = []
 
         recorder = StatusRecorder(on_status_change_function=status_change)
-        client = BrokerClient(broker_url=broker_config.TEST_BROKER_URL,
-                              status_tag=status_tag,
-                              on_status_message_function=recorder.on_status_message)
-        t_client = Thread(target=client.start)
-        t_client.start()
+        client = BrokerClient(broker_url=TEST_BROKER_URL,
+                              tag=status_tag,
+                              status_callback=recorder.on_status_message)
 
-        worker_1 = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
+
+        worker_1 = BrokerWorker(broker_url=TEST_BROKER_URL,
                                 request_tag=service_tag,
                                 name=service_name + '_1',
                                 on_request_message_function=lambda x, y: "result")
         t_worker_1 = Thread(target=worker_1.start)
         t_worker_1.start()
 
-        worker_2 = BrokerWorker(broker_url=broker_config.TEST_BROKER_URL,
+        worker_2 = BrokerWorker(broker_url=TEST_BROKER_URL,
                                 request_tag=service_tag,
                                 name=service_name + '_2',
                                 on_request_message_function=lambda x, y: "result")
@@ -97,7 +95,6 @@ class TestStatusRecorder(unittest.TestCase):
         t_worker_2.join()
         sleep(0.1)
         client.stop()
-        t_client.join()
 
     def test_cache_max_len(self):
         def noop(request_id, status):
@@ -109,7 +106,7 @@ class TestStatusRecorder(unittest.TestCase):
         for i in range(max_request_id):
             recorder.on_status_message(request_id=i,
                                        header={'source': "service_1",
-                                               'action': broker_config.ACTION_REQUEST_SUCCESS,
+                                               'action': ACTION_REQUEST_SUCCESS,
                                                'message': "something"},
                                        request={})
 

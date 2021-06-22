@@ -73,7 +73,7 @@ class RequestWriterService(object):
         self.interrupt_request = None
         self.request_completed.set()
 
-    def on_broker_message(self, request_id, request):
+    def on_request(self, request_id, request):
         self._set_request_and_wait(request_id, request)
         self.request_completed.clear()
 
@@ -87,5 +87,5 @@ class RequestWriterService(object):
         self.request = request
         self.request_completed.wait()
 
-    def on_kill_request(self, request_id):
+    def on_kill(self, request_id):
         self.interrupt_request = request_id
