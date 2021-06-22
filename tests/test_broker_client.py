@@ -1,5 +1,4 @@
 import unittest
-from threading import Thread
 from time import sleep
 
 from std_daq_service.broker.client import BrokerClient
@@ -20,18 +19,19 @@ class TestBrokerListener(unittest.TestCase):
         status_messages = []
         sent_request_id = None
 
-        def request_callback(request_id, header, request):
+        def status_callback(request_id, request, header):
             self.assertEqual(request_id, sent_request_id)
             self.assertEqual(header["source"], service_name)
 
             status_messages.append((request_id, header, request))
 
         def request_callback(request_id, request):
+            self.assertEqual(request_id, sent_request_id)
             self.assertEqual(sent_request, request)
             return service_message
 
         client = BrokerClient(broker_url=TEST_BROKER_URL, tag=tag,
-                              status_callback=request_callback)
+                              status_callback=status_callback)
 
         worker = BrokerService(broker_url=TEST_BROKER_URL, tag=tag, service_name=service_name,
                                request_callback=request_callback)
