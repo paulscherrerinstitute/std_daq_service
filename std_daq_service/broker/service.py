@@ -30,47 +30,53 @@ class BrokerService(BrokerClientBase):
         if self.user_request_callback is None:
             return
 
+        request_id = header_frame.correlation_id
+        delivery_tag = method_frame.delivery_tag
+        _logger.info(f"Received request_id {request_id} with delivery_tag {delivery_tag}.")
+
+        request = json.loads(body.decode())
+        _logger.debug(f"Received request {request}")
+
+        self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
+            correlation_id=request_id, headers={
+                'action': ACTION_REQUEST_START,
+                'source': self.service_name,
+                'message': {}
+            }))
+
         def request_f():
-            request_id = header_frame.correlation_id
-            delivery_tag = method_frame.delivery_tag
-            _logger.info(f"Received request_id {request_id} with delivery_tag {delivery_tag}.")
-
-            request = json.loads(body.decode())
-            _logger.debug(f"Received request {request}")
-
             try:
-                self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
-                    correlation_id=request_id, headers={
-                        'action': ACTION_REQUEST_START,
-                        'source': self.service_name,
-                        'message': None
-                    }))
-
                 result = self.user_request_callback(request_id, request)
 
-                self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
-                    correlation_id=request_id, headers={
-                        'action': ACTION_REQUEST_SUCCESS,
-                        'source': self.service_name,
-                        'message': result
-                    }))
+                def confirm():
+                    self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
+                        correlation_id=request_id, headers={
+                            'action': ACTION_REQUEST_SUCCESS,
+                            'source': self.service_name,
+                            'message': result
+                        }))
 
-                self.channel.basic_ack(delivery_tag=delivery_tag)
+                    channel.basic_ack(delivery_tag=delivery_tag)
+
+                self.connection.add_callback_threadsafe(confirm)
 
             except Exception as e:
                 _logger.exception("Error while executing user_request_callback.")
 
-                self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
-                    correlation_id=request_id, headers={
-                        'action': ACTION_REQUEST_FAIL,
-                        'source': self.service_name,
-                        'message': str(e)
-                    }))
-                self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
+                def reject():
+                    self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
+                        correlation_id=request_id, headers={
+                            'action': ACTION_REQUEST_FAIL,
+                            'source': self.service_name,
+                            'message': str(e)
+                        }))
+                    self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
 
-        thread = Thread(target=request_f)
-        thread.daemon = True
-        thread.start()
+                self.connection.add_callback_threadsafe(reject)
+
+            thread = Thread(target=request_f)
+            thread.daemon = True
+            thread.start()
 
     def _kill_callback(self, channel, method_frame, header_frame, body):
 
