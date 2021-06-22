@@ -1,91 +1,70 @@
 from logging import getLogger
 from threading import Event
 
+import zmq
+
 from std_daq_service.protocol import ImageMetadata
 
 _logger = getLogger("RequestWriterService")
 
 
 class RequestWriterService(object):
-    def __init__(self):
-        self.request_id = None
-        self.request = None
+    def __init__(self, input_stream_url, output_stream_url):
+        self.input_stream_url = input_stream_url
+        self.output_stream_url = output_stream_url
 
-        self.request_completed = Event()
-        self.request_result = None
-        self.interrupt_request = None
+        self.interrupt_request = Event()
+        self.current_request_id = None
 
-        self.i_image = None
+        ctx = zmq.Context()
 
-    def _interrupt(self, image_meta):
-        if self.interrupt_request != self.request_id:
-            self.interrupt_request = None
-            return
+        _logger.info(f'Connecting input stream to {self.input_stream_url}.')
+        self.input_stream = ctx.socket(zmq.SUB)
+        self.input_stream.setsockopt(zmq.RCVTIMEO, 500)
+        self.input_stream.connect(self.input_stream_url)
 
-        self._complete_request()
-
-        return {
-            "output_file": self.request["output_file"],
-            "i_image": self.request["n_images"]-1,
-            "n_images": self.request["n_images"],
-            "image_metadata": image_meta.as_dict()
-        }
-
-    def on_stream_message(self, recv_bytes: bytes):
-        if self.request is None:
-            return None
-
-        image_meta = ImageMetadata.from_buffer_copy(recv_bytes)
-
-        if self.interrupt_request is not None:
-            is_interrupted = self._interrupt(image_meta=image_meta)
-
-            if is_interrupted:
-                return is_interrupted
-
-        if self.i_image is None:
-            self.i_image = 0
-            self.request_result = {
-                'start_pulse_id': image_meta.id,
-                'n_images': self.request['n_images'],
-                'output_file': self.request["output_file"]
-            }
-
-        writer_stream_message = {
-            "output_file": self.request["output_file"],
-            "i_image": self.i_image,
-            "n_images": self.request["n_images"],
-            "image_metadata": image_meta.as_dict()
-        }
-
-        if self.i_image + 1 == self.request["n_images"]:
-            self.request_result["end_pulse_id"] = image_meta.id
-            self._complete_request()
-        else:
-            self.i_image += 1
-
-        return writer_stream_message
-
-    def _complete_request(self):
-        self.request = None
-        self.request_id = None
-        self.i_image = None
-        self.interrupt_request = None
-        self.request_completed.set()
+        _logger.info(f'Binding output stream to {self.output_stream_url}.')
+        self.output_stream = ctx.socket(zmq.PUB)
+        self.output_stream.bind(self.output_stream_url)
 
     def on_request(self, request_id, request):
-        self._set_request_and_wait(request_id, request)
-        self.request_completed.clear()
+        self.interrupt_request.clear()
+        self.current_request_id = request_id
 
-        return self.request_result
+        n_images = request['n_images']
+        writer_stream_data = {
+            'output_file': request['output_file'],
+            'n_images': n_images,
+            'image_metadata': ImageMetadata.as_dict()
+        }
 
-    def _set_request_and_wait(self, request_id, request):
-        _logger.info(f"Starting to work on request_id {request_id}, {request}")
-        self.request_result = None
-        self.interrupt_request = None
-        self.request_id = request_id
-        self.request = request
-        self.request_completed.wait()
+        _logger.info(f"Starting write request for n_images {writer_stream_data['n_images']} "
+                     f"in {writer_stream_data['output_file']}")
+
+        i_image = 0
+
+        try:
+            self.input_stream.setsockopt_string(zmq.SUBSCRIBE, "")
+
+            while i_image < n_images and not self.interrupt_request.is_set():
+                try:
+                    recv_bytes = self.input_stream.recv()
+                except zmq.Again:
+                    continue
+
+                writer_stream_data['image_metadata'] = ImageMetadata.from_buffer_copy(recv_bytes)
+                writer_stream_data['i_image'] = i_image
+
+                self.output_stream.send_json(writer_stream_data)
+                i_image += 1
+
+            # Stop message has i_image == n_images.
+            writer_stream_data["i_image"] = n_images
+            self.output_stream.send_json(writer_stream_data)
+
+        finally:
+            self.input_stream.setsockopt_string(zmq.UNSUBSCRIBE, '')
 
     def on_kill(self, request_id):
-        self.interrupt_request = request_id
+        if self.current_request_id == request_id:
+            self.interrupt_request.set()

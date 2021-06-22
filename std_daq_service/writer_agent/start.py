@@ -30,20 +30,20 @@ if __file__ == "__main__":
     input_stream = ''
     output_stream = ''
 
-    service = RequestWriterService()
-
-    transceiver = ZmqTransciever(input_stream_url=input_stream,
-                                 output_stream_url=output_stream,
-                                 on_message_function=service.on_stream_message)
+    service = RequestWriterService(input_stream_url=input_stream,
+                                   output_stream_url=output_stream)
 
     listener = BrokerService(broker_url=args.broker_url,
                              tag=args.service_tag,
-                             name=args.service_name,
+                             service_name=args.service_name,
                              request_callback=service.on_request,
                              kill_callback=service.on_kill)
 
-    # Blocking call.
-    listener.start()
+    try:
+        listener.block()
+    except KeyboardInterrupt:
+        pass
 
-    transceiver.stop()
+    listener.stop()
+
     _logger.info(f'Service {args.service_name} stopping.')
