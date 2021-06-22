@@ -3,15 +3,14 @@ from threading import Thread
 from time import sleep
 
 from std_daq_service.broker.client import BrokerClient
-from std_daq_service.broker.broker_worker import BrokerWorker
+from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS
+from std_daq_service.broker.service import BrokerService
 
 
 class TestBrokerListener(unittest.TestCase):
     def test_broker_listener_workflow(self):
         service_name = "noop_worker"
-        service_tag = "psi.facility.beamline.#"
-        request_tag = "psi.facility.beamline.profile"
-        status_tag = "psi.facility.beamline.#"
+        tag = "psi.facility.beamline"
 
         sent_request = {
             "this is a": 'request'
@@ -19,36 +18,30 @@ class TestBrokerListener(unittest.TestCase):
         service_message = "IT WORKS!!"
 
         status_messages = []
+        sent_request_id = None
 
-        def on_status_message(request_id, header, request):
+        def request_callback(request_id, header, request):
+            self.assertEqual(request_id, sent_request_id)
             self.assertEqual(header["source"], service_name)
 
             status_messages.append((request_id, header, request))
 
-        def on_service_message(request_id, request):
+        def request_callback(request_id, request):
             self.assertEqual(sent_request, request)
             return service_message
 
-        client = BrokerClient(broker_url=TEST_BROKER_URL,
-                              tag=status_tag,
-                              status_callback=on_status_message)
+        client = BrokerClient(broker_url=TEST_BROKER_URL, tag=tag,
+                              status_callback=request_callback)
 
-        worker = BrokerWorker(broker_url=TEST_BROKER_URL,
-                              request_tag=service_tag,
-                              name=service_name,
-                              on_request_message_function=on_service_message)
-
-        t_worker = Thread(target=worker.start)
-        t_worker.start()
+        worker = BrokerService(broker_url=TEST_BROKER_URL, tag=tag, service_name=service_name,
+                               request_callback=request_callback)
 
         sleep(0.1)
-        client.send_request(sent_request)
+        sent_request_id = client.send_request(sent_request)
         sleep(0.1)
 
         client.stop()
         worker.stop()
-
-        t_worker.join()
 
         self.assertEqual(len(status_messages), 2)
 
@@ -61,4 +54,3 @@ class TestBrokerListener(unittest.TestCase):
             else:
                 self.assertEqual(header['action'], ACTION_REQUEST_SUCCESS)
                 self.assertEqual(header['message'], service_message)
-
