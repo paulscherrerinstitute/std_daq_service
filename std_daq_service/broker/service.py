@@ -63,12 +63,14 @@ class BrokerService(BrokerClientBase):
             except Exception as e:
                 _logger.exception("Error while executing user_request_callback.")
 
+                error_message = str(e)
+
                 def reject():
                     self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
                         correlation_id=request_id, headers={
                             'action': ACTION_REQUEST_FAIL,
                             'source': self.service_name,
-                            'message': str(e)
+                            'message': error_message
                         }))
                     self.channel.basic_reject(delivery_tag=delivery_tag, requeue=False)
 
