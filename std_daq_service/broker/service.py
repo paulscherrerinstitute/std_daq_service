@@ -41,7 +41,7 @@ class BrokerService(BrokerClientBase):
             correlation_id=request_id, headers={
                 'action': ACTION_REQUEST_START,
                 'source': self.service_name,
-                'message': {}
+                'message': None
             }))
 
         def request_f():
