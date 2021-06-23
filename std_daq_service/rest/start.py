@@ -5,8 +5,8 @@ from flask import Flask, request, jsonify
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
+from std_daq_service.broker.status_aggregator import StatusAggregator
 from std_daq_service.rest.request_factory import build_write_request, build_broker_response
-from std_daq_service.rest.status_aggregator import StatusAggregator
 
 _logger = logging.getLogger("RestProxyService")
 
@@ -35,14 +35,14 @@ def start_rest_api(service_name, broker_url, tag):
     app = Flask(service_name)
     status_aggregator = StatusAggregator()
     broker_client = BrokerClient(broker_url, tag,
-                                 status_callback=status_aggregator.on_broker_message)
+                                 status_callback=status_aggregator.on_status_message)
 
     @app.route("/write_sync", methods=['POST'])
     def write_sync_request():
         header, message = extract_write_request(request.json)
 
         request_id = broker_client.send_request(message, header)
-        broker_response = status_aggregator.wait_for_response(request_id)
+        broker_response = status_aggregator.wait_for_complete(request_id)
 
         response = {"request_id": request_id,
                     'response': build_broker_response(response=broker_response)}

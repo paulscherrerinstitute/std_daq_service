@@ -30,3 +30,6 @@ class StatusAggregator(object):
 
         if self.status_change_callback is not None:
             self.status_change_callback(request_id, self.status[request_id])
+
+    def wait_for_complete(self):
+        pass
