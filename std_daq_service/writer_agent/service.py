@@ -20,7 +20,7 @@ class RequestWriterService(object):
 
         _logger.info(f'Connecting input stream to {self.input_stream_url}.')
         self.input_stream = ctx.socket(zmq.SUB)
-        self.input_stream.setsockopt(zmq.RCVTIMEO, 500)
+        self.input_stream.setsockopt(zmq.RCVTIMEO, 100)
         self.input_stream.connect(self.input_stream_url)
 
         _logger.info(f'Binding output stream to {self.output_stream_url}.')
