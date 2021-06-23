@@ -4,7 +4,7 @@ import logging
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL, \
     TEST_BROKER_URL
-from std_daq_service.listener.status_recorder import StatusRecorder
+from std_daq_service.broker.status_aggregator import StatusAggregator
 
 _logger = logging.getLogger("BrokerListenerConsoleClient")
 
@@ -60,7 +60,7 @@ def print_to_console(request_id, status):
 
 
 def start_console_output(tag, broker_url):
-    recorder = StatusRecorder(on_status_change_function=print_to_console)
+    recorder = StatusAggregator(status_change_callback=print_to_console)
 
     client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=recorder.on_status_message)
     client.block()
