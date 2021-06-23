@@ -52,7 +52,7 @@ class RequestWriterService(object):
                 except zmq.Again:
                     continue
 
-                writer_stream_data['image_metadata'] = ImageMetadata.from_buffer_copy(recv_bytes)
+                writer_stream_data['image_metadata'] = ImageMetadata.from_buffer_copy(recv_bytes).as_dict()
                 writer_stream_data['i_image'] = i_image
 
                 self.output_stream.send_json(writer_stream_data)
