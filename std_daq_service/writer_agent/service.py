@@ -35,7 +35,7 @@ class RequestWriterService(object):
         writer_stream_data = {
             'output_file': request['output_file'],
             'n_images': n_images,
-            'image_metadata': ImageMetadata.as_dict()
+            'image_metadata': ImageMetadata().as_dict()
         }
 
         _logger.info(f"Starting write request for n_images {writer_stream_data['n_images']} "
