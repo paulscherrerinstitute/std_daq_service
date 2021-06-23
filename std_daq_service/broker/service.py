@@ -74,9 +74,9 @@ class BrokerService(BrokerClientBase):
 
                 self.connection.add_callback_threadsafe(reject)
 
-            thread = Thread(target=request_f)
-            thread.daemon = True
-            thread.start()
+        thread = Thread(target=request_f)
+        thread.daemon = True
+        thread.start()
 
     def _kill_callback(self, channel, method_frame, header_frame, body):
 
