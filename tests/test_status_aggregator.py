@@ -4,6 +4,7 @@ from time import sleep
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_SUCCESS
+from std_daq_service.broker.service import BrokerService
 from std_daq_service.listener.start import print_to_console
 from std_daq_service.broker.status_aggregator import StatusAggregator
 
@@ -43,57 +44,40 @@ class TestStatusRecorder(unittest.TestCase):
         self.assertTrue('service_1' not in last_status['services'])
         self.assertTrue('service_2' in last_status['services'])
 
-    def test_BrokerClient_with_status_recorder(self):
+    def test_wait_for_complete(self):
 
-        service_name = "noop_worker"
-        service_tag = "psi.facility.beamline.#"
-        request_tag = "psi.facility.beamline.profile"
-        status_tag = "psi.facility.beamline.#"
+        tag = "psi.facility.beamline.#"
 
         request = {
             'this': 'request'
         }
 
-        def status_change(request_id, status):
-            nonlocal status_changes
-            status_changes.append((request_id, status))
-
-            print_to_console(request_id, status)
-
-        status_changes = []
-
-        recorder = StatusAggregator(status_change_callback=status_change)
+        aggregator = StatusAggregator()
         client = BrokerClient(broker_url=TEST_BROKER_URL,
-                              tag=status_tag,
-                              status_callback=recorder.on_status_message)
+                              tag=tag,
+                              status_callback=aggregator.on_status_message)
 
+        def service_request_callback(request_id, request):
+            sleep(0.01)
+            pass
 
-        worker_1 = BrokerWorker(broker_url=TEST_BROKER_URL,
-                                request_tag=service_tag,
-                                name=service_name + '_1',
-                                on_request_message_function=lambda x, y: "result")
-        t_worker_1 = Thread(target=worker_1.start)
-        t_worker_1.start()
-
-        worker_2 = BrokerWorker(broker_url=TEST_BROKER_URL,
-                                request_tag=service_tag,
-                                name=service_name + '_2',
-                                on_request_message_function=lambda x, y: "result")
-        t_worker_2 = Thread(target=worker_2.start)
-        t_worker_2.start()
-
-        sleep(0.1)
-        client.send_request(request_tag, request)
+        service_1 = BrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
+        service_2 = BrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
         sleep(0.1)
 
-        self.assertEqual(len(status_changes), 4)
-
-        worker_1.stop()
-        t_worker_1.join()
-        worker_2.stop()
-        t_worker_2.join()
+        request_id = client.send_request(request)
+        aggregator.wait_for_complete(request_id)
         sleep(0.1)
+
         client.stop()
+        service_1.stop()
+        service_2.stop()
+
+    def test_wait_for_complete_timeout(self):
+        aggregator = StatusAggregator()
+
+        with self.assertRaises(TimeoutError):
+            aggregator.wait_for_complete("request_id", 0.1)
 
     def test_cache_max_len(self):
         def noop(request_id, status):
