@@ -1,4 +1,9 @@
 from collections import deque
+from time import time
+
+import zmq
+
+from std_daq_service.broker.common import ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL
 
 MAX_REQUEST_ID_CACHE = 100
 
@@ -10,6 +15,10 @@ class StatusAggregator(object):
 
         self.cache_length = MAX_REQUEST_ID_CACHE
         self.request_id_buffer = deque(maxlen=self.cache_length)
+
+        self.ctx = zmq.Context()
+        self.sender = self.ctx.socket(zmq.PUB)
+        self.sender.bind("inproc://status_change")
 
     def on_status_message(self, request_id, request, header):
         if request_id not in self.status:
@@ -31,5 +40,33 @@ class StatusAggregator(object):
         if self.status_change_callback is not None:
             self.status_change_callback(request_id, self.status[request_id])
 
-    def wait_for_complete(self):
-        pass
+        self.sender.send_json({'request_id': request_id,
+                               'status': self.status[request_id]})
+
+    def wait_for_complete(self, request_id, timeout=10):
+        receiver = self.ctx.socket(zmq.SUB)
+        receiver.setsockopt(zmq.RCVTIMEO, 200)
+        receiver.setsocket_string(zmq.SUBSCRIBE, '')
+        receiver.connect("inproc://status_change")
+
+        start_time = time()
+        while time() - start_time < timeout:
+            status_update = receiver.recv_json()
+
+            if status_update['request_id'] != request_id:
+                continue
+
+            for service_name, statuses in sorted(status_update['status']['services'].items()):
+                last_received_status = statuses[-1][0]
+
+                if last_received_status not in (ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL):
+                    break
+            else:
+                receiver.close()
+                return None
+
+        else:
+            receiver.close()
+            raise TimeoutError("The request did not complete in time.")
+
+
