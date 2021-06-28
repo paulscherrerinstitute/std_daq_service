@@ -32,13 +32,37 @@ reconstruct the frames and save them into the FrameBuffer. The frames from all m
 a single metadata stream sent to **std\_assembler**.
 
 The **std\_assembler** takes care of image conversion (background, pedestal, corrections etc.) and assembly of the modules 
-into the desired shape. Once the final images are ready, they are saved into the **DetectorBuffer** and a stream of 
+into the desired shape. Once the final images are ready, they are saved into the **ImageBuffer** and a stream of 
 **ImageMetadata** is sent out to anyone listening.
 
 ### Detector buffer
-TODO
+The detector buffer provides a RAM image buffering structure (**ImageBuffer**) and buffer transfer services 
+(**std\_stream\_send** and **std\_stream\_recv**) that can be used to transfer this RAM buffering structure to and 
+from other servers. The goal of this component is to provide a detector image buffer that can be replicated across 
+multiple servers and that allows applications running on the same server to access the detector images without 
+additional memory copies.
+
+It defines the **ImageMetadata** stream structure that needs to be implemented by any component that wants to 
+communicate directly with the buffer.
+
+The **std_stream_recv** broadcasts the metadata of received images in the same way as the **std\_assembler** does
+in the **Detector readout** component, making them interchangeable for std-daq-services.
 
 ### Detector writer
+This is the first component so far that we can call a **std-daq-service**. On one end it connects to the 
+**std\_assembler** to receive a stream of the latest assembled images and on the other end it listens to the broker
+for write requests from the users. When requested by the user, the images are writen from ram buffer to disk 
+without additional copies. 
+
+Internally this component uses a **StoreStream** that controls the behaviour of the writer. The component is made 
+up from 2 parts:
+
+- **writer\_agent** (Listens to RabbitMQ for writing requests, executes the request by forwarding 
+the **ImageMetadata** stream encapsulated into **StoreStream** format to the **std\_h5\_writer**)
+- **std\_h5\_writer** (Receives a stream of **StoreStream** format and writes images from **ImageBuffer** to H5 file.)
+
+#### H5 File format
+
 TODO
 
 ## User interaction path
