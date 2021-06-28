@@ -46,12 +46,15 @@ class StatusAggregator(object):
     def wait_for_complete(self, request_id, timeout=10):
         receiver = self.ctx.socket(zmq.SUB)
         receiver.setsockopt(zmq.RCVTIMEO, 200)
-        receiver.setsocket_string(zmq.SUBSCRIBE, '')
+        receiver.setsockopt_string(zmq.SUBSCRIBE, '')
         receiver.connect("inproc://status_change")
 
         start_time = time()
         while time() - start_time < timeout:
-            status_update = receiver.recv_json()
+            try:
+                status_update = receiver.recv_json()
+            except zmq.Again:
+                continue
 
             if status_update['request_id'] != request_id:
                 continue
