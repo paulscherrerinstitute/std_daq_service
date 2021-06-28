@@ -1,35 +1,35 @@
-# sf_daq_service
+# std_daq_service
 
 This is a monorepo for std daq services.
 
 ## Architecture overview
-An std-daq-service is a micro service that uses **RabbitMQ** for message passing and **ZMQ** for data 
-streams. The services are built using predefined formats and standard in order to make them compatible 
-with the rest of the std-daq.
+An std-daq-service is a micro service that uses **RabbitMQ** for interaction with users and **ZMQ** for data 
+streams. The services are built using predefined formats and standard in order to make them part of the 
+std-daq platform.
 
 The std-daq is composed by two event flows:
 
-- Detector data flow (uses ZMQ for communication)
-- User interaction flow (Uses RabbitMQ for communication)
+- Detector data flow (images transfer, uses ZMQ for communication)
+- User interaction flow (transfer of user requests, uses RabbitMQ for communication)
 
-## Detector image flow
+## Detector data flow
 
 ![Detector data flow](docs/detector_data_flow.jpg)
 
-In order from the detector onward, the main components involved into this flow are:
+In order from the detector onward, the 3 components involved into this flow are:
 
-- Detector readout (receive detector and assemble images)
-- Detector buffer (buffer images and transfer them to other servers)
-- Detector writer (write assembled images from buffer to disk)
+- Detector readout (receive detector modules and assemble final images)
+- Detector buffer (buffer images and transfer images to other servers)
+- Detector writer (write images from buffer to disk)
 
 ### Detector readout
 The goal of this component is to convert the raw detector frames received via UDP into final images. It transforms 
-the detector into a generic camera. By unifying all detectors into the same generic cameras we can reuse the 
-pipelines developed for one detector by many, which allows us to offer centralized services to beamlines.
+the detector into a generic camera. By having all detectors standardized on the same interface we can have a common 
+std-daq for all PSI facilities.  
 
-In order to achieve this it must first receive the UDP packets from the detector in **std\_udp\_recv**,
-reconstruct the frames and save them into the FrameBuffer. The frames from all modules are then synchronized into 
-a single metadata stream sent to **std\_assembler**.
+In order to achieve this the component must first receive the UDP packets from the detector in **std\_udp\_recv**,
+reconstruct the frames and save them into **FrameBuffer**. The frames from all modules are then synchronized into 
+a single metadata stream message of **RawMetadata** format that is sent to **std\_assembler**.
 
 The **std\_assembler** takes care of image conversion (background, pedestal, corrections etc.) and assembly of the modules 
 into the desired shape. Once the final images are ready, they are saved into the **ImageBuffer** and a stream of 
@@ -37,16 +37,16 @@ into the desired shape. Once the final images are ready, they are saved into the
 
 ### Detector buffer
 The detector buffer provides a RAM image buffering structure (**ImageBuffer**) and buffer transfer services 
-(**std\_stream\_send** and **std\_stream\_recv**) that can be used to transfer this RAM buffering structure to and 
+(**std\_stream\_send** and **std\_stream\_recv**) that can be used to transfer the RAM buffering structure to and 
 from other servers. The goal of this component is to provide a detector image buffer that can be replicated across 
 multiple servers and that allows applications running on the same server to access the detector images without 
 additional memory copies.
 
 It defines the **ImageMetadata** stream structure that needs to be implemented by any component that wants to 
-communicate directly with the buffer.
+communicate operate directly with the buffer.
 
 The **std_stream_recv** broadcasts the metadata of received images in the same way as the **std\_assembler** does
-in the **Detector readout** component, making them interchangeable for std-daq-services.
+in the **Detector readout** component. Because of this detector image buffer replication is transparent to std-daq-services.
 
 ### Detector writer
 This is the first component so far that we can call a **std-daq-service**. On one end it connects to the 
@@ -65,8 +65,8 @@ the **ImageMetadata** stream encapsulated into **StoreStream** format to the **s
 
 TODO
 
-## User interaction path
-TODO
+## User interaction flow
+![User interaction flow](docs/user_interaction_flow.jpg)
 
 ## Running the tests
 
