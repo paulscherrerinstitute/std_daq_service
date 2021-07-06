@@ -4,15 +4,20 @@ import logging
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.service import BrokerService
 from std_daq_service.writer_agent.service import RequestWriterService
-from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 _logger = logging.getLogger('RequestWriteService')
+
+IPC_URL_BASE = "ipc:///tmp/std-daq-"
+INPUT_IPC_URL_SUFFIX = "-assembler"
+OUTPUT_IPC_URL_SUFFIX = "-writer_agent"
 
 if __file__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')
 
     parser.add_argument("service_tag", type=str, help="Where to bind the service")
     parser.add_argument("service_name", type=str, help="Name of the service")
+    parser.add_argument("detector_name", type=str, help="Name of the detector to write.")
+
     parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
     parser.add_argument("--log_level", default="INFO",
@@ -27,8 +32,10 @@ if __file__ == "__main__":
     _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
 
     # TODO: Bring this 2 parameters in.
-    input_stream = ''
-    output_stream = ''
+    input_stream = IPC_URL_BASE + args.detector_name + INPUT_IPC_URL_SUFFIX
+    output_stream = IPC_URL_BASE + args.detector_name + OUTPUT_IPC_URL_SUFFIX
+
+    _logger.info(f"Receiving from {input_stream} and sending data to {output_stream}.")
 
     service = RequestWriterService(input_stream_url=input_stream,
                                    output_stream_url=output_stream)
