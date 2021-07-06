@@ -15,6 +15,7 @@ class RequestWriterService(object):
 
         self.interrupt_request = Event()
         self.current_request_id = None
+        self.run_id = 0
 
         ctx = zmq.Context()
 
@@ -30,12 +31,13 @@ class RequestWriterService(object):
     def on_request(self, request_id, request):
         self.interrupt_request.clear()
         self.current_request_id = request_id
+        self.run_id += 1
 
         n_images = request['n_images']
         writer_stream_data = {
             'output_file': request['output_file'],
+            'run_id': self.run_id,
             'n_images': n_images,
-            'image_metadata': ImageMetadata().as_dict()
         }
 
         _logger.info(f"Starting write request for n_images {writer_stream_data['n_images']} "
@@ -52,17 +54,18 @@ class RequestWriterService(object):
                 except zmq.Again:
                     continue
 
-                writer_stream_data['image_metadata'] = ImageMetadata.from_buffer_copy(recv_bytes).as_dict()
+                image_meta = ImageMetadata.from_buffer_copy(recv_bytes).as_dict()
+                writer_stream_data['image_id'] = image_meta.image_id
                 writer_stream_data['i_image'] = i_image
 
                 self.output_stream.send_json(writer_stream_data)
                 i_image += 1
 
+        finally:
             # Stop message has i_image == n_images.
             writer_stream_data["i_image"] = n_images
             self.output_stream.send_json(writer_stream_data)
 
-        finally:
             self.input_stream.setsockopt_string(zmq.UNSUBSCRIBE, '')
 
     def on_kill(self, request_id):
