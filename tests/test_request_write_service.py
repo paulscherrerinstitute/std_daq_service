@@ -65,20 +65,14 @@ class TestRequestWriteService(unittest.TestCase):
         encoding = 2
 
         for pulse_id in range(request["n_images"]):
-            sender.send(ImageMetadata(version, pulse_id, image_height, image_width, dtype, encoding))
+            sender.send(bytes(ImageMetadata(version, pulse_id, image_height, image_width, dtype, encoding)))
 
         for pulse_id in range(request["n_images"]):
             write_message = receiver.recv_json()
 
-            self.assertEqual(write_message["i_image"], write_message["image_metadata"]["id"])
-            self.assertEqual(write_message["i_image"], pulse_id)
             self.assertEqual(write_message["output_file"], request["output_file"])
-
-            self.assertEqual(write_message['image_metadata']["version"], version)
-            self.assertEqual(write_message['image_metadata']["height"], image_height)
-            self.assertEqual(write_message['image_metadata']["width"], image_width)
-            self.assertEqual(write_message['image_metadata']["dtype"], dtype)
-            self.assertEqual(write_message['image_metadata']["encoding"], encoding)
+            self.assertEqual(write_message["n_images"], request['n_images'])
+            self.assertEqual(write_message["i_image"], pulse_id)
 
         sleep(0.1)
         self.assertEqual(last_header['action'], ACTION_REQUEST_SUCCESS)
