@@ -67,7 +67,7 @@ def start_rest_api(service_name, broker_url, tag):
         request_id = kill_request['request_id']
 
         broker_client.kill_request(request_id)
-        broker_response = status_aggregator.wait_for_response(request_id)
+        broker_response = status_aggregator.wait_for_complete(request_id)
 
         response = {"request_id": request_id,
                     'response': build_broker_response(response=broker_response)}
