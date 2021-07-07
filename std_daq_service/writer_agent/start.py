@@ -31,7 +31,6 @@ if __file__ == "__main__":
 
     _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
 
-    # TODO: Bring this 2 parameters in.
     input_stream = IPC_URL_BASE + args.detector_name + INPUT_IPC_URL_SUFFIX
     output_stream = IPC_URL_BASE + args.detector_name + OUTPUT_IPC_URL_SUFFIX
 
