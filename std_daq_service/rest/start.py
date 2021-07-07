@@ -6,28 +6,9 @@ from flask import Flask, request, jsonify
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.status_aggregator import StatusAggregator
-from std_daq_service.rest.request_factory import build_write_request, build_broker_response
+from std_daq_service.rest.request_factory import build_user_response, extract_write_request
 
 _logger = logging.getLogger("RestProxyService")
-
-
-def extract_write_request(request_data):
-
-    if 'output_file' not in request_data:
-        raise RuntimeError('Mandatory field "output_file" missing.')
-    output_file = request_data['output_file']
-
-    if 'n_images' not in request_data:
-        raise RuntimeError('Mandatory field "n_images" missing.')
-    n_images = request_data['n_images']
-
-    if 'sources' not in request_data:
-        raise RuntimeError('Mandatory field "sources" missing.')
-    sources = request_data['sources']
-    if isinstance(request_data['sources'], list):
-        raise RuntimeError('Field "sources" must be a list.')
-
-    return build_write_request(output_file=output_file, n_images=n_images, sources=sources)
 
 
 def start_rest_api(service_name, broker_url, tag):
@@ -45,7 +26,7 @@ def start_rest_api(service_name, broker_url, tag):
         broker_response = status_aggregator.wait_for_complete(request_id)
 
         response = {"request_id": request_id,
-                    'response': build_broker_response(response=broker_response)}
+                    'response': build_user_response(response=broker_response)}
 
         return jsonify(response)
 
@@ -70,7 +51,7 @@ def start_rest_api(service_name, broker_url, tag):
         broker_response = status_aggregator.wait_for_complete(request_id)
 
         response = {"request_id": request_id,
-                    'response': build_broker_response(response=broker_response)}
+                    'response': build_user_response(response=broker_response)}
 
         return jsonify(response)
 
