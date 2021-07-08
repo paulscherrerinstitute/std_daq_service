@@ -11,7 +11,7 @@ from std_daq_service.rest.request_factory import build_write_request, build_brok
 _logger = logging.getLogger("RestProxyService")
 
 
-def extract_write_request(request_data):
+def extract_write_request(request_data, run_id):
 
     if 'output_file' not in request_data:
         raise RuntimeError('Mandatory field "output_file" missing.')
@@ -27,7 +27,7 @@ def extract_write_request(request_data):
     if isinstance(request_data['sources'], list):
         raise RuntimeError('Field "sources" must be a list.')
 
-    return build_write_request(output_file=output_file, n_images=n_images, sources=sources)
+    return build_write_request(output_file=output_file, n_images=n_images, sources=sources, run_id=run_id)
 
 
 def start_rest_api(service_name, broker_url, tag):
@@ -39,19 +39,18 @@ def start_rest_api(service_name, broker_url, tag):
 
     @app.route("/write_sync", methods=['POST'])
     def write_sync_request():
-        header, message = extract_write_request(request.json)
-
+        run_id = 0
+        header, message = extract_write_request(request.json, run_id)
         request_id = broker_client.send_request(message, header)
         broker_response = status_aggregator.wait_for_complete(request_id)
-
         response = {"request_id": request_id,
                     'response': build_broker_response(response=broker_response)}
-
         return jsonify(response)
 
     @app.route('/write_async', methods=['POST'])
     def write_async_request():
-        header, message = extract_write_request(request.json)
+        run_id = 0
+        header, message = extract_write_request(request.json, run_id)
 
         request_id = broker_client.send_request(message, header)
         response = {"request_id": request_id}
@@ -73,9 +72,10 @@ def start_rest_api(service_name, broker_url, tag):
                     'response': build_broker_response(response=broker_response)}
 
         return jsonify(response)
+    
+    app.run(host='127.0.0.1', port=5000)
 
-
-if __file__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Rest Proxy Service')
 
     parser.add_argument("service_name", type=str, help="Name of the service")
@@ -93,6 +93,7 @@ if __file__ == "__main__":
     logging.getLogger("pika").setLevel(logging.WARNING)
 
     _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
+    print(f'Service {args.service_name} connecting to {args.broker_url}.')
 
     start_rest_api(service_name=args.service_name,
                    broker_url=args.broker_url,

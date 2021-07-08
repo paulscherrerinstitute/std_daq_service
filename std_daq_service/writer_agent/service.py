@@ -34,6 +34,7 @@ class RequestWriterService(object):
         n_images = request['n_images']
         writer_stream_data = {
             'output_file': request['output_file'],
+            'run_id': request['run_id'],
             'n_images': n_images,
             'image_metadata': ImageMetadata().as_dict()
         }
