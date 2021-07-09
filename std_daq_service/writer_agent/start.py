@@ -4,15 +4,17 @@ import logging
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.service import BrokerService
 from std_daq_service.writer_agent.service import RequestWriterService
-from std_daq_service.writer_agent.zmq_transciever import ZmqTransciever
 
 _logger = logging.getLogger('RequestWriteService')
 
-if __file__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')
 
-    parser.add_argument("service_tag", type=str, help="Where to bind the service")
     parser.add_argument("service_name", type=str, help="Name of the service")
+    parser.add_argument("service_tag", type=str, help="Where to bind the service")
+    parser.add_argument("input_stream", type=str, help="Input stream from streamer/assembler.")
+    parser.add_argument("output_stream", type=str, help="Output stream to phdf5 writer.")
+    
     parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
     parser.add_argument("--log_level", default="INFO",
@@ -25,10 +27,11 @@ if __file__ == "__main__":
     logging.getLogger("pika").setLevel(logging.WARNING)
 
     _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
+    _logger.info(f'Service {args.service_name} input stream from {args.input_stream}.')
+    _logger.info(f'Service {args.service_name} output stream to {args.output_stream}.')
 
-    # TODO: Bring this 2 parameters in.
-    input_stream = ''
-    output_stream = ''
+    input_stream = args.input_stream 
+    output_stream = args.output_stream 
 
     service = RequestWriterService(input_stream_url=input_stream,
                                    output_stream_url=output_stream)
