@@ -4,7 +4,8 @@ import sys
 
 from flask import Flask, request, jsonify
 from jsonschema import validate, exceptions
-from sls_detector import Eiger
+from slsdet import Eiger
+from slsdet.enums import timingMode
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
@@ -22,9 +23,9 @@ def is_valid_detector_config(config):
     return True
 
 def validate_det_param(param):
-    list_of_eiger_params = ["n_cycles", "triggers", 
-        "timing","n_frames", "period", "exposure_time",
-        "dynamic_range"]
+    list_of_eiger_params = ["triggers", 
+        "timing","frames", "period", "exptime",
+        "dr"]
     if param not in list_of_eiger_params:
         return False
     return True
@@ -91,44 +92,64 @@ def start_rest_api(service_name, broker_url, tag):
 
         return jsonify(response)
 
-    @app.route('/detector', methods=['GET', 'POST'])
-    def detector_config():
-        if request.method == 'GET':
-            # //TODO fetch configurations from the detector
-            response = {'response': 'to be implemented...'}
-            return jsonify(response)
-        if request.method == 'POST':
-            config = request.json
-            response={'response':'Detector configuration set.'}
-            # verify if it's a valid config
-            if not is_valid_detector_config(config):
-                response = {'response': 'Detector configuration not valid.'}
-            if config['det_name'].upper() == "EIGER":
-                try:
-                    d = Eiger()
-                except RuntimeError as e:
-                    response['response']= 'Problem connecting to the detector.'
-                else:
-                    for param in config['config']:
-                        if not validate_det_param(param):
-                            response={'response': 
-                                'Detector parameter not valid (%s).' % param}
-                            break
-                        if param == "n_cycles":
-                            d.n_cycles = config[param]
-                        if param == "triggers":
-                            d.triggers = config[param]
-                        if param == "timing":
-                            d.timing = config[param]
-                        if param == "n_frames":
-                            d.n_frames = config[param]
-                        if param == "period":
-                            d.period = config[param]
-                        if param == "exposure_time":
-                            d.exposure_time = config[param]
-                        if param == "dynamic_range":
-                            d.dynamic_range = config[param]
-            return jsonify(response)
+    @app.route('/detector/<det_name>', methods=['GET'])
+    def get_detector_config(det_name):
+        if det_name.upper() == "EIGER":
+            try:
+                d = Eiger()
+            except RuntimeError as e:
+                response['response']= 'Problem connecting to the detector.'
+            else:
+                response = {'det_name': 'EIGER'}
+                response['triggers'] = d.triggers
+                response['timing'] = str(d.timing)
+                response['frames'] = d.frames
+                response['period'] = d.period
+                response['exptime'] = d.exptime
+                response['dr'] = d.dr
+        return jsonify(response)
+
+    @app.route('/detector', methods=['POST'])
+    def set_detector_config():
+        config = request.json
+        response={'response':'Detector configuration set.'}
+        # verify if it's a valid config
+        if not is_valid_detector_config(config):
+            response = {'response': 'Detector configuration not valid.'}
+        if config['det_name'].upper() == "EIGER":
+            try:
+                d = Eiger()
+            except RuntimeError as e:
+                response['response']= 'Problem connecting to the detector.'
+            else:
+                eiger_config = config['config']
+                not_good_params = []
+                for param in eiger_config:
+                    if not validate_det_param(param):
+                        not_good_params.append(param)
+                    if param == "triggers":
+                        d.triggers = eiger_config[param]
+                    if param == "timing":
+                        # [Eiger] AUTO_TIMING, TRIGGER_EXPOSURE, GATED, BURST_TRIGGER
+                        if eiger_config[param].upper() == "AUTO_TIMING":
+                            d.timing = timingMode.AUTO_TIMING
+                        if eiger_config[param].upper() == "TRIGGER_EXPOSURE":
+                            d.timing = timingMode.TRIGGER_EXPOSURE
+                        if eiger_config[param].upper() == "GATED":
+                            d.timing = timingMode.GATED
+                        if eiger_config[param].upper() == "BURST_TRIGGER":
+                            d.timing = timingMode.BURST_TRIGGER
+                    if param == "frames":
+                        d.frames = eiger_config[param]
+                    if param == "period":
+                        d.period = eiger_config[param]
+                    if param == "exptime":
+                        d.exptime =eiger_config[param]
+                    if param == "dr":
+                        d.dr = eiger_config[param]
+                if len(not_good_params) != 0:
+                    response['response'] = 'Problem with parameters: ', not_good_params
+        return jsonify(response)
     
     app.run(host='127.0.0.1', port=5000)
 

@@ -7,14 +7,11 @@ eiger_schema = {
     "config": {
       "type": "object",
       "properties": {
-        "n_cycles": {
-          "type": "integer"
-        },
         "triggers": {
           "type": "integer"
         },
         "timing": {
-          "type": "string"
+          "type": "string",
         },
         "n_frames": {
           "type": "integer"
@@ -22,16 +19,11 @@ eiger_schema = {
         "period": {
           "type": "integer"
         },
-        "exposure_time": {
-          "type": "integer"
+        "exptime": {
+          "type": "number"
         },
-        "dynamic_range": {
-            "type": "array",
-            "items": {
-                "type": "number",
-                "enum": [8, 16, 32],
-                "maxItems": 1
-            }
+        "dr": {
+          "type": "integer"
         }
       }
     }
