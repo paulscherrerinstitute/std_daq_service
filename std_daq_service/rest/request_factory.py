@@ -1,9 +1,11 @@
 from datetime import datetime
 
 
-def build_write_request(output_file, n_images, sources):
-    return (None, { "output_file": output_file,
+def build_write_request(output_file, n_images, sources, run_id):
+    header = None
+    return (header, { "output_file": output_file,
         "n_images":n_images,
+        "run_id": run_id,
         "sources": sources,
         "timestamp": datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
     })

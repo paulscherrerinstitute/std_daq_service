@@ -5,7 +5,7 @@ import sys
 from flask import Flask, request, jsonify
 from jsonschema import validate, exceptions
 from slsdet import Eiger
-from slsdet.enums import timingMode
+from slsdet.enums import timingMode, speedLevel
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
@@ -25,7 +25,7 @@ def is_valid_detector_config(config):
 def validate_det_param(param):
     list_of_eiger_params = ["triggers", 
         "timing","frames", "period", "exptime",
-        "dr"]
+        "dr", "speed", "tengiga", "threshold"]
     if param not in list_of_eiger_params:
         return False
     return True
@@ -46,20 +46,22 @@ def extract_write_request(request_data, run_id):
     if isinstance(request_data['sources'], list):
         raise RuntimeError('Field "sources" must be a list.')
 
-    return build_write_request(output_file=output_file, n_images=n_images, sources=sources, run_id=run_id)
+    return build_write_request(output_file=output_file, n_images=n_images, 
+                sources=sources, run_id=run_id)
 
 
 def start_rest_api(service_name, broker_url, tag):
 
     app = Flask(service_name)
+    app.config['run_id'] = 0
     status_aggregator = StatusAggregator()
     broker_client = BrokerClient(broker_url, tag,
                                  status_callback=status_aggregator.on_status_message)
 
     @app.route("/write_sync", methods=['POST'])
     def write_sync_request():
-        run_id = 0
-        header, message = extract_write_request(request.json, run_id)
+        app.config['run_id'] += 1
+        header, message = extract_write_request(request.json, app.config['run_id'])
         request_id = broker_client.send_request(message, header)
         broker_response = status_aggregator.wait_for_complete(request_id)
         response = {"request_id": request_id,
@@ -68,9 +70,9 @@ def start_rest_api(service_name, broker_url, tag):
 
     @app.route('/write_async', methods=['POST'])
     def write_async_request():
-        run_id = 0
-        header, message = extract_write_request(request.json, run_id)
-
+        app.config['run_id'] += 1
+        header, message = extract_write_request(request.json, app.config['run_id'])
+        print(message)
         request_id = broker_client.send_request(message, header)
         response = {"request_id": request_id}
 
@@ -107,6 +109,9 @@ def start_rest_api(service_name, broker_url, tag):
                 response['period'] = d.period
                 response['exptime'] = d.exptime
                 response['dr'] = d.dr
+                response['tengiga'] = d.tengiga
+                response['speed'] = str(d.speed)
+                response['threshold'] = d.threshold
         return jsonify(response)
 
     @app.route('/detector', methods=['POST'])
@@ -141,6 +146,24 @@ def start_rest_api(service_name, broker_url, tag):
                             d.timing = timingMode.BURST_TRIGGER
                     if param == "frames":
                         d.frames = eiger_config[param]
+                    if param == "tengiga":
+                        d.tengiga = eiger_config[param]
+                    if param == "speed":
+                        # [Eiger] [0 or full_speed|1 or half_speed|2 or quarter_speed]
+                        if isinstance(eiger_config[param], int):
+                            if eiger_config[param] == 0:
+                                d.speed = speedLevel.FULL_SPEED
+                            elif eiger_config[param] == 1:
+                                d.speed = speedLevel.HALF_SPEED
+                            elif eiger_config[param] == 2:
+                                d.speed = speedLevel.QUARTER_SPEED
+                        elif isinstance(eiger_config[param], str):
+                            if eiger_config[param].upper() == "FULL_SPEED":
+                                d.speed = speedLevel.FULL_SPEED
+                            elif eiger_config[param].upper() == "HALF_SPEED":
+                                d.speed = speedLevel.HALF_SPEED
+                            elif eiger_config[param].upper() == "QUARTER_SPEED":
+                                d.speed = speedLevel.QUARTER_SPEED
                     if param == "period":
                         d.period = eiger_config[param]
                     if param == "exptime":

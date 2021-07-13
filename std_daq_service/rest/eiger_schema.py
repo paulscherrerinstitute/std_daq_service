@@ -13,11 +13,23 @@ eiger_schema = {
         "timing": {
           "type": "string",
         },
-        "n_frames": {
+        "speed": {
+          "type": "integer",
+        },
+        "frames": {
+          "type": "integer"
+        },
+        "speed": {
+          "anyOf": [
+              {"type": "integer"}, 
+              {"type": "string"}
+          ]
+        },
+        "tengiga": {
           "type": "integer"
         },
         "period": {
-          "type": "integer"
+          "type": "number"
         },
         "exptime": {
           "type": "number"
