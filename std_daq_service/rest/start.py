@@ -56,7 +56,7 @@ def start_rest_api(service_name, broker_url, tag):
         return jsonify(response)
 
 
-if __file__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Rest Proxy Service')
 
     parser.add_argument("service_name", type=str, help="Name of the service")

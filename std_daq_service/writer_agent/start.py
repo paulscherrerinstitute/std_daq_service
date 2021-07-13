@@ -11,7 +11,7 @@ IPC_URL_BASE = "ipc:///tmp/std-daq-"
 INPUT_IPC_URL_SUFFIX = "-assembler"
 OUTPUT_IPC_URL_SUFFIX = "-writer_agent"
 
-if __file__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')
 
     parser.add_argument("service_tag", type=str, help="Where to bind the service")
