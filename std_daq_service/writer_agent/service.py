@@ -55,13 +55,8 @@ class RequestWriterService(object):
 
                 writer_stream_data['image_metadata'] = ImageMetadata.from_buffer_copy(recv_bytes).as_dict()
                 writer_stream_data['i_image'] = i_image
-
                 self.output_stream.send_json(writer_stream_data)
                 i_image += 1
-
-            # Stop message has i_image == n_images.
-            writer_stream_data["i_image"] = n_images
-            self.output_stream.send_json(writer_stream_data)
 
         finally:
             self.input_stream.setsockopt_string(zmq.UNSUBSCRIBE, '')
