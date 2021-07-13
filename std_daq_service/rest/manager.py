@@ -14,7 +14,7 @@ class RestManager(object):
 
         return request_id, broker_response
 
-    def write_asnyc(self, message):
+    def write_async(self, message):
         return self.broker_client.send_request(message)
 
     def kill_sync(self, request_id):
