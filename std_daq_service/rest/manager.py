@@ -11,7 +11,6 @@ class RestManager(object):
     def write_sync(self, message):
         request_id = self.broker_client.send_request(message)
         broker_response = self.status_aggregator.wait_for_complete(request_id)
-
         return request_id, broker_response
 
     def write_async(self, message):

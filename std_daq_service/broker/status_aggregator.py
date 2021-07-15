@@ -66,7 +66,9 @@ class StatusAggregator(object):
                     break
             else:
                 receiver.close()
-                return None
+                return {'status':last_received_status,
+                    'request_details': status_update['status']['request']
+                }
 
         else:
             receiver.close()

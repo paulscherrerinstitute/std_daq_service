@@ -30,7 +30,11 @@ def build_write_request(output_file, n_images):
 
 
 def build_user_response(response):
-    # TODO: Convert the response into something the user can read.
-    return response
+    return {
+        'output_file': response['request_details']['output_file'],
+        'status': response['status'],
+        'init_timestamp': response['request_details']['timestamp'],
+        'end_timestamp': datetime.datetime.now().timestamp()
+    }
 
 
