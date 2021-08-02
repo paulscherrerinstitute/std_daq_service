@@ -81,7 +81,6 @@ if __name__ == "__main__":
     logging.getLogger("pika").setLevel(logging.WARNING)
 
     _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
-    print(f'Service {args.service_name} connecting to {args.broker_url}.')
 
     start_rest_api(service_name=args.service_name,
                    broker_url=args.broker_url,

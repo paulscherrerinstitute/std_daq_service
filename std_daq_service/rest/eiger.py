@@ -21,7 +21,7 @@ def validate_det_param(param):
 
 
 def set_eiger_config(config):
-    response = {'response': 'Detector configuration set.'}
+    response = {'response': 'request_success'}
     # verify if it's a valid config
     if not is_valid_detector_config(config):
         response = {'response': 'Detector configuration not valid.'}
