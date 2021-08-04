@@ -5,7 +5,7 @@ from pcaspy import Driver, SimpleServer
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 
 
-class TestEpicsReceiver(unittest.TestCase):
+class TestEpicsBuffer(unittest.TestCase):
     def test_events(self):
         pv_names = ["ioc:pv_1", "ioc:pv_2"]
 
