@@ -5,7 +5,7 @@ import epics
 _logger = logging.getLogger("EpicsReceiver")
 
 
-def silence_ca_library_errors(text):
+def silence_ca_library_errors(_):
     pass
 
 
