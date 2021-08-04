@@ -2,11 +2,23 @@ import argparse
 import json
 import logging
 
+from std_daq_service.epics_buffer.buffer import SyncEpicsBuffer
+from std_daq_service.epics_buffer.receiver import EpicsReceiver
+
 _logger = logging.getLogger("EpicsBuffer")
 
 
-def start_epics_buffer(config):
-    pass
+def start_epics_buffer(pv_names):
+    buffer = SyncEpicsBuffer(pv_names=pv_names)
+    EpicsReceiver(pv_names=pv_names, change_callback=buffer.change_callback)
+
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        pass
+
+
 
 
 if __name__ == "__main__":

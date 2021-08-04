@@ -1,7 +1,7 @@
 import time
 
 
-class EpicsBuffer(object):
+class SyncEpicsBuffer(object):
     def __init__(self, pv_names):
         self.pv_names = pv_names
         self.cache = {}
