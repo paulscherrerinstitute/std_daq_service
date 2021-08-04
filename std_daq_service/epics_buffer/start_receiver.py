@@ -2,6 +2,8 @@ import argparse
 import json
 import logging
 import signal
+import struct
+from time import sleep
 
 import epics
 import zmq
@@ -23,15 +25,17 @@ def start_epics_buffer(sampling_pv, pv_names, output_stream_url):
     output_stream.bind(output_stream_url)
 
     def on_sampling_pv(value, **kwargs):
-        output_stream.send(value, flags=zmq.SNDMORE)
-        output_stream.send(buffer.cache)
+        output_stream.send(struct.pack('<Q', int(value)), flags=zmq.SNDMORE)
+        output_stream.send_json(buffer.cache)
 
     epics.PV(pvname=sampling_pv, callback=on_sampling_pv, form='time', auto_monitor=True)
 
     try:
-       signal.pause()
+        signal.pause()
     except KeyboardInterrupt:
         pass
+
+    output_stream.close()
 
 
 if __name__ == "__main__":
