@@ -9,7 +9,7 @@ from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
-from std_daq_service.epics_buffer.start_receiver import start_epics_buffer
+from std_daq_service.epics_buffer.start import start_epics_buffer
 
 
 class TestEpicsBuffer(unittest.TestCase):

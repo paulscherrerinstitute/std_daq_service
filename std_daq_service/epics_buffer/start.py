@@ -1,28 +1,36 @@
 import argparse
 import json
 import logging
-import signal
 import struct
-from time import sleep
 
 import epics
 import zmq
 
 from std_daq_service.epics_buffer.buffer import SyncEpicsBuffer
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
+from std_daq_service.epics_buffer.writer import EpicsBufferWriter
 
 _logger = logging.getLogger("EpicsBuffer")
 
+BUFFER_STREAM_URL = "inproc://buffer_stream"
 
-def start_epics_buffer(sampling_pv, pv_names, output_stream_url):
+
+def start_epics_buffer(sampling_pv, pv_names, buffer_folder):
     buffer = SyncEpicsBuffer(pv_names=pv_names)
     EpicsReceiver(pv_names=pv_names, change_callback=buffer.change_callback)
+    writer = EpicsBufferWriter(buffer_folder=buffer_folder)
+
+    _logger.info(f'Sampling epics buffer with {sampling_pv} and writing to {buffer_folder}.')
+    _logger.debug(f'Connecting to PVs: {pv_names}')
 
     ctx = zmq.Context()
-
-    _logger.info(f'Binding output stream to {output_stream_url}.')
     output_stream = ctx.socket(zmq.PUB)
-    output_stream.bind(output_stream_url)
+    output_stream.bind(BUFFER_STREAM_URL)
+
+    input_stream = ctx.socket(zmq.SUB)
+    input_stream.setsockopt(zmq.RCVTIMEO, 100)
+    input_stream.connect(BUFFER_STREAM_URL)
+    input_stream.setsockopt_string(zmq.SUBSCRIBE, "")
 
     def on_sampling_pv(value, **kwargs):
         output_stream.send(struct.pack('<Q', int(value)), flags=zmq.SNDMORE)
@@ -31,19 +39,25 @@ def start_epics_buffer(sampling_pv, pv_names, output_stream_url):
     epics.PV(pvname=sampling_pv, callback=on_sampling_pv, form='time', auto_monitor=True)
 
     try:
-        signal.pause()
+        while True:
+            pulse_id_bytes, data = input_stream.recv_multipart()
+            pulse_id = int.from_bytes(pulse_id_bytes, 'little')
+
+            writer.write(pulse_id, data)
+
     except KeyboardInterrupt:
         pass
 
-    output_stream.close()
+    finally:
+        writer.close()
+        output_stream.close()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Epics buffer receiver')
 
     parser.add_argument("service_name", type=str, help="Name of the service")
-    parser.add_argument("sampling_pv", type=str, help="PV used for sampling the Epics buffer")
-    parser.add_argument("pv_list", type=str, help="Path to the json config file.")
+    parser.add_argument("json_config_file", type=str, help="Path to JSON config file.")
 
     parser.add_argument("--log_level", default="INFO",
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
@@ -58,6 +72,8 @@ if __name__ == "__main__":
     with open(args.json_config_file, 'r') as input_file:
         config = json.load(input_file)
 
-    start_epics_buffer(config)
+    start_epics_buffer(sampling_pv=config["sampling_pv"],
+                       pv_names=config['pv_names'],
+                       buffer_folder=config['buffer_folder'])
 
     _logger.info(f'Service {args.service_name} stopping.')
