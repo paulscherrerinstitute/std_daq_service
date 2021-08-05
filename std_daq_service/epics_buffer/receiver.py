@@ -1,6 +1,7 @@
 import logging
 import time
 import epics
+from epics.dbr import AlarmStatus
 
 _logger = logging.getLogger("EpicsReceiver")
 
@@ -39,7 +40,7 @@ class EpicsReceiver(object):
             connected=True,
             value=value,
             value_timestamp=timestamp,
-            value_status=status
+            value_status=AlarmStatus(status).name
         )
 
     def connection_callback(self, pvname, conn, **kwargs):
