@@ -41,7 +41,8 @@ class EpicsBufferWriter(object):
         # seek(0, 2) puts you to the end of the file.
         self.current_file_end = self.current_file.seek(0, 2)
 
-    def write(self, pulse_id, data):
+    def write(self, pulse_id_bytes, data_bytes):
+        pulse_id = int.from_bytes(pulse_id_bytes, 'little')
         self._prepare_file(pulse_id)
 
         # Slot index for pulse inside the bucket (file).
@@ -49,7 +50,7 @@ class EpicsBufferWriter(object):
 
         # Each slot index has 2 uint64_t (8 bytes) values
         index_offset = slot_id * 2 * 8
-        data_n_bytes = len(data)
+        data_n_bytes = len(data_bytes)
 
         # Write index: offset in bytes where the data starts, and the number of bytes of data.
         self.current_file.seek(index_offset)
@@ -57,7 +58,7 @@ class EpicsBufferWriter(object):
 
         # Dump the buffer to the end of the file.
         self.current_file.seek(self.current_file_end)
-        self.current_file.write(data)
+        self.current_file.write(data_bytes)
 
         self.current_file_end = self.current_file.tell()
 
