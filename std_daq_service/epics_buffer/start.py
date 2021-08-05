@@ -40,13 +40,18 @@ def start_epics_buffer(sampling_pv, pv_names, buffer_folder):
 
     try:
         while True:
-            pulse_id_bytes, data = input_stream.recv_multipart()
-            pulse_id = int.from_bytes(pulse_id_bytes, 'little')
+            try:
+                pulse_id_bytes, data = input_stream.recv_multipart()
+            except zmq.Again:
+                continue
 
-            writer.write(pulse_id, data)
+            writer.write(pulse_id_bytes, data)
 
     except KeyboardInterrupt:
-        pass
+        _logger.info("Received interrupt signal. Exiting.")
+
+    except Exception:
+        _logger.error("Epics buffer error.")
 
     finally:
         writer.close()
