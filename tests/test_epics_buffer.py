@@ -50,7 +50,7 @@ class TestEpicsBuffer(unittest.TestCase):
         ioc_process = Process(target=start_test_ioc)
         ioc_process.start()
 
-        recv_process = CAProcess(target=start_epics_buffer, args=(sampling_pv, pv_names, stream_url))
+        recv_process = CAProcess(target=start_epics_buffer, args=(sampling_pv, pv_names, "."))
         recv_process.start()
 
         ctx = zmq.Context()
