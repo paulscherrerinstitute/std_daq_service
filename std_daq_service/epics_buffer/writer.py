@@ -6,6 +6,9 @@ _logger = logging.getLogger("EpicsBufferWriter")
 
 BUFFER_FILENAME_FORMAT = "%d.epics_buffer.bin"
 BUFFER_FILE_MODULO = 100000
+# Each slot index has 2 uint64_t (8 bytes) values
+SLOT_INDEX_BYTES = 2 * 8
+TOTAL_INDEX_BYTES = BUFFER_FILE_MODULO * SLOT_INDEX_BYTES
 
 
 class EpicsBufferWriter(object):
@@ -16,7 +19,7 @@ class EpicsBufferWriter(object):
         os.makedirs(self.buffer_folder, exist_ok=True)
 
         self.current_file = None
-        self.current_file_end = None
+        self.current_file_data_offset = None
         # Each file is a bucket in which we place BUFFER_FILE_MODULO pulses.
         self.current_bucket = None
 
@@ -39,7 +42,11 @@ class EpicsBufferWriter(object):
         self.current_file = open(filename, mode="r+b", buffering=0)
         self.current_bucket = bucket_id
         # seek(0, 2) puts you to the end of the file.
-        self.current_file_end = self.current_file.seek(0, 2)
+        self.current_file_data_offset = self.current_file.seek(0, 2)
+
+        # We write data after the index.
+        if self.current_file_data_offset < TOTAL_INDEX_BYTES:
+            self.current_file_data_offset = TOTAL_INDEX_BYTES
 
     def write(self, pulse_id_bytes, data_bytes):
         pulse_id = int.from_bytes(pulse_id_bytes, 'little')
@@ -47,20 +54,18 @@ class EpicsBufferWriter(object):
 
         # Slot index for pulse inside the bucket (file).
         slot_id = pulse_id % BUFFER_FILE_MODULO
-
-        # Each slot index has 2 uint64_t (8 bytes) values
-        index_offset = slot_id * 2 * 8
+        index_offset = slot_id * SLOT_INDEX_BYTES
         data_n_bytes = len(data_bytes)
 
         # Write index: offset in bytes where the data starts, and the number of bytes of data.
         self.current_file.seek(index_offset)
-        self.current_file.write(struct.pack("<QQ", self.current_file_end, data_n_bytes))
+        self.current_file.write(struct.pack("<QQ", self.current_file_data_offset, data_n_bytes))
 
         # Dump the buffer to the end of the file.
-        self.current_file.seek(self.current_file_end)
+        self.current_file.seek(self.current_file_data_offset)
         self.current_file.write(data_bytes)
 
-        self.current_file_end = self.current_file.tell()
+        self.current_file_data_offset = self.current_file.tell()
 
     def close(self):
         if not self.current_file:
@@ -70,5 +75,5 @@ class EpicsBufferWriter(object):
 
         self.current_file = None
         self.current_bucket = None
-        self.current_file_end = None
+        self.current_file_data_offset = None
 
