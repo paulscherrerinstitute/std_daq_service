@@ -1,15 +1,18 @@
 import json
+import os
 import random
+import struct
 import unittest
 from multiprocessing import Process
 from time import sleep
 
-import zmq
 from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 from std_daq_service.epics_buffer.start import start_epics_buffer
+from std_daq_service.epics_buffer.writer import BUFFER_FILENAME_FORMAT, TOTAL_INDEX_BYTES, BUFFER_FILE_MODULO, \
+    SLOT_INDEX_BYTES
 
 
 class TestEpicsBuffer(unittest.TestCase):
@@ -45,45 +48,48 @@ class TestEpicsBuffer(unittest.TestCase):
     def test_receiver(self):
         sampling_pv = 'ioc:pulse_id'
         pv_names = ['ioc:pv_1', 'ioc:pv_2']
-        stream_url = 'tcp://127.0.0.1:7000'
+
+        expected_file_name = BUFFER_FILENAME_FORMAT % 0
+        if os.path.exists(expected_file_name):
+            os.remove(expected_file_name)
 
         ioc_process = Process(target=start_test_ioc)
         ioc_process.start()
 
-        recv_process = CAProcess(target=start_epics_buffer, args=(sampling_pv, pv_names, "."))
+        recv_process = CAProcess(target=start_epics_buffer, args=(sampling_pv, pv_names, '.'))
         recv_process.start()
 
-        ctx = zmq.Context()
-        receiver = ctx.socket(zmq.SUB)
-        receiver.setsockopt(zmq.RCVTIMEO, 100)
-        receiver.connect(stream_url)
-        receiver.setsockopt_string(zmq.SUBSCRIBE, "")
-
-        recv_buffer = []
-
-        while len(recv_buffer) <= 20:
+        while True:
             try:
-                pulse_id_bytes, data = receiver.recv_multipart(flags=zmq.NOBLOCK)
-                recv_buffer.append((int.from_bytes(pulse_id_bytes, 'little'), data))
-            except zmq.Again:
+                file_size = os.stat(expected_file_name).st_size
+                # 270 is the buffer data size for our test cases.
+                if file_size > (270 * 20) + TOTAL_INDEX_BYTES:
+                    break
+            except:
                 pass
 
-        receiver.close()
         recv_process.terminate()
         ioc_process.terminate()
 
-        offset = 0
-        for i in range(20):
+        with open(expected_file_name, 'rb') as buffer_file:
+            buffer_file.seek(0)
+            index_data = buffer_file.read(TOTAL_INDEX_BYTES)
 
-            if i == 0:
-                offset = recv_buffer[i][0]
+            for i in range(20):
+                index_offset = SLOT_INDEX_BYTES * i
+                pulse_id, offset, length = struct.unpack("<QQQ", index_data[index_offset:index_offset+SLOT_INDEX_BYTES])
 
-            recv_pulse_id = recv_buffer[i][0]
-            recv_data = json.loads(recv_buffer[i][1])
+                self.assertEqual(pulse_id, i)
+                # 270 is the buffer data size for our test cases.
+                self.assertTrue(length >= 270)
 
-            self.assertEqual(recv_pulse_id, i + offset)
-            # print(recv_pulse_id, recv_data)
+                buffer_file.seek(offset)
+                data = json.loads(buffer_file.read(length))
 
+                for pv_name in pv_names:
+                    self.assertTrue(pv_name in data)
+
+        os.remove(expected_file_name)
 
 def start_test_ioc():
     class TestIoc(Driver):
