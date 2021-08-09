@@ -91,6 +91,7 @@ class TestEpicsBuffer(unittest.TestCase):
 
         os.remove(expected_file_name)
 
+
 def start_test_ioc():
     class TestIoc(Driver):
         prefix = "ioc:"

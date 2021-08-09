@@ -6,8 +6,8 @@ _logger = logging.getLogger("EpicsBufferWriter")
 
 BUFFER_FILENAME_FORMAT = "%d.epics_buffer.bin"
 BUFFER_FILE_MODULO = 100000
-# Each slot index has 2 uint64_t (8 bytes) values
-SLOT_INDEX_BYTES = 2 * 8
+# Each slot index has 3 uint64_t (8 bytes) values
+SLOT_INDEX_BYTES = 3 * 8
 TOTAL_INDEX_BYTES = BUFFER_FILE_MODULO * SLOT_INDEX_BYTES
 
 
@@ -57,9 +57,9 @@ class EpicsBufferWriter(object):
         index_offset = slot_id * SLOT_INDEX_BYTES
         data_n_bytes = len(data_bytes)
 
-        # Write index: offset in bytes where the data starts, and the number of bytes of data.
+        # Write index: pulse_id, offset in bytes where the data starts, and the number of bytes of data.
         self.current_file.seek(index_offset)
-        self.current_file.write(struct.pack("<QQ", self.current_file_data_offset, data_n_bytes))
+        self.current_file.write(struct.pack("<QQQ", pulse_id, self.current_file_data_offset, data_n_bytes))
 
         # Dump the buffer to the end of the file.
         self.current_file.seek(self.current_file_data_offset)
