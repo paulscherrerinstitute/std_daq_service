@@ -17,7 +17,7 @@ if [ "${REDIS_SKIP}" = false ]; then
   fi
 
   REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
-  REDIS_CONFIG_KEY=config."${PIPELINE_NAME}"
+  REDIS_CONFIG_KEY=config."${PIPELINE_NAME}.${SERVICE_NAME}"
   REDIS_STATUS_KEY=status."${PIPELINE_NAME}.${SERVICE_NAME}"
 
   redis-cli -h "${REDIS_HOST}" get "${REDIS_CONFIG_KEY}" > redis_config.json
