@@ -11,7 +11,9 @@ for config_file in tests/local_configs/*.json; do
     continue
   fi
 
-  echo "Setting config from ${config_file} to redis under '${service_name}'."
+  REDIS_KEY=config."${service_name}"
 
-  redis-cli -x set local_configs.debug.test_pipeline < docker/example_detector.json
+  echo "Setting config from ${config_file} to Redis under '${REDIS_KEY}'."
+
+  redis-cli -x set "${REDIS_KEY}" < "${config_file}"
 done
