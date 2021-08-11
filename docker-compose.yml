@@ -4,7 +4,7 @@ services:
   broker:
     image: "rabbitmq:3-management"
     network_mode: "bridge"
-    container_name: "std-broker"
+    container_name: "rabbit"
     ports:
       - 15672:15672
       - 5672:5672
