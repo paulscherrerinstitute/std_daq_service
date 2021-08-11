@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 REDIS_SKIP="${REDIS_SKIP:-false}"
