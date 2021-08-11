@@ -77,8 +77,15 @@ if __name__ == "__main__":
     with open(args.json_config_file, 'r') as input_file:
         config = json.load(input_file)
 
-    start_epics_buffer(sampling_pv=config["sampling_pv"],
-                       pv_names=config['pv_names'],
-                       buffer_folder=config['buffer_folder'])
+    sampling_pv = config["sampling_pv"],
+    pv_names = config['pv_names'],
+    buffer_folder = config['buffer_folder']
+
+    if not sampling_pv or not pv_names or not buffer_folder:
+        raise ValueError("Invalid config file. Must set sampling_pv, pv_names and buffer_folder.", config)
+
+    start_epics_buffer(sampling_pv=sampling_pv,
+                       pv_names=pv_names,
+                       buffer_folder=buffer_folder)
 
     _logger.info(f'Service {args.service_name} stopping.')
