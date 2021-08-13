@@ -62,8 +62,8 @@ class TestEpicsBuffer(unittest.TestCase):
         while True:
             try:
                 file_size = os.stat(expected_file_name).st_size
-                # 270 is the buffer data size for our test cases.
-                if file_size > (270 * 20) + TOTAL_INDEX_BYTES:
+                # 315 is the buffer data size for our test cases.
+                if file_size > (315 * 20) + TOTAL_INDEX_BYTES:
                     break
             except:
                 pass
@@ -80,8 +80,8 @@ class TestEpicsBuffer(unittest.TestCase):
                 pulse_id, offset, length = struct.unpack("<QQQ", index_data[index_offset:index_offset+SLOT_INDEX_BYTES])
 
                 self.assertEqual(pulse_id, i)
-                # 270 is the buffer data size for our test cases.
-                self.assertTrue(length >= 270)
+                # 315 is the buffer data size for our test cases.
+                self.assertTrue(length >= 315)
 
                 buffer_file.seek(offset)
                 data = json.loads(buffer_file.read(length))

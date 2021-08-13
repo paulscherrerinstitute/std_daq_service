@@ -30,7 +30,7 @@ class EpicsReceiver(object):
                 auto_monitor=True
             ))
 
-    def value_callback(self, pvname, value, timestamp, status, **kwargs):
+    def value_callback(self, pvname, value, timestamp, status, type, **kwargs):
 
         event_timestamp = time.time()
 
@@ -40,7 +40,8 @@ class EpicsReceiver(object):
             connected=True,
             value=value,
             value_timestamp=timestamp,
-            value_status=AlarmStatus(status).name
+            value_status=AlarmStatus(status).name,
+            value_type=type[5:]
         )
 
     def connection_callback(self, pvname, conn, **kwargs):
@@ -53,5 +54,6 @@ class EpicsReceiver(object):
             connected=True,
             value=None,
             value_timestamp=None,
-            value_status=None
+            value_status=None,
+            value_type=None
         )
