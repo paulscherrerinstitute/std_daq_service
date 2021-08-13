@@ -13,7 +13,7 @@ for config_file in tests/local_configs/*.json; do
 
   REDIS_KEY=config."${service_name}"
 
-  echo "Setting config from ${config_file} to Redis under '${REDIS_KEY}'."
+  echo "Setting config ${config_file} to Redis."
 
   redis-cli -x set "${REDIS_KEY}" < "${config_file}"
 done
