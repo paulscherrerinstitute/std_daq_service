@@ -7,7 +7,7 @@ for config_file in tests/local_configs/*.json; do
   service_name="$(basename "${config_file}" .json)"
 
   if [ ! -f "${config_file}" ]; then
-    echo "Error: Config file ${config_file} not found"
+    echo "Error: no config files were found in ${config_file}"
     continue
   fi
 
