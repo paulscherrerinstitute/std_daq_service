@@ -1,10 +1,14 @@
+import logging
 from time import time
+
+_logger = logging.getLogger("EpicsIngestionStats")
 
 
 class EpicsIngestionStats (object):
     def __init__(self, service_name, output_file='stats.log'):
         self.service_name = service_name
         self.output_file = output_file
+        _logger.info("Starting service {service_name} stats logging to {self.output_file}.")
 
         self.stats = {}
         self._reset_stats()
