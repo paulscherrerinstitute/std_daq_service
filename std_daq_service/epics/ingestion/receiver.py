@@ -20,7 +20,7 @@ class EpicsReceiver(object):
         self.change_callback = change_callback
 
         for pv_name in self.pv_names:
-            _logger.debug(f"Adding PV {pv_name}.")
+            _logger.debug(f"Connecting to PV {pv_name}.")
 
             self.pvs.append(epics.PV(
                 pvname=pv_name,
