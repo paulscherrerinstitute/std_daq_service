@@ -2,7 +2,7 @@
 
 VERSION=1.0.1
 
-docker build --no-cache=true -f service.Dockerfile -t paulscherrerinstitute/std-daq-service .
+docker build --no-cache=true -f -t paulscherrerinstitute/std-daq-service .
 docker tag paulscherrerinstitute/std-daq-service-base paulscherrerinstitute/std-daq-service:$VERSION
 
 docker login

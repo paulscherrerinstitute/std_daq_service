@@ -1,0 +1,17 @@
+version: "3.6"
+
+services:
+  broker:
+    image: "rabbitmq:3-management"
+    network_mode: "bridge"
+    container_name: "rabbit"
+    ports:
+      - 15672:15672
+      - 5672:5672
+
+  redis:
+    image: "redis"
+    network_mode: "bridge"
+    container_name: "redis"
+    ports:
+      - 6379:6379
