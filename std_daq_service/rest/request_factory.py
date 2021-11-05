@@ -4,11 +4,11 @@ import datetime
 def extract_write_request(request_data):
 
     if 'output_file' not in request_data:
-        raise RuntimeError('Mandatory field "output_file" missing.')
+        raise RuntimeError(f'Mandatory field missing: output_file')
     output_file = request_data['output_file']
 
     if 'n_images' not in request_data:
-        raise RuntimeError('Mandatory field "n_images" missing.')
+        raise RuntimeError(f'Mandatory field missing: n_images')
     n_images = request_data['n_images']
 
     # if 'sources' not in request_data:
