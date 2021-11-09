@@ -3,7 +3,7 @@ import logging
 
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.service import BrokerService
-from std_daq_service.epics_writer.service import EpicsWriterService
+from std_daq_service.epics.writer.service import EpicsWriterService
 
 _logger = logging.getLogger("EpicsWriter")
 
