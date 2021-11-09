@@ -95,6 +95,13 @@ To start the service, from the rest folder, for example:
 python start.py rest eiger
 ```
 
+---
+**NOTE**
+
+The STD DAQ rest server uses the [slsdet package](https://anaconda.org/slsdetectorgroup/slsdet) to set and get configurations to the detector. The currently covered subset of parameters are: triggers, timing, frames, period, exptime, dr, speed, tengiga and threshold.
+
+---
+
 ### Usage examples
 
 #### /write_sync (POST)
@@ -170,6 +177,19 @@ Rest service answer:
 ```bash
 {'response': 'request_success'}
 ```
+
+---
+**NOTE**
+
+When a parameter is not recognized the expected response is: 
+
+```bash
+{'response': 'Parameter not valid: <NAME_OF_NOT_VALID_PARAM>'}
+```
+
+---
+
+
 
 ### Eiger configuration get (GET)
 Gets the eiger detector configuration

@@ -75,7 +75,10 @@ def set_eiger_config(config):
                 if param == "dr":
                     d.dr = eiger_config[param]
             if len(not_good_params) != 0:
-                response['response'] = 'Problem with parameters: ', not_good_params
+                params_st = ""
+                for p in not_good_params:
+                    params_st += p+" "
+                response = {'response': 'Parameter(s) not valid: '+params_st}
     return response
 
 

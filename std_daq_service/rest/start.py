@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
@@ -57,8 +57,9 @@ def start_rest_api(service_name, broker_url, tag):
     def set_detector_config():
         config = request.json
 
-        response = set_eiger_config(config)
-        return jsonify(response)
+        response = make_response(jsonify(set_eiger_config(config)),200,)
+        response.headers["Content-Type"] = "application/json"
+        return response
 
     app.run(host='127.0.0.1', port=5000)
 
