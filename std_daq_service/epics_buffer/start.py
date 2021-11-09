@@ -36,7 +36,8 @@ if __name__ == "__main__":
     if not pv_names:
         raise ValueError("Invalid config file. Must set pv_names list.", config)
 
-    start_epics_buffer(redis_host=redis_host,
+    start_epics_buffer(service_name=args.service_name,
+                       redis_host=redis_host,
                        pv_names=pv_names,
                        pulse_id_pv=pulse_id_pv)
 

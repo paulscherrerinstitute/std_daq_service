@@ -9,9 +9,9 @@ from time import sleep
 from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 
-from std_daq_service.epics.ingestion.receiver import EpicsReceiver
+from std_daq_service.epics_buffer.receiver import EpicsReceiver
 from std_daq_service.epics.ingestion.start import start_epics_buffer
-from std_daq_service.epics.buffer.writer import BUFFER_FILENAME_FORMAT, TOTAL_INDEX_BYTES, SLOT_INDEX_BYTES
+from std_daq_service.epics_writer.writer import BUFFER_FILENAME_FORMAT, TOTAL_INDEX_BYTES, SLOT_INDEX_BYTES
 
 
 class TestEpicsBuffer(unittest.TestCase):

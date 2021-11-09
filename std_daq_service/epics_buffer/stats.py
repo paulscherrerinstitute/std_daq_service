@@ -3,9 +3,11 @@ from time import time
 
 _logger = logging.getLogger("EpicsIngestionStats")
 
+DEFAULT_OUTPUT_FILE = 'stats.log'
 
-class EpicsIngestionStats (object):
-    def __init__(self, service_name, output_file='stats.log'):
+
+class EpicsBufferStats (object):
+    def __init__(self, service_name, output_file=DEFAULT_OUTPUT_FILE):
         self.service_name = service_name
         self.output_file = output_file
         _logger.info("Starting service {service_name} stats logging to {self.output_file}.")
