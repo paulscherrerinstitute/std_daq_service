@@ -55,7 +55,7 @@ class EpicsReceiver(object):
             "value_timestamp": timestamp,
             "value_status": AlarmStatus(status).name,
             "value_type": type[5:]}
-                             )
+        )
 
     def connection_callback(self, pvname, conn, **kwargs):
         event_timestamp = time.time()
