@@ -5,7 +5,11 @@ from redis import Redis
 
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 
-REDIS_MAX_STREAM_LEN = 10000
+# Redis buffer for 1 day.
+# max 10/second updates for regular channels.
+REDIS_MAX_STREAM_LEN = 3600*24*10
+# 100/second updates for pulse_id channel.
+REDIS_PULSE_ID_MAX_STREAM_LEN = 3600*24*100
 
 _logger = logging.getLogger("EpicsBuffer")
 
@@ -23,7 +27,7 @@ def start_epics_buffer(redis_host, pv_names, pulse_id_pv=None):
         _logger.info(f"Adding pulse_id_pv {pulse_id_pv} to buffer.")
 
         def on_pulse_id_change(_, value):
-            redis.xadd("pulse_id", value)
+            redis.xadd("pulse_id", value, maxlen=REDIS_PULSE_ID_MAX_STREAM_LEN)
         EpicsReceiver(pv_names=[pulse_id_pv], change_callback=on_pulse_id_change)
 
     try:
