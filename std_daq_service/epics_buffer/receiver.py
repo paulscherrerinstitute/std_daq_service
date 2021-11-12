@@ -10,6 +10,7 @@ def silence_ca_library_errors(_):
     pass
 
 
+# Disable spamming from the library.
 epics.ca.replace_printf_handler(silence_ca_library_errors)
 
 
