@@ -3,7 +3,7 @@ from time import time_ns
 
 _logger = logging.getLogger("EpicsBufferStats")
 
-DEFAULT_OUTPUT_FILE = '/var/log/%s.stats.log'
+DEFAULT_OUTPUT_FILE = '/var/log/std-daq/%s.stats.log'
 
 
 class EpicsBufferStats (object):
