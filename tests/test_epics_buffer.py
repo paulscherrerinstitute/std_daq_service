@@ -1,7 +1,5 @@
 import json
-import os
 import random
-import struct
 import unittest
 from multiprocessing import Process
 from time import sleep
@@ -9,8 +7,9 @@ import numpy as np
 
 from epics import CAProcess
 from pcaspy import Driver, SimpleServer
+from redis import Redis
 
-from std_daq_service.epics_buffer.buffer import RedisJsonSerializer
+from std_daq_service.epics_buffer.buffer import RedisJsonSerializer, start_epics_buffer
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 
 
@@ -35,7 +34,7 @@ class TestEpicsBuffer(unittest.TestCase):
             else:
                 self.assertEqual(value.tolist(), converted_data.get(name))
 
-    def test_events(self):
+    def test_receiver(self):
         pv_names = ["ioc:pv_1", "ioc:pv_2", 'ioc:pv_3']
         buffer = []
 
@@ -67,51 +66,49 @@ class TestEpicsBuffer(unittest.TestCase):
         finally:
             ioc_process.terminate()
 
-    def test_receiver(self):
-        sampling_pv = 'ioc:pulse_id'
-        pv_names = ['ioc:pv_1', 'ioc:pv_2']
+    def test_buffer(self):
+        pulse_id_pv = 'ioc:pulse_id'
+        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3']
 
-        expected_file_name = BUFFER_FILENAME_FORMAT % 0
-        if os.path.exists(expected_file_name):
-            os.remove(expected_file_name)
+        parameters = {
+            'service_name': "test_buffer",
+            'redis_host': "localhost",
+            'pv_names': pv_names,
+            'pulse_id_pv': pulse_id_pv
+        }
 
         ioc_process = Process(target=start_test_ioc)
         ioc_process.start()
 
-        recv_process = CAProcess(target=start_epics_buffer, args=(sampling_pv, pv_names, '.'))
+        recv_process = CAProcess(target=start_epics_buffer, kwargs=parameters)
         recv_process.start()
 
-        while True:
-            try:
-                file_size = os.stat(expected_file_name).st_size
-                # 315 is the buffer data size for our test cases.
-                if file_size > (315 * 20) + TOTAL_INDEX_BYTES:
-                    break
-            except:
-                pass
+        try:
 
-        recv_process.terminate()
-        ioc_process.terminate()
+            redis = Redis(decode_responses=True)
+            # Remove old keys so test is always the same.
+            redis.delete(*pv_names)
 
-        with open(expected_file_name, 'rb') as buffer_file:
-            buffer_file.seek(0)
-            index_data = buffer_file.read(TOTAL_INDEX_BYTES)
+            sleep(2)
+            data = redis.xread({name: 0 for name in pv_names}, count=100, block=1000)
 
-            for i in range(20):
-                index_offset = SLOT_INDEX_BYTES * i
-                pulse_id, offset, length = struct.unpack("<QQQ", index_data[index_offset:index_offset+SLOT_INDEX_BYTES])
+            received_channels = set()
+            for channel in data:
+                pv_name = channel[0]
+                channel_data = channel[1]
 
-                self.assertEqual(pulse_id, i)
-                # 315 is the buffer data size for our test cases.
-                self.assertTrue(length >= 315)
+                received_channels.add(pv_name)
 
-                buffer_file.seek(offset)
-                data = json.loads(buffer_file.read(length))
+                for data_point in channel_data:
+                    point_timestamp = data_point[0]
+                    point_value = data_point[1]['json']
 
-                for pv_name in pv_names:
-                    self.assertTrue(pv_name in data)
+                    json_data = json.loads(point_value)
+                    self.assertTrue(json_data["event_timestamp"] > 0)
 
-        os.remove(expected_file_name)
+        finally:
+            recv_process.terminate()
+            ioc_process.terminate()
 
 
 def start_test_ioc():
