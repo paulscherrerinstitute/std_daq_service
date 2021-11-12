@@ -1,8 +1,9 @@
+import json
 import logging
-import signal
 from time import sleep
 
 from redis import Redis
+import numpy as np
 
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 
@@ -19,6 +20,13 @@ REDIS_PULSE_ID_STREAM_NAME = "pulse_id"
 STATS_INTERVAL = 10
 
 _logger = logging.getLogger("EpicsBuffer")
+
+
+class RedisJsonSerializer(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
