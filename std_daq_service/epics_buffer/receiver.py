@@ -38,7 +38,7 @@ class EpicsReceiver(object):
         _logger.info("Connected to all PVs.")
 
     def _init_buffer(self, pvname):
-        event_timestamp = time.time()
+        event_timestamp = time.time_ns()
         _logger.debug(f"Initializing PV {pvname}.")
 
         self.change_callback(pvname, {
@@ -51,7 +51,7 @@ class EpicsReceiver(object):
         })
 
     def value_callback(self, pvname, value, timestamp, status, type, **kwargs):
-        event_timestamp = time.time()
+        event_timestamp = time.time_ns()
 
         self.change_callback(pvname, {
             "event_timestamp": event_timestamp,
@@ -63,7 +63,7 @@ class EpicsReceiver(object):
         )
 
     def connection_callback(self, pvname, conn, **kwargs):
-        event_timestamp = time.time()
+        event_timestamp = time.time_ns()
 
         self.change_callback(pvname, {
             "event_timestamp": event_timestamp,
