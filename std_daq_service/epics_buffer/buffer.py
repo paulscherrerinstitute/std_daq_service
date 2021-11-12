@@ -49,10 +49,10 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
             pulse_id = value['value']
 
             if not pulse_id:
-                # print("NO PULSE_ID??")
+                _logger.warning("Pulse_id PV invalid data.")
                 return
+
             index = int(pulse_id)
-            print(index)
             redis.xadd(PULSE_ID_NAME, {"timestamp": value['event_timestamp']}, id=index, maxlen=PULSE_ID_MAX_LEN)
         EpicsReceiver(pv_names=[pulse_id_pv], change_callback=on_pulse_id_change)
 
