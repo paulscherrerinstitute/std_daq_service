@@ -3,7 +3,7 @@ import time
 import epics
 from epics.dbr import AlarmStatus
 
-_logger = logging.getLogger("EpicsBuffer")
+_logger = logging.getLogger("EpicsBufferReceiver")
 
 
 def silence_ca_library_errors(_):
