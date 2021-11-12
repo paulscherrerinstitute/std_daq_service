@@ -5,44 +5,67 @@ import struct
 import unittest
 from multiprocessing import Process
 from time import sleep
+import numpy as np
 
 from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 
+from std_daq_service.epics_buffer.buffer import RedisJsonSerializer
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
-from std_daq_service.epics.ingestion.start import start_epics_buffer
-from std_daq_service.epics_writer.writer import BUFFER_FILENAME_FORMAT, TOTAL_INDEX_BYTES, SLOT_INDEX_BYTES
 
 
 class TestEpicsBuffer(unittest.TestCase):
+
+    def test_redis_json_serializer(self):
+        test_json = {
+            "pv_1": 1,
+            "pv_2": 2.2,
+            "pv_3": np.zeros(shape=[10]),
+            "pv_4": "test",
+            "pv_5": None,
+            "pv_6": ""
+        }
+
+        raw_data = json.dumps(test_json, cls=RedisJsonSerializer).encode("utf-8")
+        converted_data = json.loads(raw_data.decode("utf-8"))
+
+        for name, value in test_json.items():
+            if name != "pv_3":
+                self.assertEqual(value, converted_data.get(name))
+            else:
+                self.assertEqual(value.tolist(), converted_data.get(name))
+
     def test_events(self):
-        pv_names = ["ioc:pv_1", "ioc:pv_2"]
+        pv_names = ["ioc:pv_1", "ioc:pv_2", 'ioc:pv_3']
         buffer = []
 
-        def callback_function(**kwargs):
-            buffer.append(kwargs)
+        def callback_function(pv_name, change):
+            buffer.append({'name': pv_name, 'data': change})
 
         ioc_process = Process(target=start_test_ioc)
         ioc_process.start()
 
-        EpicsReceiver(pv_names, callback_function)
+        try:
 
-        while len(buffer) < 5:
-            sleep(0.1)
+            EpicsReceiver(pv_names, callback_function)
 
-        # First 2 records come as connection updates.
-        self.assertEqual({buffer[0]['pv_name'], buffer[1]['pv_name']}, set(pv_names))
-        self.assertEqual(buffer[0]["value"], None)
-        self.assertEqual(buffer[1]["value"], None)
+            while len(buffer) < 10:
+                sleep(0.1)
 
-        # We should get at least 1 value update from each PV.
-        pv_updates = set()
-        for i in range(2, 5):
-            pv_updates.add(buffer[i]["pv_name"])
-            self.assertTrue(buffer[i]['value'] is not None)
-        self.assertEqual(pv_updates, set(pv_names))
+            # First 2 records come as connection updates.
+            self.assertEqual({x['name'] for x in buffer}, set(pv_names))
+            self.assertEqual(buffer[0]['data']["value"], None)
+            self.assertEqual(buffer[1]['data']["value"], None)
 
-        ioc_process.terminate()
+            # We should get at least 1 value update from each PV.
+            pv_updates = set()
+            for i in range(2, 5):
+                pv_updates.add(buffer[i]["name"])
+                self.assertTrue(buffer[i]['data'] is not None)
+            self.assertEqual(pv_updates, set(pv_names))
+
+        finally:
+            ioc_process.terminate()
 
     def test_receiver(self):
         sampling_pv = 'ioc:pulse_id'
@@ -97,7 +120,8 @@ def start_test_ioc():
         pvdb = {
             "pulse_id": {"scan": 0.1},
             "pv_1": {"scan": 1},
-            "pv_2": {"scan": 2}
+            "pv_2": {"scan": 2, 'type': 'string'},
+            "pv_3": {"scan": 1, 'count': 10}
         }
 
         def __init__(self):
@@ -109,8 +133,16 @@ def start_test_ioc():
                 self.pulse_id += 1
                 return self.pulse_id
 
-            value = random.random()
-            return value
+            elif reason == "pv_1":
+                return random.random()
+
+            elif reason == "pv_2":
+                return "String test"
+
+            elif reason == "pv_3":
+                return [random.random() for _ in range(10)]
+
+            return None
 
     ioc_server = SimpleServer()
     ioc_server.createPV(TestIoc.prefix, TestIoc.pvdb)
