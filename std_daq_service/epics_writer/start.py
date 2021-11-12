@@ -12,7 +12,6 @@ if __name__ == "__main__":
 
     parser.add_argument("service_name", type=str, help="Name of the service")
     parser.add_argument("service_tag", type=str, help="Where to bind the service")
-    parser.add_argument("buffer_folder", type=str, help="Path to the Epics buffer wou want to write from.")
 
     parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
