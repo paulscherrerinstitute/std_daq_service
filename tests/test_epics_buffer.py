@@ -9,7 +9,7 @@ from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 from redis import Redis
 
-from std_daq_service.epics_buffer.buffer import RedisJsonSerializer, start_epics_buffer
+from std_daq_service.epics_buffer.buffer import RedisJsonSerializer, start_epics_buffer, PULSE_ID_NAME
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 
 
@@ -87,7 +87,7 @@ class TestEpicsBuffer(unittest.TestCase):
 
             redis = Redis(decode_responses=True)
             # Remove old keys so test is always the same.
-            redis.delete(*pv_names)
+            redis.delete(*(pv_names + [PULSE_ID_NAME]))
 
             sleep(2)
             data = redis.xread({name: 0 for name in pv_names}, count=100, block=1000)
