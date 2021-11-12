@@ -19,6 +19,8 @@ class EpicsReceiver(object):
         self.pvs = []
         self.change_callback = change_callback
 
+        _logger.info("Starting PV connections.")
+
         for pvname in self.pv_names:
             self._init_buffer(pvname)
 
@@ -31,6 +33,8 @@ class EpicsReceiver(object):
                 form='time',
                 auto_monitor=True
             ))
+
+        _logger.info("Connected to all PVs.")
 
     def _init_buffer(self, pvname):
         event_timestamp = time.time()
