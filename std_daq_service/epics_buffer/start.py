@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     redis_host = args.redis_host
     pulse_id_pv = config.get("pulse_id_pv")
-    pv_names = config.get('pv_names')
+    pv_names = config.get('pv_list')
 
     if not pv_names:
         raise ValueError("Invalid config file. Must set pv_names list.", config)
