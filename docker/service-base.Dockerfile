@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3
 
-RUN conda install -y -c conda-forge pyzmq pyepics flask pika redis pcaspy
+RUN conda install -y -c conda-forge pyzmq pyepics flask pika redis redis-py pcaspy
 
 COPY docker-entrypoint.sh redis_status.sh /usr/bin/
 
