@@ -57,8 +57,9 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
         EpicsReceiver(pv_names=[pulse_id_pv], change_callback=on_pulse_id_change)
 
     try:
-        sleep(STATS_INTERVAL)
-        stats.write_stats()
+        while True:
+            sleep(STATS_INTERVAL)
+            stats.write_stats()
 
     except KeyboardInterrupt:
         _logger.info("Received interrupt signal. Exiting.")
