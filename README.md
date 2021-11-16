@@ -1,6 +1,6 @@
 # std_daq_service
 
-This is a monorepo for std daq services.
+This is a monorepo for standard daq services.
 
 ## Getting started
 
