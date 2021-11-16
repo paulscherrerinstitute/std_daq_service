@@ -5,6 +5,8 @@ from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS
 from std_daq_service.broker.service import BrokerService
 
+# TODO: Fix resource warning when closing Pika.
+
 
 class TestBrokerListener(unittest.TestCase):
     def test_broker_listener_workflow(self):
