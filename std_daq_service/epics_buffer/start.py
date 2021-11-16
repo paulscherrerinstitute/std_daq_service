@@ -21,8 +21,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    _logger.setLevel(args.log_level)
-
+    logging.basicConfig(level=args.log_level)
     _logger.info(f'Service {args.service_name} starting.')
 
     with open(args.json_config_file, 'r') as input_file:
