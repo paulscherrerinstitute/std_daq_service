@@ -35,7 +35,7 @@ class EpicsReceiver(object):
                 auto_monitor=True
             ))
 
-        _logger.info("Connected to all PVs.")
+        _logger.info("Processed all PV connections.")
 
     def _init_buffer(self, pvname):
         event_timestamp = time.time_ns()
