@@ -25,21 +25,25 @@ class EpicsBufferStats (object):
         self.stats = {
             'n_events': 0,
             'n_bytes': 0,
+            'channel_updates': set()
         }
 
     def record(self, name, data):
         self.stats['n_events'] += 1
         self.stats['n_bytes'] += len(data)
+        self.stats['channel_changed'].add(name)
 
     def write_stats(self):
         end_time = time_ns()
         throughput = self.stats['n_bytes'] / (end_time - self.start_time) * 10**9
+        n_channels_changed = len(self.stats("channel_changed"))
 
         # InfluxDB line protocol
         stats_output = f'epics_buffer,service_name={self.service_name}' \
                        f' n_events={self.stats["n_events"]}i' \
                        f' n_bytes={self.stats["n_bytes"]}i' \
-                       f' throughput={throughput}' \
+                       f' n_channels_changed={n_channels_changed}i' \
+                       f' throughput_bytes={throughput}' \
                        f' {end_time}'
 
         self.start_time = end_time
