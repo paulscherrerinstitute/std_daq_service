@@ -2,7 +2,7 @@ import json
 import logging
 from time import sleep
 
-from redis import Redis
+from redis import Redis, ResponseError
 import numpy as np
 
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
@@ -51,9 +51,13 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
             if not pulse_id:
                 _logger.warning("Pulse_id PV invalid data.")
                 return
-
             index = int(pulse_id)
-            redis.xadd(PULSE_ID_NAME, {"timestamp": value['event_timestamp']}, id=index, maxlen=PULSE_ID_MAX_LEN)
+
+            try:
+                redis.xadd(PULSE_ID_NAME, {"timestamp": value['event_timestamp']}, id=index, maxlen=PULSE_ID_MAX_LEN)
+            except ResponseError as e:
+                _logger.warning(f"Cannot insert pulse_id {index} to Redis.", str(e))
+
         EpicsReceiver(pv_names=[pulse_id_pv], change_callback=on_pulse_id_change)
 
     try:
