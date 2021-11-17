@@ -9,7 +9,7 @@ Redis and RabbitMQ in order to run unit tests. In the root folder of the project
 ```bash
 sh setup_dev_env.sh
 ```
-This will bring up both services in your local machine and populate REDIS with test configurations. 
+This will bring up both services in your local machine and populate Redis with test configurations. 
 You can now execute the unit tests from your local dev environment or you can use the provided docker container. 
 From the root of the project:
 ```bash
