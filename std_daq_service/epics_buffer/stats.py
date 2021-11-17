@@ -25,7 +25,7 @@ class EpicsBufferStats (object):
         self.stats = {
             'n_events': 0,
             'n_bytes': 0,
-            'channel_updates': set()
+            'channel_changed': set()
         }
 
     def record(self, name, data):
