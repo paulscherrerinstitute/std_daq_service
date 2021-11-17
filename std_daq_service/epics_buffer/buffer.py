@@ -2,6 +2,7 @@ import json
 import logging
 from time import sleep
 
+import epics
 from redis import Redis, ResponseError
 import numpy as np
 
@@ -40,25 +41,27 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
 
         redis.xadd(pv_name, {'json': raw_value}, id=value['event_timestamp'], maxlen=PV_MAX_LEN)
         stats.record(pv_name, raw_value)
+
     EpicsReceiver(pv_names=pv_names, change_callback=on_pv_change)
 
     if pulse_id_pv:
         _logger.info(f"Adding pulse_id_pv {pulse_id_pv} to buffer.")
 
-        def on_pulse_id_change(_, value):
-            pulse_id = value['value']
-
-            if not pulse_id:
-                _logger.warning("Pulse_id PV invalid data.")
+        def on_pulse_id_change(value, timestamp, **kwargs):
+            if not value:
+                _logger.warning("Pulse_id PV empty.")
                 return
-            index = int(pulse_id)
+            pulse_id = int(value)
 
             try:
-                redis.xadd(PULSE_ID_NAME, {"timestamp": value['event_timestamp']}, id=index, maxlen=PULSE_ID_MAX_LEN)
-            except ResponseError as e:
-                _logger.warning(f"Cannot insert pulse_id {index} to Redis.", str(e))
+                redis.xadd(PULSE_ID_NAME, {"timestamp": timestamp}, id=pulse_id, maxlen=PULSE_ID_MAX_LEN)
+            except Exception as e:
+                _logger.warning(f"Cannot insert pulse_id {pulse_id} to Redis. {str(e)}")
 
-        EpicsReceiver(pv_names=[pulse_id_pv], change_callback=on_pulse_id_change)
+        epics.PV(pvname=pulse_id_pv,
+                 callback=on_pulse_id_change,
+                 form='time',
+                 auto_monitor=True)
 
     try:
         while True:
@@ -73,4 +76,3 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
 
     finally:
         stats.close()
-
