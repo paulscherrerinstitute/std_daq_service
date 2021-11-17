@@ -13,7 +13,7 @@ class EpicsBufferStats (object):
         if output_file is None:
             output_file = DEFAULT_OUTPUT_FILE % service_name
         self.output_file = output_file
-        _logger.info("Starting service {service_name} stats logging to {self.output_file}.")
+        _logger.info(f"Starting service {service_name} stats logging to {self.output_file}.")
 
         self.stats = {}
         self._reset_stats()
