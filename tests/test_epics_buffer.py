@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import unittest
 from multiprocessing import Process
@@ -11,6 +12,7 @@ from redis import Redis
 
 from std_daq_service.epics_buffer.buffer import RedisJsonSerializer, start_epics_buffer, PULSE_ID_NAME
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
+from std_daq_service.epics_buffer.stats import EpicsBufferStats
 
 
 class TestEpicsBuffer(unittest.TestCase):
@@ -109,6 +111,36 @@ class TestEpicsBuffer(unittest.TestCase):
         finally:
             recv_process.terminate()
             ioc_process.terminate()
+
+    def test_stats(self):
+        n_bytes = 1000
+        n_events = 100
+        n_channels_changed = 10
+        log_output = "temp.log"
+
+        if os.path.exists(log_output):
+            os.remove(log_output)
+
+        buffer = EpicsBufferStats("test_service", log_output)
+        for i in range(n_events):
+            buffer.record(f"pv_{i % n_channels_changed}", np.zeros(shape=[n_bytes], dtype="uint8").tobytes())
+            if i % 20 == 0:
+                buffer.write_stats()
+
+        buffer.close()
+
+        self.assertTrue(os.path.exists(log_output))
+
+        with open(log_output, 'r') as input_file:
+            stats_output = input_file.readlines()
+
+        os.remove(log_output)
+        self.assertEqual(len(stats_output), 5)
+
+        # Check if service identifying info is in the output.
+        for line in stats_output:
+            self.assertTrue("test_service" in line)
+            self.assertTrue("epics_buffer" in line)
 
 
 def start_test_ioc():
