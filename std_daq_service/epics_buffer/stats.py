@@ -18,7 +18,7 @@ class EpicsBufferStats (object):
         self.stats = {}
         self._reset_stats()
 
-        self.output_file = open(self.output_file, 'a')
+        self.output_file = open(self.output_file, 'a', buffering=1)
         self.start_time = time_ns()
 
     def _reset_stats(self):
@@ -36,7 +36,7 @@ class EpicsBufferStats (object):
     def write_stats(self):
         end_time = time_ns()
         throughput = self.stats['n_bytes'] / (end_time - self.start_time) * 10**9
-        n_channels_changed = len(self.stats("channel_changed"))
+        n_channels_changed = len(self.stats["channel_changed"])
 
         # InfluxDB line protocol
         stats_output = f'epics_buffer,service_name={self.service_name}' \
@@ -44,7 +44,7 @@ class EpicsBufferStats (object):
                        f' n_bytes={self.stats["n_bytes"]}i' \
                        f' n_channels_changed={n_channels_changed}i' \
                        f' throughput_bytes={throughput}' \
-                       f' {end_time}'
+                       f' {end_time}\n'
 
         self.start_time = end_time
         self._reset_stats()
