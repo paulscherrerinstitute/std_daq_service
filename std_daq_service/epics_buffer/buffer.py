@@ -1,6 +1,6 @@
 import json
 import logging
-from time import sleep
+from time import sleep, time_ns
 
 import epics
 from redis import Redis, ResponseError
@@ -54,7 +54,7 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
             pulse_id = int(value)
 
             try:
-                redis.xadd(PULSE_ID_NAME, {"timestamp": timestamp}, id=pulse_id, maxlen=PULSE_ID_MAX_LEN)
+                redis.xadd(PULSE_ID_NAME, {"timestamp": time_ns()}, id=pulse_id, maxlen=PULSE_ID_MAX_LEN)
             except Exception as e:
                 _logger.warning(f"Cannot insert pulse_id {pulse_id} to Redis. {str(e)}")
 
@@ -72,7 +72,7 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
         _logger.info("Received interrupt signal. Exiting.")
 
     except Exception:
-        _logger.error("Epics buffer error.")
+        _logger.exception("Epics buffer error.")
 
     finally:
         stats.close()
