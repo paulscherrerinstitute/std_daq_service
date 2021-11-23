@@ -3,7 +3,7 @@ from time import time_ns
 
 _logger = logging.getLogger("EpicsBufferStats")
 
-DEFAULT_OUTPUT_FILE = '/var/log/std-daq/%s.stats.log'
+DEFAULT_OUTPUT_FILE = '/var/log/std-daq/perf.log'
 
 
 class EpicsBufferStats (object):
@@ -11,7 +11,7 @@ class EpicsBufferStats (object):
         self.service_name = service_name
 
         if output_file is None:
-            output_file = DEFAULT_OUTPUT_FILE % service_name
+            output_file = DEFAULT_OUTPUT_FILE
         self.output_file = output_file
         _logger.info(f"Starting service {service_name} stats logging to {self.output_file}.")
 
