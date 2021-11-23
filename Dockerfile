@@ -1,4 +1,4 @@
-FROM paulscherrerinstitute/std-daq-service-base:1.0.4
+FROM paulscherrerinstitute/std-daq-service-base:1.0.5
 
 COPY . /std_daq_service/
 
