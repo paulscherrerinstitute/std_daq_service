@@ -1,5 +1,5 @@
 from slsdet import Eiger
-from slsdet.enums import timingMode, speedLevel
+from slsdet.enums import timingMode, speedLevel, runStatus
 from jsonschema import validate, exceptions
 
 def get_eiger_config(det_name):
@@ -91,22 +91,26 @@ def set_eiger_config(config):
 
 def set_eiger_cmd(cmd):
     response = {'response': 'request_success'}
-    # verify if it's a valid config
-    if not is_valid_detector_config(config):
-        response = {'response': 'Detector configuration not valid.'}
-    
     try:
         d = Eiger()
     except RuntimeError as e:
         response['response'] = 'Problem connecting to the detector.'
         return response
     if cmd == "START":
-        d.acquire()
-        return response
+        if d.status == runStatus.IDLE:
+            d.acquire()
+            return response
+        else:
+            response['response'] = "Not possible to start, the detector is not idle"
+            return response
     elif cmd == "STOP":
-        d.stop()
-        return response
-    response['response'] = f"Unknown problem when communicating with {config['det_name']}."
+        if d.status == runStatus.RUNNING:
+            d.stop()
+            return response
+        else:
+            response['response'] = "Nothing to do, the detector is not running."
+            return response
+    response['response'] = f"Unknown problem when communicating with Eiger."
     return response
 
 

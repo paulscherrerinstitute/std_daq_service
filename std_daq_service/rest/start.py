@@ -59,17 +59,16 @@ def start_rest_api(service_name, broker_url, tag):
         if det_name.upper() == "EIGER":
             config = request.json
             response={}
-            if config.has_key('config'):
+            if 'config' in config:
                 response = make_response(jsonify(set_eiger_config(config)),200,)
-            elif config.has_key('cmd'):
-                if config['cmd'].upper() == 'stop':
+            if 'cmd' in config:
+                if config['cmd'].upper() == 'STOP':
                     response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
-                elif config['cmd'].upper() == 'start':
+                elif config['cmd'].upper() == 'START':
                     response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
                 else:
                     response = make_response(jsonify({'response':'Eiger command not found.'}),200,)
-            else:
-                response = make_response(jsonify({'response':'Post request not recognized.'}),200,)
+            
             response.headers["Content-Type"] = "application/json"
             return response
 
