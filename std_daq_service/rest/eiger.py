@@ -2,6 +2,24 @@ from slsdet import Eiger
 from slsdet.enums import timingMode, speedLevel
 from jsonschema import validate, exceptions
 
+def get_eiger_config(det_name):
+    response = {}
+    try:
+        d = Eiger()
+    except RuntimeError as e:
+        response['response'] = 'Problem connecting to the detector.'
+    else:
+        response['det_name'] = 'EIGER'
+        response['triggers'] = d.triggers
+        response['timing'] = str(d.timing)
+        response['frames'] = d.frames
+        response['period'] = d.period
+        response['exptime'] = d.exptime
+        response['dr'] = d.dr
+        response['tengiga'] = d.tengiga
+        response['speed'] = str(d.speed)
+        response['threshold'] = d.threshold
+    return response
 
 def is_valid_detector_config(config):
     try:
@@ -9,16 +27,6 @@ def is_valid_detector_config(config):
     except exceptions.ValidationError as err:
         return False
     return True
-
-
-def validate_det_param(param):
-    list_of_eiger_params = ["triggers",
-                            "timing", "frames", "period", "exptime",
-                            "dr", "speed", "tengiga", "threshold"]
-    if param not in list_of_eiger_params:
-        return False
-    return True
-
 
 def set_eiger_config(config):
     response = {'response': 'request_success'}
@@ -75,34 +83,40 @@ def set_eiger_config(config):
                 if param == "dr":
                     d.dr = eiger_config[param]
             if len(not_good_params) != 0:
-                params_st = ""
+                params_str = ""
                 for p in not_good_params:
-                    params_st += p+" "
-                response = {'response': 'Parameter(s) not valid: '+params_st}
+                    params_str += p+" "
+                response = {'response': 'Problem with parameters: '+params_str}
+    return response
+
+def set_eiger_cmd(cmd):
+    response = {'response': 'request_success'}
+    # verify if it's a valid config
+    if not is_valid_detector_config(config):
+        response = {'response': 'Detector configuration not valid.'}
+    
+    try:
+        d = Eiger()
+    except RuntimeError as e:
+        response['response'] = 'Problem connecting to the detector.'
+        return response
+    if cmd == "START":
+        d.acquire()
+        return response
+    elif cmd == "STOP":
+        d.stop()
+        return response
+    response['response'] = f"Unknown problem when communicating with {config['det_name']}."
     return response
 
 
-def get_eiger_config(det_name):
-    response = {}
-
-    if det_name.upper() == "EIGER":
-        try:
-            d = Eiger()
-        except RuntimeError as e:
-            response['response'] = 'Problem connecting to the detector.'
-        else:
-            response['det_name'] = 'EIGER'
-            response['triggers'] = d.triggers
-            response['timing'] = str(d.timing)
-            response['frames'] = d.frames
-            response['period'] = d.period
-            response['exptime'] = d.exptime
-            response['dr'] = d.dr
-            response['tengiga'] = d.tengiga
-            response['speed'] = str(d.speed)
-            response['threshold'] = d.threshold
-    return response
-
+def validate_det_param(param):
+    list_of_eiger_params = ["triggers",
+                            "timing", "frames", "period", "exptime",
+                            "dr", "speed", "tengiga", "threshold"]
+    if param not in list_of_eiger_params:
+        return False
+    return True
 
 eiger_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",

@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, make_response
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.status_aggregator import StatusAggregator
-from std_daq_service.rest.eiger import set_eiger_config, get_eiger_config
+from std_daq_service.rest.eiger import set_eiger_config, get_eiger_config, set_eiger_cmd
 from std_daq_service.rest.manager import RestManager
 from std_daq_service.rest.request_factory import build_user_response, extract_write_request
 
@@ -49,17 +49,32 @@ def start_rest_api(service_name, broker_url, tag):
 
     @app.route('/detector/<det_name>', methods=['GET'])
     def get_detector_config(det_name):
-        response = get_eiger_config(det_name)
+        if det_name.upper() == "EIGER":
+            response = get_eiger_config(det_name)
 
         return jsonify(response)
 
-    @app.route('/detector', methods=['POST'])
-    def set_detector_config():
-        config = request.json
+    @app.route('/detector/<det_name>', methods=['POST'])
+    def set_detector_method(det_name):
+        if det_name.upper() == "EIGER":
+            config = request.json
+            response={}
+            if config.has_key('config'):
+                response = make_response(jsonify(set_eiger_config(config)),200,)
+            elif config.has_key('cmd'):
+                if config['cmd'].upper() == 'stop':
+                    response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
+                elif config['cmd'].upper() == 'start':
+                    response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
+                else:
+                    response = make_response(jsonify({'response':'Eiger command not found.'}),200,)
+            else:
+                response = make_response(jsonify({'response':'Post request not recognized.'}),200,)
+            response.headers["Content-Type"] = "application/json"
+            return response
 
-        response = make_response(jsonify(set_eiger_config(config)),200,)
-        response.headers["Content-Type"] = "application/json"
-        return response
+
+
 
     app.run(host='127.0.0.1', port=5000)
 
