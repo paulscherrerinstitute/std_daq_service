@@ -1,95 +1,146 @@
 import json
 import os
 import random
-import struct
 import unittest
 from multiprocessing import Process
 from time import sleep
+import numpy as np
 
 from epics import CAProcess
 from pcaspy import Driver, SimpleServer
+from redis import Redis
 
+from std_daq_service.epics_buffer.buffer import RedisJsonSerializer, start_epics_buffer, PULSE_ID_NAME
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
-from std_daq_service.epics_buffer.start import start_epics_buffer
-from std_daq_service.epics_buffer.writer import BUFFER_FILENAME_FORMAT, TOTAL_INDEX_BYTES, BUFFER_FILE_MODULO, \
-    SLOT_INDEX_BYTES
+from std_daq_service.epics_buffer.stats import EpicsBufferStats
 
 
 class TestEpicsBuffer(unittest.TestCase):
-    def test_events(self):
-        pv_names = ["ioc:pv_1", "ioc:pv_2"]
-        buffer = []
 
-        def callback_function(**kwargs):
-            buffer.append(kwargs)
+    def test_redis_json_serializer(self):
+        test_json = {
+            "pv_1": 1,
+            "pv_2": 2.2,
+            "pv_3": np.zeros(shape=[10]),
+            "pv_4": "test",
+            "pv_5": None,
+            "pv_6": ""
+        }
 
-        ioc_process = Process(target=start_test_ioc)
-        ioc_process.start()
+        raw_data = json.dumps(test_json, cls=RedisJsonSerializer).encode("utf-8")
+        converted_data = json.loads(raw_data.decode("utf-8"))
 
-        EpicsReceiver(pv_names, callback_function)
-
-        while len(buffer) < 5:
-            sleep(0.1)
-
-        # First 2 records come as connection updates.
-        self.assertEqual({buffer[0]['pv_name'], buffer[1]['pv_name']}, set(pv_names))
-        self.assertEqual(buffer[0]["value"], None)
-        self.assertEqual(buffer[1]["value"], None)
-
-        # We should get at least 1 value update from each PV.
-        pv_updates = set()
-        for i in range(2, 5):
-            pv_updates.add(buffer[i]["pv_name"])
-            self.assertTrue(buffer[i]['value'] is not None)
-        self.assertEqual(pv_updates, set(pv_names))
-
-        ioc_process.terminate()
+        for name, value in test_json.items():
+            if name != "pv_3":
+                self.assertEqual(value, converted_data.get(name))
+            else:
+                self.assertEqual(value.tolist(), converted_data.get(name))
 
     def test_receiver(self):
-        sampling_pv = 'ioc:pulse_id'
-        pv_names = ['ioc:pv_1', 'ioc:pv_2']
+        pv_names = ["ioc:pv_1", "ioc:pv_2", 'ioc:pv_3']
+        buffer = []
 
-        expected_file_name = BUFFER_FILENAME_FORMAT % 0
-        if os.path.exists(expected_file_name):
-            os.remove(expected_file_name)
+        def callback_function(pv_name, change):
+            buffer.append({'name': pv_name, 'data': change})
 
         ioc_process = Process(target=start_test_ioc)
         ioc_process.start()
 
-        recv_process = CAProcess(target=start_epics_buffer, args=(sampling_pv, pv_names, '.'))
+        try:
+
+            EpicsReceiver(pv_names, callback_function)
+
+            while len(buffer) < 10:
+                sleep(0.1)
+
+            # First 2 records come as connection updates.
+            self.assertEqual({x['name'] for x in buffer}, set(pv_names))
+            self.assertEqual(buffer[0]['data']["value"], None)
+            self.assertEqual(buffer[1]['data']["value"], None)
+
+            # We should get at least 1 value update from each PV.
+            pv_updates = set()
+            for i in range(2, 5):
+                pv_updates.add(buffer[i]["name"])
+                self.assertTrue(buffer[i]['data'] is not None)
+            self.assertEqual(pv_updates, set(pv_names))
+
+        finally:
+            ioc_process.terminate()
+
+    def test_buffer(self):
+        pulse_id_pv = 'ioc:pulse_id'
+        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3']
+
+        parameters = {
+            'service_name': "test_buffer",
+            'redis_host': "localhost",
+            'pv_names': pv_names,
+            'pulse_id_pv': pulse_id_pv
+        }
+
+        ioc_process = Process(target=start_test_ioc)
+        ioc_process.start()
+
+        recv_process = CAProcess(target=start_epics_buffer, kwargs=parameters)
         recv_process.start()
 
-        while True:
-            try:
-                file_size = os.stat(expected_file_name).st_size
-                # 315 is the buffer data size for our test cases.
-                if file_size > (315 * 20) + TOTAL_INDEX_BYTES:
-                    break
-            except:
-                pass
+        try:
 
-        recv_process.terminate()
-        ioc_process.terminate()
+            redis = Redis(decode_responses=True)
+            # Remove old keys so test is always the same.
+            redis.delete(*(pv_names + [PULSE_ID_NAME]))
 
-        with open(expected_file_name, 'rb') as buffer_file:
-            buffer_file.seek(0)
-            index_data = buffer_file.read(TOTAL_INDEX_BYTES)
+            sleep(2)
+            data = redis.xread({name: 0 for name in pv_names}, count=100, block=1000)
 
-            for i in range(20):
-                index_offset = SLOT_INDEX_BYTES * i
-                pulse_id, offset, length = struct.unpack("<QQQ", index_data[index_offset:index_offset+SLOT_INDEX_BYTES])
+            received_channels = set()
+            for channel in data:
+                pv_name = channel[0]
+                channel_data = channel[1]
 
-                self.assertEqual(pulse_id, i)
-                # 315 is the buffer data size for our test cases.
-                self.assertTrue(length >= 315)
+                received_channels.add(pv_name)
 
-                buffer_file.seek(offset)
-                data = json.loads(buffer_file.read(length))
+                for data_point in channel_data:
+                    point_timestamp = data_point[0]
+                    point_value = data_point[1]['json']
 
-                for pv_name in pv_names:
-                    self.assertTrue(pv_name in data)
+                    json_data = json.loads(point_value)
+                    self.assertTrue(json_data["event_timestamp"] > 0)
 
-        os.remove(expected_file_name)
+        finally:
+            recv_process.terminate()
+            ioc_process.terminate()
+
+    def test_stats(self):
+        n_bytes = 1000
+        n_events = 100
+        n_channels_changed = 10
+        log_output = "temp.log"
+
+        if os.path.exists(log_output):
+            os.remove(log_output)
+
+        buffer = EpicsBufferStats("test_service", log_output)
+        for i in range(n_events):
+            buffer.record(f"pv_{i % n_channels_changed}", np.zeros(shape=[n_bytes], dtype="uint8").tobytes())
+            if i % 20 == 0:
+                buffer.write_stats()
+
+        buffer.close()
+
+        self.assertTrue(os.path.exists(log_output))
+
+        with open(log_output, 'r') as input_file:
+            stats_output = input_file.readlines()
+
+        os.remove(log_output)
+        self.assertEqual(len(stats_output), 5)
+
+        # Check if service identifying info is in the output.
+        for line in stats_output:
+            self.assertTrue("test_service" in line)
+            self.assertTrue("epics_buffer" in line)
 
 
 def start_test_ioc():
@@ -98,7 +149,8 @@ def start_test_ioc():
         pvdb = {
             "pulse_id": {"scan": 0.1},
             "pv_1": {"scan": 1},
-            "pv_2": {"scan": 2}
+            "pv_2": {"scan": 2, 'type': 'string'},
+            "pv_3": {"scan": 1, 'count': 10}
         }
 
         def __init__(self):
@@ -110,8 +162,16 @@ def start_test_ioc():
                 self.pulse_id += 1
                 return self.pulse_id
 
-            value = random.random()
-            return value
+            elif reason == "pv_1":
+                return random.random()
+
+            elif reason == "pv_2":
+                return "String test"
+
+            elif reason == "pv_3":
+                return [random.random() for _ in range(10)]
+
+            return None
 
     ioc_server = SimpleServer()
     ioc_server.createPV(TestIoc.prefix, TestIoc.pvdb)

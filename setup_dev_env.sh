@@ -3,7 +3,7 @@ set -e
 
 docker-compose up -d
 
-for config_file in tests/local_configs/*.json; do
+for config_file in tests/redis_configs/*.json; do
   service_name="$(basename "${config_file}" .json)"
 
   if [ ! -f "${config_file}" ]; then

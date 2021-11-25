@@ -1,6 +1,21 @@
 # std_daq_service
 
-This is a monorepo for std daq services.
+This is a monorepo for standard daq services.
+
+## Getting started
+
+For development and testing you need to have **Docker** and **docker-compose** installed. You must run 
+Redis and RabbitMQ in order to run unit tests. In the root folder of the project execute:
+```bash
+sh setup_dev_env.sh
+```
+This will bring up both services in your local machine and populate Redis with test configurations. 
+You can now execute the unit tests from your local dev environment or you can use the provided docker container. 
+From the root of the project:
+```bash
+sh tests_in_docker.sh
+```
+(Please note that at the moments the test container uses host networking, so you might have problems on a Mac.)
 
 ## Architecture overview
 An std-daq-service is a micro service that uses **RabbitMQ** for interaction with users and **ZMQ** for data 

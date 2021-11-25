@@ -1,5 +1,8 @@
+import logging
 import os
 import h5py
+
+_logger = logging.getLogger("EpicsWriterFile")
 
 
 class EpicsH5Writer(object):

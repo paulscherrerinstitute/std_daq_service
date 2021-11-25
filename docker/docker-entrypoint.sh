@@ -11,14 +11,14 @@ if [ "${REDIS_SKIP}" = false ]; then
     exit 1;
   fi
 
-  if [[ -z "${SERVICE_NAME}" ]]; then
-    echo "Environment variable SERVICE_NAME not defined."
+  if [[ -z "${INSTANCE_NAME}" ]]; then
+    echo "Environment variable INSTANCE_NAME not defined."
     exit 1;
   fi
 
   REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
-  REDIS_CONFIG_KEY=config."${PIPELINE_NAME}.${SERVICE_NAME}"
-  REDIS_STATUS_KEY=status."${PIPELINE_NAME}.${SERVICE_NAME}"
+  REDIS_CONFIG_KEY=config."${PIPELINE_NAME}.${INSTANCE_NAME}"
+  REDIS_STATUS_KEY=status."${PIPELINE_NAME}.${INSTANCE_NAME}"
 
   redis-cli -h "${REDIS_HOST}" get "${REDIS_CONFIG_KEY}" > redis_config.json
 

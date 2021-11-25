@@ -1,4 +1,4 @@
-version: "3.6"
+version: "3.2"
 
 services:
   broker:
@@ -15,3 +15,4 @@ services:
     container_name: "redis"
     ports:
       - 6379:6379
+    command: redis-server --save ''
