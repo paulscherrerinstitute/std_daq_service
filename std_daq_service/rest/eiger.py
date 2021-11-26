@@ -98,7 +98,7 @@ def set_eiger_cmd(cmd):
         return response
     if cmd == "START":
         if d.status == runStatus.IDLE:
-            d.acquire()
+            d.startDetector()
             return response
         else:
             response['response'] = "Not possible to start, the detector is not idle"
