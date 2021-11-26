@@ -13,7 +13,7 @@ _logger = logging.getLogger("EpicsBuffer")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Epics buffer receiver')
 
-    parser.add_argument("json_config_file", type=str, help="Path to JSON config file.")
+    parser.add_argument("--json_config_file", type=str, default="redis_config.json", help="Path to JSON config file.")
     parser.add_argument("--service_name", type=str, default=None,
                         help="Name of the service. If not specified, env variables "
                              "PIPELINE_NAME:INSTANCE_NAME will be used. Otherwise random.")
