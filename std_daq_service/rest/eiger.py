@@ -8,17 +8,26 @@ def get_eiger_config(det_name):
         d = Eiger()
     except RuntimeError as e:
         response['response'] = 'Problem connecting to the detector.'
-    else:
-        response['det_name'] = 'EIGER'
-        response['triggers'] = d.triggers
-        response['timing'] = str(d.timing)
-        response['frames'] = d.frames
-        response['period'] = d.period
-        response['exptime'] = d.exptime
-        response['dr'] = d.dr
-        response['tengiga'] = d.tengiga
-        response['speed'] = str(d.speed)
-        response['threshold'] = d.threshold
+    
+    response['det_name'] = 'EIGER'
+    response['triggers'] = d.triggers
+    response['timing'] = str(d.timing)
+    response['frames'] = d.frames
+    response['period'] = d.period
+    response['exptime'] = d.exptime
+    response['dr'] = d.dr
+    response['tengiga'] = d.tengiga
+    response['speed'] = str(d.speed)
+    response['threshold'] = d.threshold
+    return response
+
+def get_eiger_status():
+    response = {}
+    try:
+        d = Eiger()
+    except RuntimeError as e:
+        response['response'] = 'Problem connecting to the detector.'
+    response['status'] = d.status.name
     return response
 
 def is_valid_detector_config(config):

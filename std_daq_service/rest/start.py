@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, make_response
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.status_aggregator import StatusAggregator
-from std_daq_service.rest.eiger import set_eiger_config, get_eiger_config, set_eiger_cmd
+from std_daq_service.rest.eiger import set_eiger_config, get_eiger_config, set_eiger_cmd, get_eiger_status
 from std_daq_service.rest.manager import RestManager
 from std_daq_service.rest.request_factory import build_user_response, extract_write_request
 
@@ -66,6 +66,8 @@ def start_rest_api(service_name, broker_url, tag):
                     response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
                 elif config['cmd'].upper() == 'START':
                     response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
+                elif config['cmd'].upper() == 'STATUS':
+                    response = make_response(jsonify(get_eiger_status()),200,)
                 else:
                     response = make_response(jsonify({'response':'Eiger command not found.'}),200,)
             
