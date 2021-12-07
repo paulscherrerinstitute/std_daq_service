@@ -11,7 +11,7 @@ if [[ -z "${REDIS_STATUS_KEY}" ]]; then
   exit 1;
 fi
 
-STATUS="$(redis-cli -x hset "${REDIS_STATUS_KEY}" config < redis_config.json)"
+STATUS="$(redis-cli -x hset "${REDIS_STATUS_KEY}" config < config.json)"
 if [ "${STATUS}" != 0 ] && [ "${STATUS}" != 1 ]; then
   echo "Cound not set service status in Redis: ${STATUS}"
   exit 1;
