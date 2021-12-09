@@ -16,7 +16,7 @@ def read_service_arguments(service_description):
     parser.add_argument("--service_name", type=str, default=None,
                         help="Name of the service. If not specified, env variables "
                              "SERVICE_NAME will be used. Otherwise random.")
-    parser.add_argument("--config", type=str, default=DEFAULT_CONFIG_FILE, help="Path to JSON config file.")
+    parser.add_argument("--json_config_file", type=str, default=DEFAULT_CONFIG_FILE, help="Path to JSON config file.")
 
     parser.add_argument("--redis_host", type=str, help="Host of redis instance.", default=DEFAULT_REDIS_HOST)
     parser.add_argument("--log_level", default=DEFAULT_LOG_LEVEL,
