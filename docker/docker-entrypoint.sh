@@ -15,16 +15,31 @@ if [ "${REDIS_SKIP}" = false ]; then
   REDIS_CONFIG_KEY=config."${SERVICE_NAME}"
   REDIS_STATUS_KEY=status."${SERVICE_NAME}"
 
-  redis-cli -h "${REDIS_HOST}" get "${REDIS_CONFIG_KEY}" > config.json
+  if [ -f config.json ]; then
+    echo "Local config.json file detected. Skipping Redis download."
+  else
+    redis-cli -h "${REDIS_HOST}" get "${REDIS_CONFIG_KEY}" > config.json
 
-  CONFIG_BYTES="$(stat -c %s config.json)"
-  if [ "${CONFIG_BYTES}" -le 1 ]; then
+    CONFIG_BYTES="$(stat -c %s config.json)"
+    if [ "${CONFIG_BYTES}" -le 1 ]; then
       echo "Key missing in redis(${REDIS_HOST}): ${REDIS_CONFIG_KEY}"
       exit 1;
+    fi
   fi
 
   export REDIS_STATUS_KEY
   redis_status.sh &
+fi
+
+if [ -f config.json ]; then
+  CONFIG_BYTES="$(stat -c %s config.json)"
+  if [ "${CONFIG_BYTES}" -le 1 ]; then
+    echo "Empty config.json file."
+    exit 1;
+  fi
+else
+  echo "Missing config.json file."
+  exit 1;
 fi
 
 EXECUTABLE="${@:1}"
