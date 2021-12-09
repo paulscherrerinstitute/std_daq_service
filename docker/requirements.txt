@@ -1,0 +1,8 @@
+# Anaconda requirements file
+pyzmq
+pyepics
+flask
+pika
+redis
+redis-py
+pcaspy
