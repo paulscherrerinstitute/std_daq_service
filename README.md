@@ -17,6 +17,11 @@ sh tests_in_docker.sh
 ```
 (Please note that at the moments the test container uses host networking, so you might have problems on a Mac.)
 
+To run services in the docker container you can run:
+```bash 
+docker run --net=host --rm -e SERVICE_NAME=debug.test -v $(pwd)/config.json:/std_daq_service/config.json paulscherrerinstitute/std-daq-service epics_buffer
+```
+
 ## Architecture overview
 An std-daq-service is a micro service that uses **RabbitMQ** for interaction with users and **ZMQ** for data 
 streams. The services are built using predefined formats and standard in order to make them part of the 
