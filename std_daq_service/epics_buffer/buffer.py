@@ -3,7 +3,7 @@ import logging
 from time import sleep, time_ns
 
 import epics
-from redis import Redis, ResponseError
+from redis import Redis
 import numpy as np
 
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
