@@ -11,7 +11,7 @@ from std_daq_service.writer_agent.service import RequestWriterService
 
 class TestRequestWriteService(unittest.TestCase):
 
-    def _setup_service(self, tag, service_name, status_callback):
+    def _setup_service(self, service_name, status_callback):
         input_stream_url = "tcp://127.0.0.1:7000"
         output_stream_url = "tcp://127.0.0.1:7001"
 
@@ -28,18 +28,17 @@ class TestRequestWriteService(unittest.TestCase):
                                        output_stream_url=output_stream_url)
 
         listener = BrokerService(broker_url=TEST_BROKER_URL,
-                                 tag=tag,
                                  service_name=service_name,
                                  request_callback=service.on_request,
                                  kill_callback=service.on_kill)
 
         client = BrokerClient(broker_url=TEST_BROKER_URL,
-                              tag=tag,
+                              tag=service_name,
                               status_callback=status_callback)
         return sender, receiver, listener, service, client
 
     def test_basic_workflow(self):
-        tag = 'test_service'
+        service_name = 'test_service'
         request = {
             "n_images": 10,
             "output_file": "/test/output.h5"
@@ -50,7 +49,7 @@ class TestRequestWriteService(unittest.TestCase):
             last_header = header
         last_header = None
 
-        sender, receiver, listener, service, client = self._setup_service(tag, tag, on_status_message)
+        sender, receiver, listener, service, client = self._setup_service(service_name, on_status_message)
         sleep(0.1)
 
         client.send_request(request)
@@ -85,7 +84,7 @@ class TestRequestWriteService(unittest.TestCase):
 
     def test_write_kill(self):
 
-        tag = 'kill_service'
+        service_name = 'kill_service'
         n_images = 10
 
         def on_status_message(request_id, request, header):
@@ -93,7 +92,7 @@ class TestRequestWriteService(unittest.TestCase):
             last_header = header
         last_header = None
 
-        sender, receiver, listener, service, client = self._setup_service(tag, tag, on_status_message)
+        sender, receiver, listener, service, client = self._setup_service(service_name, on_status_message)
         sleep(0.1)
 
         for pulse_id in range(5):
@@ -126,7 +125,7 @@ class TestRequestWriteService(unittest.TestCase):
         client.stop()
 
     def test_multiple_requests(self):
-        tag = 'multi_service'
+        service_name = 'multi_service'
         n_images = 5
 
         def on_status_message(request_id, request, header):
@@ -134,7 +133,7 @@ class TestRequestWriteService(unittest.TestCase):
             last_header = header
         last_header = None
 
-        sender, receiver, listener, service, client = self._setup_service(tag, tag, on_status_message)
+        sender, receiver, listener, service, client = self._setup_service(service_name, on_status_message)
         sleep(0.1)
 
         # Send write request.

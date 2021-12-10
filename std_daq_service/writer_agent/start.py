@@ -40,7 +40,6 @@ if __name__ == "__main__":
                                    output_stream_url=output_stream)
 
     listener = BrokerService(broker_url=args.broker_url,
-                             tag=args.service_tag,
                              service_name=args.service_name,
                              request_callback=service.on_request,
                              kill_callback=service.on_kill)

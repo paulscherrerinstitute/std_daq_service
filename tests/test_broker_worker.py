@@ -12,7 +12,6 @@ class TestBrokerListener(unittest.TestCase):
 
         request = {"just": "a", "request": "yeey"}
         service_name = "testing_service"
-        service_tag = "psi.facility.beamline"
 
         error_message = "This is an expected error. Carry on."
 
@@ -42,12 +41,11 @@ class TestBrokerListener(unittest.TestCase):
                 self.assertEqual(request, received_request)
 
         worker = BrokerService(TEST_BROKER_URL,
-                               tag=service_tag,
                                service_name=service_name,
                                request_callback=on_request_message)
 
         client = BrokerClient(broker_url=TEST_BROKER_URL,
-                              tag=service_tag,
+                              tag=service_name,
                               status_callback=on_status_message)
 
         sleep(0.1)
@@ -72,7 +70,6 @@ class TestBrokerListener(unittest.TestCase):
 
         request = {"just": "a", "request": "kill"}
         service_name = "killable_service"
-        service_tag = "psi.facility.beamline"
 
         status_messages = []
 
@@ -91,13 +88,12 @@ class TestBrokerListener(unittest.TestCase):
         kill_flag = False
 
         worker = BrokerService(TEST_BROKER_URL,
-                               tag=service_tag,
                                service_name=service_name,
                                request_callback=on_request_message,
                                kill_callback=on_kill_message)
 
         client = BrokerClient(broker_url=TEST_BROKER_URL,
-                              tag=service_tag,
+                              tag=service_name,
                               status_callback=on_status_message)
 
         sleep(0.1)

@@ -11,7 +11,6 @@ from std_daq_service.broker.service import BrokerService
 class TestBrokerListener(unittest.TestCase):
     def test_broker_listener_workflow(self):
         service_name = "noop_worker"
-        tag = "psi.facility.beamline"
 
         sent_request = {
             "this is a": 'request'
@@ -32,10 +31,11 @@ class TestBrokerListener(unittest.TestCase):
             self.assertEqual(sent_request, request)
             return service_message
 
-        client = BrokerClient(broker_url=TEST_BROKER_URL, tag=tag,
+        client = BrokerClient(broker_url=TEST_BROKER_URL, tag=service_name,
                               status_callback=status_callback)
 
-        worker = BrokerService(broker_url=TEST_BROKER_URL, tag=tag, service_name=service_name,
+        worker = BrokerService(broker_url=TEST_BROKER_URL,
+                               service_name=service_name,
                                request_callback=request_callback)
 
         sleep(0.1)

@@ -11,8 +11,8 @@ _logger = getLogger("BrokerService")
 
 
 class BrokerService(BrokerClientBase):
-    def __init__(self, broker_url, tag, service_name, request_callback=None, kill_callback=None):
-        super().__init__(broker_url=broker_url, tag=tag)
+    def __init__(self, broker_url, service_name, request_callback=None, kill_callback=None):
+        super().__init__(broker_url=broker_url, tag=service_name)
 
         self.service_name = service_name
         _logger.info(f"Service {service_name} starting.")
