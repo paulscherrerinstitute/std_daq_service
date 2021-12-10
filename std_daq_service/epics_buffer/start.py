@@ -1,15 +1,22 @@
+import argparse
 import logging
+import os
 
 from std_daq_service.epics_buffer.buffer import start_epics_buffer
-from std_daq_service.start_utils import read_service_arguments
+from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("EpicsBuffer")
 
 
 def main():
-    service_name, config, redis_host = read_service_arguments("Epics buffer service")
+    parser = argparse.ArgumentParser(description="Epics buffer service")
+    parser.add_argument("--redis_host", type=str, help="Host of redis instance.",
+                        default=os.environ.get("REDIS_HOST", "localhost"))
+    service_name, config, args = default_service_setup(parser)
 
-    _logger.info(f'Service {service_name} starting.')
+    redis_host = args.redis_host
+
+    _logger.info(f'Service {service_name} starting with REDIS_HOST {redis_host}.')
     _logger.debug(config)
 
     pulse_id_pv = config.get("pulse_id_pv")
