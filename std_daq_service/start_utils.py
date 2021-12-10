@@ -13,7 +13,6 @@ def default_service_setup(parser):
                         help="Name of the service. If not specified, env variables "
                              "SERVICE_NAME will be used. Otherwise random.")
     parser.add_argument("--json_config_file", type=str, default=DEFAULT_CONFIG_FILE, help="Path to JSON config file.")
-
     parser.add_argument("--log_level", default=DEFAULT_LOG_LEVEL,
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
