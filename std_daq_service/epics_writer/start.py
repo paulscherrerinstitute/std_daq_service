@@ -11,7 +11,7 @@ _logger = logging.getLogger("EpicsWriter")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Epics buffer writer service')
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
-                        default=os.environ.get("BROKER_HOST", "127.0.0.1"))
+                        default=os.environ.get("BROKER_HOST", '127.0.0.1'))
     parser.add_argument("--redis_host", type=str, help="Host of redis instance.",
                         default=os.environ.get("REDIS_HOST", "localhost"))
     service_name, config, args = default_service_setup(parser)
