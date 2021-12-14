@@ -26,7 +26,7 @@ class EpicsH5Writer(object):
 
     def write_metadata(self, metadata):
         # TODO: Implement metadata writing
-        pass
+        _logger.warning(f"Received metadata but function not implemented. {metadata}")
 
     def write_pv(self, pv_name, pv_data):
 
