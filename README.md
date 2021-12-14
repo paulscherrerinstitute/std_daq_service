@@ -53,10 +53,24 @@ docker run --net=host --rm  \
 For more information on the parameters of the docker container please check the **Service container** section. 
 
 ### Service container
-Extended documentation: [Service container](docker/README.md)
+The service container should be used in order to standardize the runtime environment of services. It provides 
+standard ways to pass parameters, config files, manage service logs and ship status and configs to Redis.
 
-TODO: Add more info about the service container
+The environment parameters that can be passed to the container are:
+- SERVICE_NAME (unique identifier of the service to run)
+- REDIS_HOST (default: 127.0.0.1; Host of the Redis instance)
+- REDIS_SKIP (default: False; Skip reporting to Redis - useful for debugging and development)
+(in addition, any env parameters directly consumed by the service can be passed as well)
 
+When starting the container you can also map a configuration file to **/std\_daq\_service/config.json**.
+If you do not provide a config.json file, the container will try to download it from Redis from the key 
+**config.\[service\_name\]**. If no key with this name is present in Redis or you did not provide the config file,
+the container will initialize an empty json file. This config file is later loaded by the service.
+
+You can pass environment variables to Docker with the -e flag and you can mount files with the -v flag (both paths 
+needs to be absolute, and you must map your config file in the image to **/std\_daq\_service/config.json**)
+
+For more detailed information please consult the [Service container](docker/README.md) page.
 ## Deployment
 
 The deployment should be made with Docker images. You must copy a specific version of the software into 
