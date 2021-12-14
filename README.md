@@ -18,9 +18,14 @@ This will bring up both services on your local machine and populate Redis with t
 (located in **tests/redis\_configs/\[service\_name\].json**). You can now execute the unit tests from your local 
 dev environment or you can use the provided docker container.
 
-You can also manually setup your local paths (if your IDE does not do that already) by running:
+To manually setup your local paths (if your IDE does not do that already):
 ```bash
 python setup.py develop
+```
+
+You manually install the required Python modules:
+```bash
+conda install -c conda-forge --yes --file docker/requirements.txt
 ```
 
 ### Running unit tests
