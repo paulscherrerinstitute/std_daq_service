@@ -20,6 +20,9 @@ def main():
     broker_url = args.broker_url
     redis_host = args.redis_host
 
+    # Suppress pika logging
+    logging.getLogger("pika").setLevel(logging.WARNING)
+
     _logger.info(f'Epics buffer writer {service_name} listening on broker {args.broker_url} on buffer {redis_host}.')
 
     service = EpicsWriterService(redis_host=redis_host)
