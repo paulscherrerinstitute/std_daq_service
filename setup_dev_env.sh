@@ -2,6 +2,7 @@
 set -e
 
 docker-compose up -d
+sleep 1
 
 for config_file in tests/redis_configs/*.json; do
   service_name="$(basename "${config_file}" .json)"
