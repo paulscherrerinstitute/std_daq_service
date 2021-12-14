@@ -2,25 +2,55 @@
 
 This is a monorepo for standard daq services.
 
+Documentation of individual services:
+- [Epics buffer](std_daq_service/epics_buffer/README.md)
+- [Epics writer](std_daq_service/epics_writer/README.md)
+
 ## Getting started
 
+### Setup development environment
 For development and testing you need to have **Docker** and **docker-compose** installed. You must run 
-Redis and RabbitMQ in order to run unit tests. In the root folder of the project execute:
+Redis and RabbitMQ in order to run unit tests. To start them, from the root folder of the project, execute:
 ```bash
 sh setup_dev_env.sh
 ```
-This will bring up both services in your local machine and populate Redis with test configurations. 
-You can now execute the unit tests from your local dev environment or you can use the provided docker container. 
-From the root of the project:
+This will bring up both services on your local machine and populate Redis with test configurations 
+(located in **tests/redis\_configs/\[service\_name\].json**). You can now execute the unit tests from your local 
+dev environment or you can use the provided docker container.
+
+You can also manually setup your local paths (if your IDE does not do that already) by running:
+```bash
+python setup.py develop
+```
+
+### Running unit tests
+To run the tests in a docker container, execute from the root of the project:
 ```bash
 sh tests_in_docker.sh
 ```
-(Please note that at the moments the test container uses host networking, so you might have problems on a Mac.)
+(Please note that at the moments the test container uses host networking, so you might have problems on a Mac - 
+you will need to open the needed ports manually.)
 
-To run services in the docker container you can run:
-```bash 
-docker run --net=host --rm -e SERVICE_NAME=debug.test -v $(pwd)/config.json:/std_daq_service/config.json paulscherrerinstitute/std-daq-service epics_buffer
+If you have set your development environment correctly you can also run the unit tests from your machine. 
+In the root folder run:
+```bash
+python -m unittest discover tests/
 ```
+
+### Starting a service
+Once you have Redis and RabbitMQ running locally you can start the services straight from your machine, but we 
+suggest you use the provided docker container for this. 
+
+To run services in the docker container, from the project root:
+```bash 
+docker run --net=host --rm  \
+    -e SERVICE_NAME=debug.epics_buffer \
+    -v $(pwd)/tests/redis_configs/debug.epics_buffer.json:/std_daq_service/config.json \
+    paulscherrerinstitute/std-daq-service \
+    epics_buffer
+```
+
+For more information on the parameters of the docker container please check the **Service container** section. 
 
 ## Architecture overview
 An std-daq-service is a micro service that uses **RabbitMQ** for interaction with users and **ZMQ** for data 
@@ -281,6 +311,8 @@ the user is **guest** and password is **guest**.
 The deployment can only be made with Docker images. You must copy a specific version of the software into 
 a new version of the **std-daq-service** docker image and push it to the registry. The **std-daq-service**
 image you build must use the image **std-daq-service-base** base.
+
+## Service container
 
 ### Building the image base
 
