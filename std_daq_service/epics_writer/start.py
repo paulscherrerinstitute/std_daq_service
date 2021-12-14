@@ -1,36 +1,30 @@
 import argparse
 import logging
+import os
 
-from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.service import BrokerService
 from std_daq_service.epics_writer.service import EpicsWriterService
+from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("EpicsWriter")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Epics writer.')
+    parser = argparse.ArgumentParser(description='Epics buffer writer service')
+    parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
+                        default=os.environ.get("BROKER_HOST", "127.0.0.1"))
+    parser.add_argument("--redis_host", type=str, help="Host of redis instance.",
+                        default=os.environ.get("REDIS_HOST", "localhost"))
+    service_name, config, args = default_service_setup(parser)
 
-    parser.add_argument("service_name", type=str, help="Name of the service")
-    parser.add_argument("service_tag", type=str, help="Where to bind the service")
+    broker_url = args.broker_url
+    redis_host = args.redis_host
 
-    parser.add_argument("--broker_url", default=TEST_BROKER_URL,
-                        help="Address of the broker to connect to.")
-    parser.add_argument("--log_level", default="INFO",
-                        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
-                        help="Log level to use.")
+    _logger.info(f'Epics buffer writer {service_name} listening on broker {args.broker_url} on buffer {redis_host}.')
 
-    args = parser.parse_args()
+    service = EpicsWriterService(redis_host=redis_host)
 
-    _logger.setLevel(args.log_level)
-    logging.getLogger("pika").setLevel(logging.WARNING)
-
-    _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
-
-    service = EpicsWriterService(buffer_folder=args.buffer_folder)
-
-    listener = BrokerService(broker_url=args.broker_url,
-                             tag=args.service_tag,
-                             service_name=args.service_name,
+    listener = BrokerService(broker_url=broker_url,
+                             service_name=service_name,
                              request_callback=service.on_request,
                              kill_callback=service.on_kill)
 
