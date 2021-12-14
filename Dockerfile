@@ -1,4 +1,4 @@
-FROM paulscherrerinstitute/std-daq-service-base:1.0.8
+FROM paulscherrerinstitute/std-daq-service-base:1.0.9
 
 COPY . /std_daq_service/
 WORKDIR /std_daq_service
