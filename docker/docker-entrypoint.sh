@@ -23,7 +23,8 @@ if [ "${REDIS_SKIP}" = false ]; then
     CONFIG_BYTES="$(stat -c %s config.json)"
     if [ "${CONFIG_BYTES}" -le 1 ]; then
       echo "Key missing in redis(${REDIS_HOST}): ${REDIS_CONFIG_KEY}"
-      exit 1;
+      echo "Initializing empty json file."
+      echo "{}" > config.json
     fi
   fi
 
