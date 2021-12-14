@@ -8,7 +8,8 @@ from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("EpicsWriter")
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description='Epics buffer writer service')
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
@@ -36,3 +37,7 @@ if __name__ == "__main__":
     listener.stop()
 
     _logger.info(f'Service {args.service_name} stopping.')
+
+
+if __name__ == "__main__":
+    main()
