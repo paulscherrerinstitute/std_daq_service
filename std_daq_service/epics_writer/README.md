@@ -59,3 +59,6 @@ The request for writing must be in format:
 }
 ```
 All fields are mandatory except **metadata**.
+
+## Output H5 file
+TODO
