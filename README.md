@@ -52,6 +52,19 @@ docker run --net=host --rm  \
 
 For more information on the parameters of the docker container please check the **Service container** section. 
 
+### Service container
+Extended documentation: [Service container](docker/README.md)
+
+TODO: Add more info about the service container
+
+## Deployment
+
+The deployment should be made with Docker images. You must copy a specific version of the software into 
+a new version of the **std-daq-service** docker image and push it to the registry. The **std-daq-service**
+image you build must use the image **std-daq-service-base** base.
+
+If you modified the 
+
 ## Architecture overview
 An std-daq-service is a micro service that uses **RabbitMQ** for interaction with users and **ZMQ** for data 
 streams. The services are built using predefined formats and standard in order to make them part of the 
@@ -306,24 +319,5 @@ You have 2 ports mapped:
 the user is **guest** and password is **guest**.
 - 5672 is the broker address. 
 
-## Deployment
 
-The deployment can only be made with Docker images. You must copy a specific version of the software into 
-a new version of the **std-daq-service** docker image and push it to the registry. The **std-daq-service**
-image you build must use the image **std-daq-service-base** base.
 
-## Service container
-
-### Building the image base
-
-Building the base image should not be necessary unless you are trying to update the std-daq platform. If 
-you are not sure what this means, please do not perform this step.
-
-Navigate to **docker/** and run 
-```bash
-./build_std-daq-service-base.sh
-```
-
-### Building the service image
-
-TODO:
