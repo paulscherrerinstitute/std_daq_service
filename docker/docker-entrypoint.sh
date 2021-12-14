@@ -34,12 +34,12 @@ fi
 if [ -f config.json ]; then
   CONFIG_BYTES="$(stat -c %s config.json)"
   if [ "${CONFIG_BYTES}" -le 1 ]; then
-    echo "Empty config.json file."
+    echo "Provided empty config.json file. Do not provide the file if not needed by the service."
     exit 1;
   fi
 else
-  echo "Missing config.json file."
-  exit 1;
+  echo "No config.json file. Initializing empty json file."
+  echo "{}" > config.json
 fi
 
 EXECUTABLE="${@:1}"
