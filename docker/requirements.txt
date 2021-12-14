@@ -6,4 +6,4 @@ pika
 redis
 redis-py
 pcaspy
-h5py
+h5py=3.1.0
