@@ -63,12 +63,17 @@ def print_to_console_raw(request_id, request, header):
     request_string = f'{request_id[:4]}..{request_id[-4:]}'
     service_name = header['source']
     action = header['action']
-    message = header['message']
+    error_message = header['message']
     output_file = request.get("output_file", "")
+
+    if action == ACTION_REQUEST_FAIL:
+        output_message = error_message
+    else:
+        output_message = output_file
 
     combined_output = f'[{request_string}] ' \
                       f'{text_color_mapping[action]}{service_name}{RESET} ' \
-                      f'{message or output_file}'
+                      f'{output_message}'
 
     print(combined_output)
 
