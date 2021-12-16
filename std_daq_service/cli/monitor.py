@@ -64,10 +64,11 @@ def print_to_console_raw(request_id, request, header):
     service_name = header['source']
     action = header['action']
     message = header['message']
+    output_file = request.get("output_file", "")
 
     combined_output = f'[{request_string}] ' \
-                      f'{text_color_mapping[action]}{service_name}{RESET}' \
-                      f'{message}'
+                      f'{text_color_mapping[action]}{service_name}{RESET} ' \
+                      f'{message or output_file}'
 
     print(combined_output)
 
