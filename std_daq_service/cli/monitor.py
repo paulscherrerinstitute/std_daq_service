@@ -6,7 +6,6 @@ from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL
 from std_daq_service.broker.status_aggregator import StatusAggregator
 
-
 RESET = u"\u001b[0m"
 
 GREEN_TEXT = u'\u001b[32m'
@@ -45,8 +44,10 @@ def print_to_console(request_id, status):
         status_order = service_status_order[last_received_status]
         indicator_string = status_symbol_mapping[last_received_status]
         name_string = f" {text_color_mapping[last_received_status]}{service_name}{RESET}"
+        # TODO: Add messages and maybe separate the output to each service individually.
 
         output_statuses.append((status_order, name_string, indicator_string))
+
     output_statuses = sorted(output_statuses)
 
     request_string = f'{request_id[:4]}..{request_id[-4:]}'

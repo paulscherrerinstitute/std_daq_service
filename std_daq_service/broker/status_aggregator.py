@@ -66,12 +66,9 @@ class StatusAggregator(object):
                     break
             else:
                 receiver.close()
-                return {'status':last_received_status,
-                    'request_details': status_update['status']['request']
-                }
+                return {'status': last_received_status,
+                        'request_details': status_update['status']['request']}
 
         else:
             receiver.close()
             raise TimeoutError("The request did not complete in time.")
-
-
