@@ -3,12 +3,11 @@ import logging
 
 from flask import Flask, request, jsonify, make_response
 
-from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL
-from std_daq_service.broker.status_aggregator import StatusAggregator
 from std_daq_service.rest.eiger import set_eiger_config, get_eiger_config, set_eiger_cmd, get_eiger_status
 from std_daq_service.rest.manager import RestManager
 from std_daq_service.rest.request_factory import build_user_response, extract_write_request
+from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("RestProxyService")
 
@@ -74,32 +73,22 @@ def start_rest_api(service_name, broker_url, tag):
             response.headers["Content-Type"] = "application/json"
             return response
 
-
-
-
     app.run(host='127.0.0.1', port=5000)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Rest Proxy Service')
-
-    parser.add_argument("service_name", type=str, help="Name of the service")
+    parser = argparse.ArgumentParser(description='SLS Rest Service')
     parser.add_argument("tag", type=str, help="Tag on which the proxy listens to statuses and sends requests.")
-
     parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
-    parser.add_argument("--log_level", default="INFO",
-                        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
-                        help="Log level to use.")
 
-    args = parser.parse_args()
+    service_name, config, args = default_service_setup()
+    broker_url = args.broker_url
+    tag = args.tag
 
-    _logger.setLevel(args.log_level)
-    logging.getLogger("pika").setLevel(logging.WARNING)
+    _logger.info(f'Service {service_name} connecting to {broker_url}.')
 
-    _logger.info(f'Service {args.service_name} connecting to {args.broker_url}.')
-
-    start_rest_api(service_name=args.service_name,
+    start_rest_api(service_name=service_name,
                    broker_url=args.broker_url,
                    tag=args.tag)
 

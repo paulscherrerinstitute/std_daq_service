@@ -22,6 +22,9 @@ def default_service_setup(parser):
     logging.basicConfig(level=args.log_level,
                         format="%(levelname)s %(asctime)s %(name)s %(message)s")
 
+    # Suppress pika logging
+    logging.getLogger("pika").setLevel(logging.WARNING)
+
     with open(args.json_config_file, 'r') as input_file:
         config = json.load(input_file)
 
