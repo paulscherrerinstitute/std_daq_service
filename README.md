@@ -150,3 +150,80 @@ the **ImageMetadata** stream encapsulated into **StoreStream** format to the **s
 
 ## User interaction flow
 ![User interaction flow](docs/user_interaction_flow.jpg)
+
+## Creating a new service
+
+### Overview 
+**Developing a new service involves:**
+- Writing your service in a new folder inside **std\_daq\_service/**.
+- Writing a README.md about it and linking to it from this file.
+- Updating the setup.py file entry_points with your new executable.
+- Updating the docker/requirements.txt file if your service needs additional libraries.
+
+**Releasing your new service involves:**
+- If you modified the docker/requirements.txt file, you need to increase the base container version in 
+docker/build_service-base.sh and build the new container by running ./build_service-base.sh from the **docker/** folder.
+- Increase the service container version in build_docker.sh and build it by running ./build_docker.sh from the root of
+the project
+
+### Configuration
+
+Your service can expect the following environment variables in the execution context:
+- SERVICE_NAME (in the format \[facility\].\[beamline\].\[service_name\])
+- BROKER_HOST (Hostname of the broker)
+If you need additional environment variables you will have to specify them yourself in the deployment scripts.
+
+Your service will automatically get the JSON config file you will provide to the deployment system under **config.json** 
+in the container working dir.
+
+Some of this details can be taken care for you if you use the helper method **default\_service\_setup**:
+```python
+import argparse
+import os
+from std_daq_service.start_utils import default_service_setup
+
+parser = argparse.ArgumentParser(description='New service')
+
+# Example of parameters specific to your service.
+parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
+                    default=os.environ.get("BROKER_HOST", '127.0.0.1'))
+
+# Returns the service_name, config dictionary (loaded from file),
+# and returns the parsed arguments from ArgumentParser.
+# It also configures the basic logging.
+service_name, config, args = default_service_setup(parser)
+```
+
+### Service entry point
+Your service entry point should be added to the **setup.py** file. You should name the file where your entry point is 
+**start.py** and develop it in a standardized manner.
+
+You can choose between 3 standard service types:
+- Background services (services that get started and never interact with the user)
+- Primary service (this are services that react to user requests on the broker)
+- Post-processing services (this are services that react to statuses from other services)
+For more details check the user interaction flow above. This different types of service as also discussed in the 
+next chapters. 
+
+Example of a start.py:
+```python
+import argparse
+import os
+from std_daq_service.start_utils import default_service_setup
+
+def main():
+    parser = argparse.ArgumentParser(description='New service')
+    parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
+                        default=os.environ.get("BROKER_HOST", '127.0.0.1'))
+
+    service_name, config, args = default_service_setup(parser)
+    broker_url = args.broker_url
+
+if __name__ == "__main__":
+    main()
+```
+### Background service
+
+### Primary service
+
+### Post processing service
