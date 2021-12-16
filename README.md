@@ -2,10 +2,12 @@
 
 This is a monorepo for standard daq services.
 
-Documentation of individual services:
+Documentation of interfaces:
 - [SLS Rest interface](std_daq_service/rest/README.md)
+- [Broker command line interface](std_daq_service/cli/README.md)
+
+Documentation of services:
 - [Writer agent](std_daq_service/writer_agent/README.md)
-- [Broker listener](std_daq_service/listener/README.md)
 - [Epics buffer](std_daq_service/epics_buffer/README.md)
 - [Epics writer](std_daq_service/epics_writer/README.md)
 

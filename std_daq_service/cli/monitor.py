@@ -1,12 +1,11 @@
 import argparse
 import logging
+import os
 
 from std_daq_service.broker.client import BrokerClient
-from std_daq_service.broker.common import ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL, \
-    TEST_BROKER_URL
+from std_daq_service.broker.common import ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL
 from std_daq_service.broker.status_aggregator import StatusAggregator
 
-_logger = logging.getLogger("BrokerListenerConsoleClient")
 
 RESET = u"\u001b[0m"
 
@@ -59,26 +58,25 @@ def print_to_console(request_id, status):
     print(combined_output)
 
 
-def start_console_output(tag, broker_url):
+def main():
+    parser = argparse.ArgumentParser(description='Monitor status queue on broker.')
+    parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
+                        default=os.environ.get("BROKER_HOST", '127.0.0.1'))
+    parser.add_argument("--tag", type=str, help="Tag on which to send the request.", default="*")
+
+    args = parser.parse_args()
+
+    broker_url = args.broker_url
+    tag = args.tag
+
+    # Suppress pika logging
+    logging.getLogger("pika").setLevel(logging.WARNING)
+
     recorder = StatusAggregator(status_change_callback=print_to_console)
 
     client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=recorder.on_status_message)
     client.block()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Broker listener')
-
-    parser.add_argument("tag", type=str, default="#", help="Tag to bind to on the status exchange.")
-    parser.add_argument("--broker_url", default=TEST_BROKER_URL,
-                        help="Address of the broker to connect to.")
-    parser.add_argument("--log_level", default="ERROR",
-                        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
-                        help="Log level to use.")
-
-    args = parser.parse_args()
-
-    _logger.setLevel(args.log_level)
-    logging.getLogger("pika").setLevel(logging.WARNING)
-
-    start_console_output(tag=args.tag, broker_url=args.broker_url)
+if __name__ == "main":
+    main()
