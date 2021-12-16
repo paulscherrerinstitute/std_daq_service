@@ -1,11 +1,9 @@
 import unittest
-from threading import Thread
 from time import sleep
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_SUCCESS
-from std_daq_service.broker.service import BrokerService
-from std_daq_service.listener.start import print_to_console
+from std_daq_service.broker.primary_service import PrimaryBrokerService
 from std_daq_service.broker.status_aggregator import StatusAggregator
 
 
@@ -61,8 +59,8 @@ class TestStatusRecorder(unittest.TestCase):
             sleep(0.01)
             pass
 
-        service_1 = BrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
-        service_2 = BrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
+        service_1 = PrimaryBrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
+        service_2 = PrimaryBrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
         sleep(0.1)
 
         request_id = client.send_request(request)

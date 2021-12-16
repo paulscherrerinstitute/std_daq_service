@@ -10,7 +10,7 @@ from std_daq_service.broker.common import BrokerClientBase, STATUS_EXCHANGE, REQ
 _logger = getLogger("BrokerService")
 
 
-class BrokerService(BrokerClientBase):
+class PrimaryBrokerService(BrokerClientBase):
     def __init__(self, broker_url, service_name, request_callback=None, kill_callback=None):
         super().__init__(broker_url=broker_url, tag=service_name)
 

@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from std_daq_service.broker.common import TEST_BROKER_URL
-from std_daq_service.broker.service import BrokerService
+from std_daq_service.broker.primary_service import PrimaryBrokerService
 from std_daq_service.writer_agent.service import RequestWriterService
 
 _logger = logging.getLogger('RequestWriteService')
@@ -39,10 +39,10 @@ if __name__ == "__main__":
     service = RequestWriterService(input_stream_url=input_stream,
                                    output_stream_url=output_stream)
 
-    listener = BrokerService(broker_url=args.broker_url,
-                             service_name=args.service_name,
-                             request_callback=service.on_request,
-                             kill_callback=service.on_kill)
+    listener = PrimaryBrokerService(broker_url=args.broker_url,
+                                    service_name=args.service_name,
+                                    request_callback=service.on_request,
+                                    kill_callback=service.on_kill)
 
     try:
         listener.block()

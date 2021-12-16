@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 
-from std_daq_service.broker.service import BrokerService
+from std_daq_service.broker.primary_service import PrimaryBrokerService
 from std_daq_service.epics_writer.service import EpicsWriterService
 from std_daq_service.start_utils import default_service_setup
 
@@ -24,10 +24,10 @@ def main():
 
     service = EpicsWriterService(redis_host=redis_host)
 
-    listener = BrokerService(broker_url=broker_url,
-                             service_name=service_name,
-                             request_callback=service.on_request,
-                             kill_callback=service.on_kill)
+    listener = PrimaryBrokerService(broker_url=broker_url,
+                                    service_name=service_name,
+                                    request_callback=service.on_request,
+                                    kill_callback=service.on_kill)
 
     try:
         listener.block()

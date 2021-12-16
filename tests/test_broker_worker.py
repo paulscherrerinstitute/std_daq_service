@@ -4,7 +4,7 @@ from time import sleep
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_START, \
     ACTION_REQUEST_FAIL
-from std_daq_service.broker.service import BrokerService
+from std_daq_service.broker.primary_service import PrimaryBrokerService
 
 
 class TestBrokerListener(unittest.TestCase):
@@ -40,9 +40,9 @@ class TestBrokerListener(unittest.TestCase):
             else:
                 self.assertEqual(request, received_request)
 
-        worker = BrokerService(TEST_BROKER_URL,
-                               service_name=service_name,
-                               request_callback=on_request_message)
+        worker = PrimaryBrokerService(TEST_BROKER_URL,
+                                      service_name=service_name,
+                                      request_callback=on_request_message)
 
         client = BrokerClient(broker_url=TEST_BROKER_URL,
                               tag=service_name,
@@ -87,10 +87,10 @@ class TestBrokerListener(unittest.TestCase):
             kill_flag = True
         kill_flag = False
 
-        worker = BrokerService(TEST_BROKER_URL,
-                               service_name=service_name,
-                               request_callback=on_request_message,
-                               kill_callback=on_kill_message)
+        worker = PrimaryBrokerService(TEST_BROKER_URL,
+                                      service_name=service_name,
+                                      request_callback=on_request_message,
+                                      kill_callback=on_kill_message)
 
         client = BrokerClient(broker_url=TEST_BROKER_URL,
                               tag=service_name,

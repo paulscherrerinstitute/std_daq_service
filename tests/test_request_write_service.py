@@ -4,7 +4,7 @@ import zmq
 
 from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS
-from std_daq_service.broker.service import BrokerService
+from std_daq_service.broker.primary_service import PrimaryBrokerService
 from std_daq_service.protocol import ImageMetadata
 from std_daq_service.writer_agent.service import RequestWriterService
 
@@ -27,10 +27,10 @@ class TestRequestWriteService(unittest.TestCase):
         service = RequestWriterService(input_stream_url=input_stream_url,
                                        output_stream_url=output_stream_url)
 
-        listener = BrokerService(broker_url=TEST_BROKER_URL,
-                                 service_name=service_name,
-                                 request_callback=service.on_request,
-                                 kill_callback=service.on_kill)
+        listener = PrimaryBrokerService(broker_url=TEST_BROKER_URL,
+                                        service_name=service_name,
+                                        request_callback=service.on_request,
+                                        kill_callback=service.on_kill)
 
         client = BrokerClient(broker_url=TEST_BROKER_URL,
                               tag=service_name,
