@@ -222,8 +222,24 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-### Background service
+#### Background service
 
-### Primary service
+#### Primary service
 
-### Post processing service
+#### Postprocessing service
+
+### Service implementation
+
+Primary and postprocessing services need to implement **on\_request** and **on\_kill** functions. It is crucial to 
+take into account that this 2 functions are called in separate threads.
+
+Minimum service definition:
+```python
+class NoopService(object):
+
+    def on_request(self, request_id, request):
+        pass
+
+    def on_kill(self, request_id):
+        pass
+```
