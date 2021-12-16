@@ -36,7 +36,7 @@ service_status_order = {
 }
 
 
-def print_to_console(request_id, status):
+def print_to_console_agg(request_id, status):
     output_statuses = []
     for service_name, statuses in sorted(status['services'].items()):
         last_received_status = statuses[-1][0]
@@ -59,8 +59,22 @@ def print_to_console(request_id, status):
     print(combined_output)
 
 
+def print_to_console_raw(request_id, request, header):
+    request_string = f'{request_id[:4]}..{request_id[-4:]}'
+    service_name = header['source']
+    action = header['action']
+    message = header['message']
+
+    combined_output = f'[{request_string}] ' \
+                      f'{text_color_mapping[action]}{service_name}{RESET}' \
+                      f'{message}'
+
+    print(combined_output)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Monitor status queue on broker.')
+    parser.add_argument("--agg", type=bool, action="store_true", help="Aggregate status reporting.")
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
     parser.add_argument("--tag", type=str, help="Tag on which to send the request.", default="*")
@@ -69,15 +83,25 @@ def main():
 
     broker_url = args.broker_url
     tag = args.tag
+    aggregate_output = args.agg
 
     # Suppress pika logging
     logging.getLogger("pika").setLevel(logging.WARNING)
 
-    recorder = StatusAggregator(status_change_callback=print_to_console)
-    client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=recorder.on_status_message)
+    if aggregate_output:
+        recorder = StatusAggregator(status_change_callback=print_to_console_agg)
+        f_on_status_message = recorder.on_status_message
+    else:
+        f_on_status_message = print_to_console_raw
+
+    client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=f_on_status_message)
 
     print("Connected. Waiting for messages.")
-    client.block()
+
+    try:
+        client.block()
+    except KeyboardInterrupt:
+        client.stop()
 
 
 if __name__ == "main":
