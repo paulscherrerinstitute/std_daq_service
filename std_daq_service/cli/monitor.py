@@ -73,8 +73,9 @@ def main():
     logging.getLogger("pika").setLevel(logging.WARNING)
 
     recorder = StatusAggregator(status_change_callback=print_to_console)
-
     client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=recorder.on_status_message)
+
+    print("Connected. Waiting for messages.")
     client.block()
 
 
