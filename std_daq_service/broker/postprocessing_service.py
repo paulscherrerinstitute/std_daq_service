@@ -45,8 +45,13 @@ class PostprocessingBrokerService(BrokerClientBase):
             channel.basic_ack(delivery_tag=delivery_tag)
             return
 
-        # If the primary service failed, this one will as well.
         action = header_frame.headers["action"]
+
+        # Skip start action of service.
+        if action == ACTION_REQUEST_START:
+            return
+
+        # If the primary service failed, this one will as well.
         if action == ACTION_REQUEST_FAIL:
             self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
                 correlation_id=request_id, headers={
