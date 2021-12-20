@@ -18,7 +18,7 @@ class PostprocessingBrokerService(BrokerClientBase):
         self.primary_tag = primary_tag
         _logger.info(f"Service {service_name} starting.")
 
-        self.bind_queue(STATUS_EXCHANGE, self.tag, self._status_callback, False)
+        self.bind_queue(STATUS_EXCHANGE, self.primary_tag, self._status_callback, False)
         self.bind_queue(KILL_EXCHANGE, self.tag, self._kill_callback, True)
 
         self.user_status_callback = status_callback
