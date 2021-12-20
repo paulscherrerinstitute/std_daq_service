@@ -29,7 +29,7 @@ def main():
     listener = PostprocessingBrokerService(broker_url=broker_url,
                                            service_name=service_name,
                                            primary_tag=primary_tag,
-                                           request_callback=service.on_request,
+                                           status_callback=service.on_request,
                                            kill_callback=service.on_kill)
 
 
