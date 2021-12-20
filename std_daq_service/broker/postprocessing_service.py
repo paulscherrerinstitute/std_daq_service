@@ -49,6 +49,7 @@ class PostprocessingBrokerService(BrokerClientBase):
 
         # Skip start action of service.
         if action == ACTION_REQUEST_START:
+            channel.basic_ack(delivery_tag=delivery_tag)
             return
 
         # If the primary service failed, this one will as well.
@@ -59,6 +60,8 @@ class PostprocessingBrokerService(BrokerClientBase):
                     'source': self.service_name,
                     'message': f"Primary service {self.primary_tag} failure. "
                 }))
+
+            channel.basic_ack(delivery_tag=delivery_tag)
             return
 
         request = json.loads(body.decode())
