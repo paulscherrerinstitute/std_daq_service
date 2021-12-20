@@ -68,7 +68,7 @@ class PostprocessingBrokerService(BrokerClientBase):
 
         def request_f():
             try:
-                result = self.user_status_callback(request_id, request, primary_message)
+                result = self.user_status_callback(request_id, request)
 
                 def confirm():
                     self.channel.basic_publish(STATUS_EXCHANGE, self.tag, body, BasicProperties(
