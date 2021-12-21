@@ -1,3 +1,5 @@
+import os
+
 from slsdet import Eiger
 from slsdet.enums import timingMode, speedLevel, runStatus
 from jsonschema import validate, exceptions
@@ -37,7 +39,7 @@ def is_valid_detector_config(config):
         return False
     return True
 
-def set_eiger_config(config):
+def set_eiger_config(config, config_file):
     response = {'response': 'request_success'}
     # verify if it's a valid config
     if not is_valid_detector_config(config):
@@ -91,6 +93,20 @@ def set_eiger_config(config):
                     d.exptime = eiger_config[param]
                 if param == "dr":
                     d.dr = eiger_config[param]
+                    # gitlab config runner
+                    if eiger_config[param] in [4, 8, 16, 32]:
+                        # updates the value inside the config file
+                        with open(config_file, 'r+') as f:
+                            content = json.load(f)
+                            content['bit_depth'] = 16
+                            f.truncate(0)
+                            json.dump(content, f, indent='\t', separators=(',', ': '))
+                        # pushes the file to the repo
+                        folder_config = os.path.dirname(os.path.dirname(file))
+                        rc = os.system(f'cd {folder_config} && git pull && git add . && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
+                        if rc != 0:
+                            response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
+
             if len(not_good_params) != 0:
                 params_str = ""
                 for p in not_good_params:
