@@ -38,4 +38,4 @@ class EpicsH5Writer(object):
         fields = pv_data[0].keys()
 
         for field in fields:
-            self.file.create_dataset(f'{pv_name}/{field}', data=(x[field] for x in pv_data))
+            self.file.create_dataset(f'{pv_name}/{field}', data=[x[field] for x in pv_data])
