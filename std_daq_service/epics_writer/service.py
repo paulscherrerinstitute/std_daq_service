@@ -67,7 +67,7 @@ def download_pv_data(redis, pv, start_timestamp, stop_timestamp):
     # Last data point: either exactly on the timestamp of next in the future.
     data.extend(redis.xrange(pv, min=stop_timestamp, count=1))
 
-    _logger.info(f"Downloaded {len(data)} data points for PV {pv}.")
+    _logger.debug(f"Downloaded {len(data)} data points for PV {pv}.")
 
     # Response in format [(b'event_timestamp-0', {b'json': b'JSON_STRING'})]
     return [json.loads(x[1]['json'.encode()].decode()) for x in data]
