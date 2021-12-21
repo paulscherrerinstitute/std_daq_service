@@ -102,6 +102,7 @@ class EpicsWriterService(object):
                     writer.write_pv(pv_name, pv_data)
                 except Exception as e:
                     _logger.exception(f"Error while writing PV {pv_name}.")
+                    raise
 
                 if self._cancel_request == self._current_request:
                     raise Exception("User requested interruption.")
