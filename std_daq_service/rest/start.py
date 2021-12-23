@@ -1,5 +1,6 @@
 import argparse
 import logging
+import json
 
 from flask import Flask, request, jsonify, make_response
 
@@ -12,7 +13,7 @@ from std_daq_service.start_utils import default_service_setup
 _logger = logging.getLogger("RestProxyService")
 
 
-def start_rest_api(service_name, broker_url, tag):
+def start_rest_api(service_name, broker_url, tag, config_file):
     app = Flask(service_name)
     manager = RestManager(broker_url=broker_url, tag=tag)
 
@@ -56,16 +57,16 @@ def start_rest_api(service_name, broker_url, tag):
     @app.route('/detector/<det_name>', methods=['POST'])
     def set_detector_method(det_name):
         if det_name.upper() == "EIGER":
-            config = request.json
+            config_new = request.json
             response={}
-            if 'config' in config:
-                response = make_response(jsonify(set_eiger_config(config)),200,)
-            if 'cmd' in config:
-                if config['cmd'].upper() == 'STOP':
-                    response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
-                elif config['cmd'].upper() == 'START':
-                    response = make_response(jsonify(set_eiger_cmd(config['cmd'].upper())),200,)
-                elif config['cmd'].upper() == 'STATUS':
+            if 'config' in config_new:
+                response = make_response(jsonify(set_eiger_config(config_new, config_file)),200,)
+            if 'cmd' in config_new:
+                if config_new['cmd'].upper() == 'STOP':
+                    response = make_response(jsonify(set_eiger_cmd(config_new['cmd'].upper())),200,)
+                elif config_new['cmd'].upper() == 'START':
+                    response = make_response(jsonify(set_eiger_cmd(config_new['cmd'].upper())),200,)
+                elif config_new['cmd'].upper() == 'STATUS':
                     response = make_response(jsonify(get_eiger_status()),200,)
                 else:
                     response = make_response(jsonify({'response':'Eiger command not found.'}),200,)
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
 
-    service_name, config, args = default_service_setup()
+    service_name, config, args = default_service_setup(parser)
     broker_url = args.broker_url
     tag = args.tag
 
@@ -90,6 +91,7 @@ if __name__ == "__main__":
 
     start_rest_api(service_name=service_name,
                    broker_url=args.broker_url,
-                   tag=args.tag)
+                   tag=args.tag,
+                   config_file=args.json_config_file)
 
     _logger.info(f'Service {args.service_name} stopping.')
