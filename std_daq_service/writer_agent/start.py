@@ -14,7 +14,6 @@ OUTPUT_IPC_URL_SUFFIX = "-writer_agent"
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')
 
-    parser.add_argument("service_tag", type=str, help="Where to bind the service")
     parser.add_argument("service_name", type=str, help="Name of the service")
     parser.add_argument("detector_name", type=str, help="Name of the detector to write.")
 
