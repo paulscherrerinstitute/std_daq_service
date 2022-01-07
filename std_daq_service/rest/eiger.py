@@ -102,8 +102,8 @@ def set_eiger_config(config, config_file):
                             f.truncate(0)
                             json.dump(content, f, indent='\t', separators=(',', ': '))
                         # pushes the file to the repo
-                        folder_config = os.path.dirname(os.path.dirname(file))
-                        rc = os.system(f'cd {folder_config} && git pull && git add . && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
+                        os.chdir(os.path.dirname(__file__))
+                        rc = os.system("git pull && git add . && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push")
                         if rc != 0:
                             response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
 
