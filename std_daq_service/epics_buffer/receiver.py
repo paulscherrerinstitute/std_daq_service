@@ -1,7 +1,9 @@
 import logging
+import struct
 import time
 import epics
 from epics.dbr import AlarmStatus
+import numpy as np
 
 _logger = logging.getLogger("EpicsBufferReceiver")
 
@@ -12,6 +14,48 @@ def silence_ca_library_errors(_):
 
 # Disable spamming from the library.
 epics.ca.replace_printf_handler(silence_ca_library_errors)
+
+FTYPE_STRING = 0
+FTYPE_INT16 = 1
+FTYPE_FLOAT32 = 2
+FTYPE_ENUM = 3
+FTYPE_CHAR = 4
+FTYPE_INT32 = 5
+FTYPE_FLOAT64 = 6
+FTYPE_TIME_FLOAT64 = 20
+
+# Struct mapping found https://docs.python.org/3/library/struct.html
+# Format: EPICS_DBR_TYPE : (buffer dtype, struct type)
+epics_dbr_type_mapping = {
+    FTYPE_CHAR: ("u1", 'c'),
+    FTYPE_STRING: ("string", 's'),
+    FTYPE_ENUM: ("u2", "H"),
+    FTYPE_INT16: ("i2", "h"),
+    FTYPE_INT32: ("i4", "i"),
+    FTYPE_FLOAT32: ("f4", "f"),
+    FTYPE_FLOAT64: ("f8", "d"),
+    FTYPE_TIME_FLOAT64: ("f8", "d")
+}
+
+
+def convert_ca_to_buffer(value, ftype):
+    value_type = type(value)
+    shape = (1,)
+
+    if value_type == np.ndarray:
+        shape = value.shape
+        dtype = f"{value.dtype.kind}{value.dtype.itemsize}"
+        value = value.tobytes()
+
+    elif value_type == str:
+        dtype = "string"
+    else:
+        dtype = epics_dbr_type_mapping[ftype][0]
+        value = struct.pack(epics_dbr_type_mapping[ftype][1], value)
+
+    shape_bytes = struct.pack(f"<{len(shape)}I", *shape)
+
+    return value, dtype, shape_bytes
 
 
 class EpicsReceiver(object):
@@ -31,25 +75,25 @@ class EpicsReceiver(object):
                 connection_callback=self.connection_callback,
                 form='time',
                 auto_monitor=True
+
             ))
 
         _logger.info("Processed all PV connections.")
 
-    def value_callback(self, pvname, value, timestamp, status, type, **kwargs):
-        event_timestamp = time.time_ns()
+    def value_callback(self, pvname, value, timestamp, status, ftype, **kwargs):
+
+        value, dtype, shape = convert_ca_to_buffer(value, ftype)
 
         self.change_callback(pvname, {
-            "event_timestamp": event_timestamp,
-            "connected": True,
+            "id": timestamp,
+            "type": dtype,
+            "shape": shape,
             "value": value,
-            "value_timestamp": timestamp,
-            "value_status": AlarmStatus(status).name,
-            "value_type": type[5:]}
+            "connected": 1,
+            "status": AlarmStatus(status).name}
         )
 
     def connection_callback(self, pvname, conn, **kwargs):
-        event_timestamp = time.time_ns()
-
         # We already registered this state.
         if self.connected_channels[pvname] == conn:
             return
@@ -62,11 +106,10 @@ class EpicsReceiver(object):
             _logger.warning(f"Channel {pvname} disconnected.")
 
             self.change_callback(pvname, {
-                "event_timestamp": event_timestamp,
-                "connected": conn,
+                "id": time.time_ns(),
+                "type": None,
+                "shape": None,
                 "value": None,
-                "value_timestamp": None,
-                "value_status": None,
-                "value_type": None}
+                "connected": 0}
             )
 
