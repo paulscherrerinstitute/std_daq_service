@@ -19,12 +19,11 @@ class EpicsReceiver(object):
         self.pv_names = pv_names
         self.pvs = []
         self.change_callback = change_callback
+        self.connected_channels = {pv_name: False for pv_name in pv_names}
 
         _logger.info("Starting PV connections.")
 
         for pvname in self.pv_names:
-            self._init_buffer(pvname)
-
             _logger.debug(f"Connecting to PV {pvname}.")
 
             self.pvs.append(epics.PV(
@@ -36,19 +35,6 @@ class EpicsReceiver(object):
             ))
 
         _logger.info("Processed all PV connections.")
-
-    def _init_buffer(self, pvname):
-        event_timestamp = time.time_ns()
-        _logger.debug(f"Initializing PV {pvname}.")
-
-        self.change_callback(pvname, {
-            "event_timestamp": event_timestamp,
-            "connected": None,
-            "value": None,
-            "value_timestamp": None,
-            "value_status": None,
-            "value_type": None
-        })
 
     def value_callback(self, pvname, value, timestamp, status, type, **kwargs):
         event_timestamp = time.time_ns()
@@ -65,11 +51,23 @@ class EpicsReceiver(object):
     def connection_callback(self, pvname, conn, **kwargs):
         event_timestamp = time.time_ns()
 
-        self.change_callback(pvname, {
-            "event_timestamp": event_timestamp,
-            "connected": conn,
-            "value": None,
-            "value_timestamp": None,
-            "value_status": None,
-            "value_type": None}
-        )
+        # We already registered this state.
+        if self.connected_channels[pvname] == conn:
+            return
+
+        self.connected_channels[pvname] = conn
+        _logger.debug(f"Channel {pvname} changed connected status to conntected:{conn}.")
+
+        # We send updates only when we transition from a connected to a disconnected state.
+        if not conn:
+            _logger.warning(f"Channel {pvname} disconnected.")
+
+            self.change_callback(pvname, {
+                "event_timestamp": event_timestamp,
+                "connected": conn,
+                "value": None,
+                "value_timestamp": None,
+                "value_status": None,
+                "value_type": None}
+            )
+
