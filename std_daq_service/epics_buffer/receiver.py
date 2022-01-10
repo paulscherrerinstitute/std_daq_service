@@ -16,14 +16,13 @@ epics.ca.replace_printf_handler(silence_ca_library_errors)
 
 class EpicsReceiver(object):
     def __init__(self, pv_names, change_callback):
-        self.pv_names = pv_names
         self.pvs = []
         self.change_callback = change_callback
         self.connected_channels = {pv_name: False for pv_name in pv_names}
 
         _logger.info("Starting PV connections.")
 
-        for pvname in self.pv_names:
+        for pvname in pv_names:
             _logger.debug(f"Connecting to PV {pvname}.")
 
             self.pvs.append(epics.PV(
