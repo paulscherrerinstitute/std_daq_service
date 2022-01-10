@@ -36,11 +36,8 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
     stats = EpicsBufferStats(service_name=service_name)
 
     def on_pv_change(pv_name, value):
-        # Convert dictionary to bytes to store in Redis.
-        raw_value = json.dumps(value, cls=RedisJsonSerializer).encode('utf-8')
-
-        redis.xadd(pv_name, {'json': raw_value}, id=value['event_timestamp'], maxlen=PV_MAX_LEN)
-        stats.record(pv_name, raw_value)
+        redis.xadd(pv_name, value, maxlen=PV_MAX_LEN)
+        stats.record(pv_name, value)
 
     EpicsReceiver(pv_names=pv_names, change_callback=on_pv_change)
 
