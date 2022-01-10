@@ -53,14 +53,17 @@ class TestEpicsBuffer(unittest.TestCase):
             while len(buffer) < 10:
                 sleep(0.1)
 
-            # First 2 records come as connection updates.
+            print(buffer)
+
             self.assertEqual({x['name'] for x in buffer}, set(pv_names))
-            self.assertEqual(buffer[0]['data']["value"], None)
-            self.assertEqual(buffer[1]['data']["value"], None)
+
+            # First record from each PV is an empty one.
+            for i in range(len(pv_names)):
+                self.assertEqual(buffer[i]['data']["status"], "UDF")
 
             # We should get at least 1 value update from each PV.
             pv_updates = set()
-            for i in range(2, 5):
+            for i in range(len(pv_names), len(buffer)):
                 pv_updates.add(buffer[i]["name"])
                 self.assertTrue(buffer[i]['data'] is not None)
             self.assertEqual(pv_updates, set(pv_names))
