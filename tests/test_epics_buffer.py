@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import struct
 import unittest
 from multiprocessing import Process
 from time import sleep
@@ -10,31 +11,12 @@ from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 from redis import Redis
 
-from std_daq_service.epics_buffer.buffer import RedisJsonSerializer, start_epics_buffer, PULSE_ID_NAME
+from std_daq_service.epics_buffer.buffer import start_epics_buffer, PULSE_ID_NAME
 from std_daq_service.epics_buffer.receiver import EpicsReceiver
 from std_daq_service.epics_buffer.stats import EpicsBufferStats
 
 
 class TestEpicsBuffer(unittest.TestCase):
-
-    def test_redis_json_serializer(self):
-        test_json = {
-            "pv_1": 1,
-            "pv_2": 2.2,
-            "pv_3": np.zeros(shape=[10]),
-            "pv_4": "test",
-            "pv_5": None,
-            "pv_6": ""
-        }
-
-        raw_data = json.dumps(test_json, cls=RedisJsonSerializer).encode("utf-8")
-        converted_data = json.loads(raw_data.decode("utf-8"))
-
-        for name, value in test_json.items():
-            if name != "pv_3":
-                self.assertEqual(value, converted_data.get(name))
-            else:
-                self.assertEqual(value.tolist(), converted_data.get(name))
 
     def test_receiver(self):
         pv_names = ["ioc:pv_1", "ioc:pv_2", 'ioc:pv_3']
@@ -90,7 +72,7 @@ class TestEpicsBuffer(unittest.TestCase):
 
         try:
 
-            redis = Redis(decode_responses=True)
+            redis = Redis()
             # Remove old keys so test is always the same.
             redis.delete(*(pv_names + [PULSE_ID_NAME]))
 
@@ -105,11 +87,14 @@ class TestEpicsBuffer(unittest.TestCase):
                 received_channels.add(pv_name)
 
                 for data_point in channel_data:
-                    point_timestamp = data_point[0]
-                    point_value = data_point[1]['json']
+                    redis_timestamp = data_point[0]
+                    value_timestamp = data_point[1][b'id']
+                    value_bytes = data_point[1][b'value']
+                    data_type = data_point[1][b'type']
+                    shape_bytes = data_point[1][b'shape']
 
-                    json_data = json.loads(point_value)
-                    self.assertTrue(json_data["event_timestamp"] > 0)
+                    shape = struct.unpack(f"<{len(value_bytes)/4}I", shape_bytes)
+                    print(redis_timestamp, value_timestamp, value_bytes, data_type, shape_bytes, shape)
 
         finally:
             recv_process.terminate()
