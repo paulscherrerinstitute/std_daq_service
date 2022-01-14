@@ -44,7 +44,7 @@ class TestStatusRecorder(unittest.TestCase):
 
     def test_wait_for_complete(self):
 
-        tag = "psi.facility.beamline.#"
+        tag = "*"
 
         request = {
             'this': 'request'
@@ -59,12 +59,12 @@ class TestStatusRecorder(unittest.TestCase):
             sleep(0.01)
             pass
 
-        service_1 = PrimaryBrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
-        service_2 = PrimaryBrokerService(TEST_BROKER_URL, tag, "service_1", service_request_callback)
+        service_1 = PrimaryBrokerService(TEST_BROKER_URL, "*", service_request_callback)
+        service_2 = PrimaryBrokerService(TEST_BROKER_URL, "*", service_request_callback)
         sleep(0.1)
 
         request_id = client.send_request(request)
-        aggregator.wait_for_complete(request_id)
+        aggregator.wait_for_complete(request_id, timeout=3)
         sleep(0.1)
 
         client.stop()
