@@ -1,4 +1,3 @@
-import json
 import os
 import random
 import struct
@@ -34,8 +33,6 @@ class TestEpicsBuffer(unittest.TestCase):
 
             while len(buffer) < 10:
                 sleep(0.1)
-
-            print(buffer)
 
             self.assertEqual({x['name'] for x in buffer}, set(pv_names))
 
@@ -93,9 +90,14 @@ class TestEpicsBuffer(unittest.TestCase):
                     data_type = data_point[1][b'type']
                     shape_bytes = data_point[1][b'shape']
 
-                    shape = struct.unpack(f"<{len(value_bytes)/4}I", shape_bytes)
-                    print(redis_timestamp, value_timestamp, value_bytes, data_type, shape_bytes, shape)
+                    shape = struct.unpack(f"<{len(shape_bytes) // 4}I", shape_bytes)
 
+                    if data_type == b"string":
+                        data = str(value_bytes)
+                    else:
+                        data = np.frombuffer(value_bytes, dtype=data_type).reshape(shape)
+
+                    self.assertIsNotNone(data, shape)
         finally:
             recv_process.terminate()
             ioc_process.terminate()
