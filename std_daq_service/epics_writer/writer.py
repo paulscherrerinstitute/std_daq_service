@@ -11,7 +11,8 @@ class EpicsH5Writer(object):
         self.datasets = {}
 
         path_to_file = os.path.dirname(self.output_file)
-        os.makedirs(path_to_file, exist_ok=True)
+        if path_to_file:
+            os.makedirs(path_to_file, exist_ok=True)
 
         self.file = h5py.File(self.output_file, 'w')
 
