@@ -26,6 +26,10 @@ class EpicsH5Writer(object):
         self.file.close()
 
     def write_metadata(self, metadata):
+
+        if not metadata:
+            return
+
         # TODO: Implement metadata writing
         _logger.warning(f"Received metadata but function not implemented. {metadata}")
 
