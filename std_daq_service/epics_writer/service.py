@@ -87,27 +87,24 @@ class EpicsWriterService(object):
 
         start_pulse_id, stop_pulse_id, pv_list, output_file, metadata = extract_request(request)
 
-        writer = EpicsH5Writer(output_file=output_file)
         redis = Redis(host=self.redis_host)
-
         try:
-            if metadata:
-                writer.write_metadata(metadata)
-
             start_timestamp, stop_timestamp = map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id)
 
-            for pv_name in pv_list:
-                try:
-                    pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
-                    writer.write_pv(pv_name, pv_data)
-                except Exception as e:
-                    _logger.exception(f"Error while writing PV {pv_name}.")
-                    raise
+            with EpicsH5Writer(output_file=output_file) as writer:
+                writer.write_metadata(metadata)
 
-                if self._cancel_request == self._current_request:
-                    raise Exception("User requested interruption.")
+                for pv_name in pv_list:
+                    try:
+                        pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
+                        writer.write_pv(pv_name, pv_data)
+                    except Exception as e:
+                        _logger.exception(f"Error while writing PV {pv_name}.")
+                        raise
+
+                    if self._cancel_request == self._current_request:
+                        raise Exception("User requested interruption.")
         finally:
-            writer.close()
             redis.close()
 
     def on_kill(self, request_id):
