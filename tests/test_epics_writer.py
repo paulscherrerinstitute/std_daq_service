@@ -1,10 +1,12 @@
 import os
+import struct
 import unittest
 from multiprocessing import Process
 from time import sleep, time
 
 import h5py
 from epics import CAProcess
+import numpy as np
 from redis import Redis
 
 from std_daq_service.epics_buffer.buffer import start_epics_buffer
@@ -44,13 +46,34 @@ class TestEpicsWriter(unittest.TestCase):
 
         redis = Redis()
 
-        start_t = time()
+        start_t = int(time() * 1000)
         sleep(2)
-        stop_t = time()
+        stop_t = int(time() * 1000)
 
         try:
             for pvname in pv_names:
-                print(download_pv_data(redis, pvname, start_timestamp=start_t, stop_timestamp=stop_t))
+                pv_data = download_pv_data(redis, pvname, start_timestamp=start_t, stop_timestamp=stop_t)
+                self.assertTrue(pv_data)
+
+                for id, value in pv_data:
+                    redis_id = int(id.decode().split("-")[0])
+                    epics_id = int(float(value[b'id'].decode()) * 1000)
+                    self.assertTrue(redis_id > epics_id)
+
+                    dtype = value[b'type'].decode()
+                    if dtype == 'string':
+                        value_array = value[b'value'].decode()
+                    else:
+                        shape = struct.unpack(f"<{len(value[b'shape']) // 4}I", value[b'shape'])
+                        value_array = np.frombuffer(value[b'value'], dtype=dtype).reshape(shape)
+
+                        self.assertTrue(len(value_array) > 0)
+
+                    connected = bool(value[b'connected'])
+                    status = value[b'status'].decode()
+
+                    self.assertTrue(connected)
+                    self.assertTrue(status)
         finally:
             redis.close()
 
