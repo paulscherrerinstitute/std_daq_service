@@ -91,5 +91,7 @@ class TestEpicsWriter(unittest.TestCase):
             recv_process.terminate()
 
         with h5py.File(file_name, 'r') as input_file:
+            self.assertTrue(pv_name in input_file)
+
             if pv_name != "missing":
-                self.assertTrue(pv_name in input_file)
+                self.assertTrue(f'{pv_name}/value' in input_file)

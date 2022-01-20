@@ -92,6 +92,7 @@ class EpicsH5Writer(object):
         unpacked_data = prepare_data_for_writing(pv_name, pv_data)
         if unpacked_data is None:
             _logger.warning(f"PV data for {pv_name} is empty.")
+            self.file.create_group(pv_name)
             return
 
         n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
