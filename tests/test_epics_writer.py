@@ -15,19 +15,6 @@ from tests.test_epics_buffer import start_test_ioc
 
 class TestEpicsWriter(unittest.TestCase):
 
-    def test_basic_writer(self):
-        file_name = "test.h5"
-        pv_name = "test_pv"
-        pv_data = None
-
-        self.addCleanup(os.remove, file_name)
-
-        with EpicsH5Writer(output_file=file_name) as writer:
-            writer.write_pv(pv_name, pv_data)
-
-        with h5py.File(file_name) as input_file:
-            self.assertTrue(pv_name in input_file)
-
     def test_data_download(self):
         pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3']
         parameters = {
@@ -68,3 +55,40 @@ class TestEpicsWriter(unittest.TestCase):
 
             ioc_process.terminate()
             recv_process.terminate()
+
+    def test_basic_writer(self):
+        file_name = "test.h5"
+        self.addCleanup(os.remove, file_name)
+
+        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3']
+        parameters = {
+            'service_name': "test_buffer",
+            'redis_host': "localhost",
+            'pv_names': pv_names,
+        }
+
+        ioc_process = Process(target=start_test_ioc)
+        ioc_process.start()
+
+        recv_process = CAProcess(target=start_epics_buffer, kwargs=parameters)
+        recv_process.start()
+
+        redis = Redis()
+
+        start_t = int(time() * 1000)
+        sleep(2)
+        stop_t = int(time() * 1000)
+
+        try:
+            with EpicsH5Writer(output_file=file_name) as writer:
+                for pv_name in pv_names:
+                    pv_data = download_pv_data(redis, pv_name, start_timestamp=start_t, stop_timestamp=stop_t)
+                    writer.write_pv(pv_name, pv_data)
+        finally:
+            redis.close()
+
+            ioc_process.terminate()
+            recv_process.terminate()
+
+        with h5py.File(file_name, 'r') as input_file:
+            self.assertTrue(pv_name in input_file)
