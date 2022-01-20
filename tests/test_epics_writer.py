@@ -1,17 +1,15 @@
 import os
-import struct
 import unittest
 from multiprocessing import Process
 from time import sleep, time
 
 import h5py
 from epics import CAProcess
-import numpy as np
 from redis import Redis
 
 from std_daq_service.epics_buffer.buffer import start_epics_buffer
 from std_daq_service.epics_writer.service import download_pv_data
-from std_daq_service.epics_writer.writer import EpicsH5Writer
+from std_daq_service.epics_writer.writer import EpicsH5Writer, prepare_data_for_writing
 from tests.test_epics_buffer import start_test_ioc
 
 
@@ -51,29 +49,20 @@ class TestEpicsWriter(unittest.TestCase):
         stop_t = int(time() * 1000)
 
         try:
-            for pvname in pv_names:
-                pv_data = download_pv_data(redis, pvname, start_timestamp=start_t, stop_timestamp=stop_t)
+            for pv_name in pv_names:
+                pv_data = download_pv_data(redis, pv_name, start_timestamp=start_t, stop_timestamp=stop_t)
                 self.assertTrue(pv_data)
 
-                for id, value in pv_data:
-                    redis_id = int(id.decode().split("-")[0])
-                    epics_id = int(float(value[b'id'].decode()) * 1000)
-                    self.assertTrue(redis_id > epics_id)
+                n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = \
+                    prepare_data_for_writing(pv_name, pv_data)
 
-                    dtype = value[b'type'].decode()
-                    if dtype == 'string':
-                        value_array = value[b'value'].decode()
-                    else:
-                        shape = struct.unpack(f"<{len(value[b'shape']) // 4}I", value[b'shape'])
-                        value_array = np.frombuffer(value[b'value'], dtype=dtype).reshape(shape)
+                self.assertTrue(n_data_points > 0)
+                self.assertEqual(dataset_timestamp.shape, (n_data_points, 1))
+                self.assertEqual(dataset_connected.shape, (n_data_points, 1))
+                self.assertEqual(dataset_status.shape, (n_data_points, 1))
 
-                        self.assertTrue(len(value_array) > 0)
+                self.assertEqual(dataset_status.shape[0], n_data_points)
 
-                    connected = bool(value[b'connected'])
-                    status = value[b'status'].decode()
-
-                    self.assertTrue(connected)
-                    self.assertTrue(status)
         finally:
             redis.close()
 
