@@ -89,8 +89,12 @@ class EpicsH5Writer(object):
 
     def write_pv(self, pv_name, pv_data):
 
-        n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = \
-            prepare_data_for_writing(pv_name, pv_data)
+        unpacked_data = prepare_data_for_writing(pv_name, pv_data)
+        if unpacked_data is None:
+            _logger.warning(f"PV data for {pv_name} is empty.")
+            return
+
+        n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
 
         h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
         self.file.create_dataset(f'{pv_name}/value', data=dataset_value, dtype=h5_dataset_type)

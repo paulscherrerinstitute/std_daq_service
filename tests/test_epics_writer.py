@@ -60,7 +60,7 @@ class TestEpicsWriter(unittest.TestCase):
         file_name = "test.h5"
         self.addCleanup(os.remove, file_name)
 
-        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3']
+        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3', "missing"]
         parameters = {
             'service_name': "test_buffer",
             'redis_host': "localhost",
@@ -91,4 +91,5 @@ class TestEpicsWriter(unittest.TestCase):
             recv_process.terminate()
 
         with h5py.File(file_name, 'r') as input_file:
-            self.assertTrue(pv_name in input_file)
+            if pv_name != "missing":
+                self.assertTrue(pv_name in input_file)
