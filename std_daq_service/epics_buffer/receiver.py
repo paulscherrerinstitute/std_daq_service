@@ -50,6 +50,10 @@ def convert_ca_to_buffer(value, ftype):
     elif value_type == str:
         dtype = "string"
     else:
+        if ftype not in epics_dbr_type_mapping:
+            message = f"Ftype {ftype} missing in epics DBR mapping for value_type {value_type}."
+            raise RuntimeError(message)
+
         dtype = epics_dbr_type_mapping[ftype][0]
         value = struct.pack(epics_dbr_type_mapping[ftype][1], value)
 
