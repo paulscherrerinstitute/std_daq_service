@@ -22,6 +22,7 @@ FTYPE_ENUM = 3
 FTYPE_CHAR = 4
 FTYPE_INT32 = 5
 FTYPE_FLOAT64 = 6
+FTYPE_TIME_ENUM = 17
 FTYPE_TIME_FLOAT64 = 20
 
 # Struct mapping found https://docs.python.org/3/library/struct.html
@@ -34,6 +35,7 @@ epics_dbr_type_mapping = {
     FTYPE_INT32: ("i4", "i"),
     FTYPE_FLOAT32: ("f4", "f"),
     FTYPE_FLOAT64: ("f8", "d"),
+    FTYPE_TIME_ENUM: ("u2", "H"),
     FTYPE_TIME_FLOAT64: ("f8", "d")
 }
 
