@@ -92,7 +92,9 @@ class EpicsH5Writer(object):
         n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = \
             prepare_data_for_writing(pv_name, pv_data)
 
+        h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
+        self.file.create_dataset(f'{pv_name}/value', data=dataset_value, dtype=h5_dataset_type)
+
         self.file.create_dataset(f'{pv_name}/timestamp', data=dataset_timestamp)
-        self.file.create_dataset(f'{pv_name}/value', data=dataset_value)
         self.file.create_dataset(f'{pv_name}/connected', data=dataset_connected)
-        self.file.create_dataset(f'{pv_name}/status', data=dataset_status)
+        self.file.create_dataset(f'{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
