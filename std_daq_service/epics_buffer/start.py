@@ -23,7 +23,7 @@ def main():
     pv_names = config.get('pv_list')
 
     if not pv_names:
-        raise ValueError("Invalid config file. Must set pv_names list.", config)
+        _logger.warning("Invalid config file. Must set pv_names list.", config)
 
     start_epics_buffer(service_name=service_name,
                        redis_host=redis_host,
