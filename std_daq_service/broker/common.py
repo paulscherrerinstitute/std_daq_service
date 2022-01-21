@@ -9,7 +9,7 @@ _logger = getLogger("broker_utils")
 TEST_BROKER_URL = '127.0.0.1'
 
 STATUS_EXCHANGE = 'status'
-STATUS_EXCHANGE_TYPE = 'topic'
+STATUS_EXCHANGE_TYPE = 'fanout'
 
 REQUEST_EXCHANGE = 'request'
 REQUEST_EXCHANGE_TYPE = 'topic'
