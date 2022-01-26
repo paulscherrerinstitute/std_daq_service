@@ -17,6 +17,18 @@ if [ "${STATUS}" != 0 ] && [ "${STATUS}" != 1 ]; then
   exit 1;
 fi
 
+STATUS="$(redis-cli --raw hset "${REDIS_STATUS_KEY}" service_name "${SERVICE_NAME}")"
+if [ "${STATUS}" != 0 ] && [ "${STATUS}" != 1 ]; then
+  echo "Cound not set service status in Redis: ${STATUS}"
+  exit 1;
+fi
+
+STATUS="$(redis-cli --raw hset "${REDIS_STATUS_KEY}" start_timestamp "$(date +%s)")"
+if [ "${STATUS}" != 0 ] && [ "${STATUS}" != 1 ]; then
+  echo "Cound not set service status in Redis: ${STATUS}"
+  exit 1;
+fi
+
 STATUS="$(redis-cli expire "${REDIS_STATUS_KEY}" ${EXPIRE_SECONDS})"
 if [ "${STATUS}" != 1 ]; then
   echo "Could not set status expire: ${STATUS}"

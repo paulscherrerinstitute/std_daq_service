@@ -29,6 +29,7 @@ if [ "${REDIS_SKIP}" = false ]; then
   fi
 
   export REDIS_STATUS_KEY
+  export SERVICE_NAME
   redis_status.sh &
 fi
 

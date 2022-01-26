@@ -17,6 +17,8 @@ for config_file in tests/redis_configs/*.json; do
 
   echo "Setting config ${config_file} to Redis."
 
-  redis-cli -x set "${REDIS_KEY}" < "${config_file}"
-  redis-cli -x hset "${REDIS_STATUS_KEY}" config < "${config_file}"
+  redis-cli -x --raw set "${REDIS_KEY}" < "${config_file}"
+  redis-cli -x --raw hset "${REDIS_STATUS_KEY}" config < "${config_file}"
+  redis-cli --raw hset "${REDIS_STATUS_KEY}" start_timestamp "$(date +%s)"
+  redis-cli --raw hset "${REDIS_STATUS_KEY}" service_name "${service_name}"
 done
