@@ -8,10 +8,10 @@ from std_daq_service.broker.client import BrokerClient
 
 def main():
     parser = argparse.ArgumentParser(description='Generate request to broker')
+    parser.add_argument("tag", type=str, help="Tag on which to send the request.")
     parser.add_argument("request_json", type=str, help="File with request JSON file to send.")
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
-    parser.add_argument("--tag", type=str, help="Tag on which to send the request.", default="*")
 
     args = parser.parse_args()
 
