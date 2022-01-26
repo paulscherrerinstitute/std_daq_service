@@ -15,10 +15,13 @@ def main():
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
     parser.add_argument("--redis_host", type=str, help="Host of redis instance.",
                         default=os.environ.get("REDIS_HOST", "localhost"))
+    parser.add_argument("--tag", type=str, help="Tag to listen for on the broker",
+                        default="#")
     service_name, config, args = default_service_setup(parser)
 
     broker_url = args.broker_url
     redis_host = args.redis_host
+    tag = args.tag
 
     _logger.info(f'Epics buffer writer {service_name} listening on broker {args.broker_url} on buffer {redis_host}.')
 
@@ -26,6 +29,7 @@ def main():
 
     listener = PrimaryBrokerService(broker_url=broker_url,
                                     service_name=service_name,
+                                    tag=tag,
                                     request_callback=service.on_request,
                                     kill_callback=service.on_kill)
 
