@@ -31,7 +31,7 @@ class TestBrokerListener(unittest.TestCase):
             self.assertEqual(sent_request, request)
             return service_message
 
-        client = BrokerClient(broker_url=TEST_BROKER_URL, tag=service_name,
+        client = BrokerClient(broker_url=TEST_BROKER_URL, tag="beamline.*",
                               status_callback=status_callback)
 
         worker = PrimaryBrokerService(broker_url=TEST_BROKER_URL,

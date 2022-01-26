@@ -11,8 +11,8 @@ _logger = getLogger("BrokerPostprocessingService")
 
 
 class PostprocessingBrokerService(BrokerClientBase):
-    def __init__(self, broker_url, service_name, primary_tag, status_callback=None, kill_callback=None):
-        super().__init__(broker_url=broker_url, tag=service_name)
+    def __init__(self, broker_url, service_name, primary_tag, tag="#", status_callback=None, kill_callback=None):
+        super().__init__(broker_url=broker_url, tag=tag)
 
         self.service_name = service_name
         self.primary_tag = primary_tag
