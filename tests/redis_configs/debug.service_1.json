@@ -1,0 +1,8 @@
+{
+  "pulse_id_pv": "ioc:pulse_id",
+  "pv_list": [
+    "ioc:pv_1",
+    "ioc:pv_2",
+    "ioc:pv_3"
+  ]
+}
