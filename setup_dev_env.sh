@@ -4,7 +4,7 @@ set -e
 docker-compose up -d
 sleep 1
 
-for config_file in tests/redis_configs/*.json; do
+for config_file in tests/configs/*.json; do
   service_name="$(basename "${config_file}" .json)"
 
   if [ ! -f "${config_file}" ]; then
