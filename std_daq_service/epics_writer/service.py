@@ -74,8 +74,9 @@ def download_pv_data(redis, pv, start_timestamp, stop_timestamp):
 
 
 class EpicsWriterService(object):
-    def __init__(self, redis_host):
+    def __init__(self, redis_host, redis_port=6379):
         self.redis_host = redis_host
+        self.redis_port = redis_port
 
         self._cancel_request = None
         self._current_request = None
@@ -87,7 +88,7 @@ class EpicsWriterService(object):
 
         start_pulse_id, stop_pulse_id, pv_list, output_file, metadata = extract_request(request)
 
-        redis = Redis(host=self.redis_host)
+        redis = Redis(host=self.redis_host, port=self.redis_port)
         try:
             start_timestamp, stop_timestamp = map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id)
 
