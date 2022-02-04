@@ -22,20 +22,32 @@ FTYPE_ENUM = 3
 FTYPE_CHAR = 4
 FTYPE_INT32 = 5
 FTYPE_FLOAT64 = 6
+
+FTYPE_TIME_STRING = 14
+FTYPE_TIME_INT16 = 15
+FTYPE_TIME_FLOAT32 = 16
 FTYPE_TIME_ENUM = 17
+FTYPE_TIME_CHAR = 18
+FTYPE_TIME_INT32 = 19
 FTYPE_TIME_FLOAT64 = 20
 
 # Struct mapping found https://docs.python.org/3/library/struct.html
 # Format: EPICS_DBR_TYPE : (buffer dtype, struct type)
 epics_dbr_type_mapping = {
-    FTYPE_CHAR: ("u1", 'c'),
     FTYPE_STRING: ("string", 's'),
-    FTYPE_ENUM: ("u2", "H"),
     FTYPE_INT16: ("i2", "h"),
-    FTYPE_INT32: ("i4", "i"),
     FTYPE_FLOAT32: ("f4", "f"),
+    FTYPE_ENUM: ("u2", "H"),
+    FTYPE_CHAR: ("u1", 'c'),
+    FTYPE_INT32: ("i4", "i"),
     FTYPE_FLOAT64: ("f8", "d"),
+
+    FTYPE_TIME_STRING: ("string", "s"),
+    FTYPE_TIME_INT16: ("i2", "h"),
+    FTYPE_TIME_FLOAT32: ("f4", "f"),
     FTYPE_TIME_ENUM: ("u2", "H"),
+    FTYPE_TIME_CHAR: ("u1", "c"),
+    FTYPE_TIME_INT32: ("i4", "i"),
     FTYPE_TIME_FLOAT64: ("f8", "d")
 }
 
