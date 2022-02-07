@@ -84,8 +84,11 @@ class EpicsH5Writer(object):
         if not metadata:
             return
 
-        # TODO: Implement metadata writing
-        _logger.warning(f"Received metadata but function not implemented. {metadata}")
+        for dataset_name, value in metadata.items():
+            if not isinstance(value, str):
+                _logger.warning(f"Cannot set dataset {dataset_name}. Only string values supported. Value: {value}")
+
+            self.file.create_dataset(dataset_name, dtype=h5py.special_dtype(vlen=str), data=value)
 
     def write_pv(self, pv_name, pv_data):
 

@@ -79,11 +79,20 @@ class TestEpicsWriter(unittest.TestCase):
         sleep(2)
         stop_t = int(time() * 1000)
 
+        metadata = {
+            'general/user': '17502',
+            'general/process': 'sf_daq_broker.broker_manager',
+            'general/created': '2022-02-04 18:55:39.374424',
+            'general/instrument': 'alvra'
+        }
+
         try:
             with EpicsH5Writer(output_file=file_name) as writer:
                 for pv_name in pv_names:
                     pv_data = download_pv_data(redis, pv_name, start_timestamp=start_t, stop_timestamp=stop_t)
                     writer.write_pv(pv_name, pv_data)
+
+                writer.write_metadata(metadata)
         finally:
             redis.close()
 
@@ -95,3 +104,7 @@ class TestEpicsWriter(unittest.TestCase):
 
             if pv_name != "missing":
                 self.assertTrue(f'{pv_name}/value' in input_file)
+
+            for key, value in metadata.items():
+                self.assertTrue(key in input_file)
+                self.assertEqual(input_file[key].value, metadata[key])
