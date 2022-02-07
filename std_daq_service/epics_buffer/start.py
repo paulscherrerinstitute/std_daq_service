@@ -12,9 +12,12 @@ def main():
     parser = argparse.ArgumentParser(description="Epics buffer service")
     parser.add_argument("--redis_host", type=str, help="Host of redis instance.",
                         default=os.environ.get("REDIS_HOST", "localhost"))
+    parser.add_argument("--redis_port", type=int, help='Port of redis instance',
+                        default=os.environ.get("REDIS_PORT", 6379))
     service_name, config, args = default_service_setup(parser)
 
     redis_host = args.redis_host
+    redis_port = args.redis_port
 
     _logger.info(f'Service {service_name} starting with REDIS_HOST {redis_host}.')
     _logger.debug(config)
@@ -27,6 +30,7 @@ def main():
 
     start_epics_buffer(service_name=service_name,
                        redis_host=redis_host,
+                       redis_port=redis_port,
                        pv_names=pv_names,
                        pulse_id_pv=pulse_id_pv)
 

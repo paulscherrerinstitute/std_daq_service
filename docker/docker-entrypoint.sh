@@ -12,13 +12,14 @@ if [ "${REDIS_SKIP}" = false ]; then
   fi
 
   REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+  REDIS_PORT="${REDIS_PORT:-6379}"
   REDIS_CONFIG_KEY=config."${SERVICE_NAME}"
   REDIS_STATUS_KEY=status."${SERVICE_NAME}"
 
   if [ -f config.json ]; then
     echo "Local config.json file detected. Skipping Redis download."
   else
-    redis-cli -h "${REDIS_HOST}" get "${REDIS_CONFIG_KEY}" > config.json
+    redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" get "${REDIS_CONFIG_KEY}" > config.json
 
     CONFIG_BYTES="$(stat -c %s config.json)"
     if [ "${CONFIG_BYTES}" -le 1 ]; then
@@ -29,6 +30,9 @@ if [ "${REDIS_SKIP}" = false ]; then
   fi
 
   export REDIS_STATUS_KEY
+  export SERVICE_NAME
+  export REDIS_HOST
+  export REDIS_PORT
   redis_status.sh &
 fi
 

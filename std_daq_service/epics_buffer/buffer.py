@@ -20,10 +20,10 @@ STATS_INTERVAL = 10
 _logger = logging.getLogger("EpicsBuffer")
 
 
-def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None):
+def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None, redis_port=6379):
     _logger.debug(f'Connecting to PVs: {pv_names}')
 
-    redis = Redis(host=redis_host)
+    redis = Redis(host=redis_host, port=redis_port)
     stats = EpicsBufferStats(service_name=service_name)
 
     def on_pv_change(pv_name, value):
