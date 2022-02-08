@@ -55,7 +55,7 @@ class EpicsValidationService(object):
         try:
             validation_result = self.validate_file(request_id, output_file)
         except Exception as e:
-            validation_result = f"Count not process output file: {e}"
+            validation_result = [f"Count not process output file: {e}"]
 
         for line in validation_result:
             output_text += f'\t{line}\n'
