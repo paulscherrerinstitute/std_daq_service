@@ -53,7 +53,7 @@ class EpicsValidationService(object):
         output_text += f'[{source}] Output file analysis:\n'
 
         try:
-            validation_result = self.validate_file(self.requests[request_id], output_file)
+            validation_result = self.validate_file(request_id, output_file)
         except Exception as e:
             validation_result = f"Count not process output file: {e}"
 
@@ -88,15 +88,17 @@ class EpicsValidationService(object):
             _logger.info(f"Request {request_id} started in {source}.")
 
         elif action == ACTION_REQUEST_SUCCESS:
-            self.on_request_success(request_id, source, output_file)
             _logger.info(f"Request {request_id} completed successfully.")
+
+            self.on_request_success(request_id, source, output_file)
 
             self.cleanup_request(request_id)
 
         elif action == ACTION_REQUEST_FAIL:
             error_message = header["message"]
-            self.on_request_fail(request_id, source, error_message)
             _logger.info(f'Request {request_id} failed: {error_message}')
+
+            self.on_request_fail(request_id, source, error_message)
 
             self.cleanup_request(request_id)
 
