@@ -52,7 +52,12 @@ class EpicsValidationService(object):
         output_text = f'[{source}] Request {request_id} completed in {time_delta:.2f} seconds.\n'
         output_text += f'[{source}] Output file analysis:\n'
 
-        for line in self.validate_file(self.requests[request_id], output_file):
+        try:
+            validation_result = self.validate_file(self.requests[request_id], output_file)
+        except Exception as e:
+            validation_result = f"Count not process output file: {e}"
+
+        for line in validation_result:
             output_text += f'\t{line}\n'
 
         self.print_run_log(request_id=request_id, message=output_text)
