@@ -41,9 +41,9 @@ class EpicsValidationService(object):
         stop_pulse_id = self.requests[request_id]['stop_pulse_id']
         n_channels = len(self.requests[request_id]['channels'])
 
-        output_text = f'[EPICS] Processing of {request_id} started in service {source}.\n'
-        output_text +=  f'[EPICS] Requesting file {output_file} for pulse_id range {start_pulse_id} to {stop_pulse_id}'\
-                        f'with {n_channels} channels.'
+        output_text = f'[{source}] Processing of {request_id} started in service {source}.\n'
+        output_text +=  f'[{source}] Requesting file {output_file} for pulse_id range {start_pulse_id} to ' \
+                        f'{stop_pulse_id} with {n_channels} channels.'
 
         self.print_run_log(request_id=request_id, message=output_text)
 
@@ -69,7 +69,8 @@ class EpicsValidationService(object):
             self.on_request_start(request_id, source, output_file)
 
         elif action == ACTION_REQUEST_SUCCESS:
-            self.on_request_success(request_id)
+            self.on_request_success(request_id, source)
 
         elif action == ACTION_REQUEST_FAIL:
-            self.on_request_fail(request_id)
+            error_message = header["message"]
+            self.on_request_fail(request_id, source, error_message)
