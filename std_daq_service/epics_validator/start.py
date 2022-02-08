@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 
+from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.postprocessing_service import PostprocessingBrokerService
 from std_daq_service.epics_validator.service import EpicsValidationService
 from std_daq_service.start_utils import default_service_setup
@@ -23,20 +24,14 @@ def main():
                  f'for primary service {primary_tag}.')
 
     service = EpicsValidationService()
-
-    listener = PostprocessingBrokerService(broker_url=broker_url,
-                                           service_name=service_name,
-                                           primary_tag=primary_tag,
-                                           status_callback=service.on_request,
-                                           kill_callback=service.on_kill)
-
+    client = BrokerClient(broker_url=broker_url, tag=primary_tag, status_callback=service.on_status_change)
 
     try:
-        listener.block()
+        client.block()
     except KeyboardInterrupt:
-        pass
-
-    listener.stop()
+        _logger.info("User interruption request. Ending service.")
+    finally:
+        client.stop()
 
     _logger.info(f'Service {args.service_name} stopping.')
 
