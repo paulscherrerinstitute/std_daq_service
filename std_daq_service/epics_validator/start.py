@@ -14,7 +14,9 @@ def main():
     parser = argparse.ArgumentParser(description='Epics buffer writer service')
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
-    parser.add_argument("--tag", type=str, help="Tag of the Epics writer to validate", default="#.epics_writer")
+    parser.add_argument("--tag", type=str, help="Tag to listen for on the broker",
+                        default="#")
+
     service_name, config, args = default_service_setup(parser)
 
     broker_url = args.broker_url
