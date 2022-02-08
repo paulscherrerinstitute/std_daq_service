@@ -46,7 +46,7 @@ class EpicsValidationService(object):
         self.print_run_log(request_id=request_id, message=output_text)
 
     def on_request_success(self, request_id, source, output_file):
-        start_time = self.headers[request_id][0][0]
+        start_time = self.headers[request_id][source][0]
         time_delta = time.time() - start_time
 
         output_text = f'[{source}] Request {request_id} completed in {time_delta:.2f} seconds.\n'
@@ -103,4 +103,5 @@ class EpicsValidationService(object):
     def cleanup_request(self, request_id):
         del self.requests[request_id]
         del self.headers[request_id]
+
         _logger.debug(f"Request {request_id} removed from cache.")
