@@ -64,12 +64,12 @@ class EpicsValidationService(object):
 
     def on_status_change(self, request_id, request, header):
 
+        source = header['source']
         if request_id not in self.requests:
             _logger.debug(f"Received new request {request_id}.")
             self.requests[request_id] = request
-            self.headers[request_id] = {}
+            self.headers[request_id] = {source: []}
 
-        source = header['source']
         header_entry = (time.time(), header, source)
         self.headers[request_id][source].append(header_entry)
 
