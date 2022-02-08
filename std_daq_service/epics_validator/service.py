@@ -32,7 +32,10 @@ class EpicsValidationService(object):
         if run_log_file is None:
             return
 
-        print(message)
+        _logger.debug(message)
+
+        with open(run_log_file, 'a') as output_file:
+            output_file.write(message)
 
     def on_request_start(self, request_id, source, output_file):
         start_pulse_id = self.requests[request_id]['start_pulse_id']
