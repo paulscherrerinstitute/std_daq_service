@@ -3,7 +3,6 @@ import logging
 import os
 
 from std_daq_service.broker.client import BrokerClient
-from std_daq_service.broker.postprocessing_service import PostprocessingBrokerService
 from std_daq_service.epics_validator.service import EpicsValidationService
 from std_daq_service.start_utils import default_service_setup
 

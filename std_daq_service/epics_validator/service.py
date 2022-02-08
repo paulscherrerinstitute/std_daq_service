@@ -44,7 +44,7 @@ class EpicsValidationService(object):
 
         output_text = f'[{source}] Processing of {request_id} started in service {source}.\n'
         output_text += f'[{source}] Requesting file {output_file} for pulse_id range {start_pulse_id} to ' \
-                       f'{stop_pulse_id} with {n_channels} channels.'
+                       f'{stop_pulse_id} with {n_channels} channels.\n'
 
         self.print_run_log(request_id=request_id, message=output_text)
 
@@ -66,7 +66,7 @@ class EpicsValidationService(object):
         self.print_run_log(request_id=request_id, message=output_text)
 
     def on_request_fail(self, request_id, source, error_message):
-        output_text = f'[{source}] Request {request_id} failed. Error:\n{error_message}'
+        output_text = f'[{source}] Request {request_id} failed. Error:\n{error_message}\n'
 
         self.print_run_log(request_id=request_id, message=output_text)
 
