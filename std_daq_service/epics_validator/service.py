@@ -13,27 +13,26 @@ class EpicsValidationService(object):
         self.requests = {}
         self.headers = {}
 
-    def validate_file(self, request_id):
-        _logger.info(f"Validating request {request_id} on file {input_filename}.")
-        output_file = self.requests[request_id]['output_file']
+    def validate_file(self, request_id, output_file):
+        _logger.info(f"Validating request {request_id} file {output_file}.")
+        expected_channels = self.requests[request_id]['channels']
+
         with h5py.File(output_file, mode='r') as input_file:
 
             missing_channels = []
             for channel in expected_channels:
                 if channel not in input_file:
-                    missing_channels.append(channel)
+                    missing_channels.append(f"Missing pv {channel}")
 
-        valid = len(missing_channels) == 0
-
-        return {
-            "valid": valid,
-            "missing_channels": missing_channels
-        }
+        return missing_channels
 
     def print_run_log(self, request_id, message):
         run_log_file = self.requests[request_id].get("run_log_file")
+
         if run_log_file is None:
             return
+
+        print(message)
 
     def on_request_start(self, request_id, source, output_file):
         start_pulse_id = self.requests[request_id]['start_pulse_id']
@@ -47,7 +46,16 @@ class EpicsValidationService(object):
         self.print_run_log(request_id=request_id, message=output_text)
 
     def on_request_success(self, request_id, source, output_file):
-        pass
+        start_time = self.headers[request_id][0][0]
+        time_delta = time.time() - start_time
+
+        output_text = f'[{source}] Request {request_id} completed in {time_delta:.2f} seconds.\n'
+        output_text += f'[{source}] Output file analysis:\n'
+
+        for line in self.validate_file(self.requests[request_id], output_file):
+            output_text += f'\t{line}\n'
+
+        self.print_run_log(request_id=request_id, message=output_text)
 
     def on_request_fail(self, request_id, source, error_message):
         output_text = f'[{source}] Request {request_id} failed. Error:\n{error_message}'
@@ -57,22 +65,37 @@ class EpicsValidationService(object):
     def on_status_change(self, request_id, request, header):
 
         if request_id not in self.requests:
+            _logger.debug(f"Received new request {request_id}.")
             self.requests[request_id] = request
-            self.headers[request_id] = []
+            self.headers[request_id] = {}
 
         source = header['source']
         header_entry = (time.time(), header, source)
-        self.headers[request_id].append(header_entry)
+        self.headers[request_id][source].append(header_entry)
 
         output_file = request['output_file']
         action = header['action']
 
+        _logger.debug(f"Received action {action} for request {request_id} from {source}.")
+
         if action == ACTION_REQUEST_START:
             self.on_request_start(request_id, source, output_file)
+            _logger.info(f"Request {request_id} started in {source}.")
 
         elif action == ACTION_REQUEST_SUCCESS:
             self.on_request_success(request_id, source, output_file)
+            _logger.info(f"Request {request_id} completed successfully.")
+
+            self.cleanup_request(request_id)
 
         elif action == ACTION_REQUEST_FAIL:
             error_message = header["message"]
             self.on_request_fail(request_id, source, error_message)
+            _logger.info(f'Request {request_id} failed: {error_message}')
+
+            self.cleanup_request(request_id)
+
+    def cleanup_request(self, request_id):
+        del self.requests[request_id]
+        del self.headers[request_id]
+        _logger.debug(f"Request {request_id} removed from cache.")
