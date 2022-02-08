@@ -74,7 +74,7 @@ def start_rest_api(service_name, broker_url, tag, config_file):
             response.headers["Content-Type"] = "application/json"
             return response
 
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host='0.0.0.0', port=5000)
 
 
 if __name__ == "__main__":
