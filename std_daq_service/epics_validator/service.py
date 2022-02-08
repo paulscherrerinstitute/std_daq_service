@@ -35,23 +35,24 @@ class EpicsValidationService(object):
         if run_log_file is None:
             return
 
-
     def on_request_start(self, request_id, source, output_file):
         start_pulse_id = self.requests[request_id]['start_pulse_id']
         stop_pulse_id = self.requests[request_id]['stop_pulse_id']
         n_channels = len(self.requests[request_id]['channels'])
 
         output_text = f'[{source}] Processing of {request_id} started in service {source}.\n'
-        output_text +=  f'[{source}] Requesting file {output_file} for pulse_id range {start_pulse_id} to ' \
-                        f'{stop_pulse_id} with {n_channels} channels.'
+        output_text += f'[{source}] Requesting file {output_file} for pulse_id range {start_pulse_id} to ' \
+                       f'{stop_pulse_id} with {n_channels} channels.'
 
         self.print_run_log(request_id=request_id, message=output_text)
 
-
-    def on_request_success(self, request_id):
-
-    def on_request_fail(self, request_id):
+    def on_request_success(self, request_id, source, output_file):
         pass
+
+    def on_request_fail(self, request_id, source, error_message):
+        output_text = f'[{source}] Request {request_id} failed. Error:\n{error_message}'
+
+        self.print_run_log(request_id=request_id, message=output_text)
 
     def on_status_change(self, request_id, request, header):
 
@@ -63,13 +64,14 @@ class EpicsValidationService(object):
         header_entry = (time.time(), header, source)
         self.headers[request_id].append(header_entry)
 
+        output_file = request['output_file']
         action = header['action']
+
         if action == ACTION_REQUEST_START:
-            output_file = request['output_file']
             self.on_request_start(request_id, source, output_file)
 
         elif action == ACTION_REQUEST_SUCCESS:
-            self.on_request_success(request_id, source)
+            self.on_request_success(request_id, source, output_file)
 
         elif action == ACTION_REQUEST_FAIL:
             error_message = header["message"]
