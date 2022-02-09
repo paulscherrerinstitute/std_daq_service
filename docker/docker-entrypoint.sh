@@ -23,7 +23,7 @@ if [ "${REDIS_SKIP}" = false ]; then
 fi
 
 if [ ! -f config.json ]; then
-  echo "No config.json file. Initializing empty json file."
+  echo "[INFO] No config.json file mapped to container. Creating default."
   echo "{}" > config.json
 fi
 
