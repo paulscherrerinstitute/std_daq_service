@@ -2,7 +2,7 @@ import logging
 import struct
 import time
 import epics
-from epics.dbr import AlarmStatus
+from epics.dbr import AlarmStatus, DBE_VALUE, DBE_ALARM, DBE_LOG
 import numpy as np
 
 _logger = logging.getLogger("EpicsBufferReceiver")
@@ -77,10 +77,15 @@ def convert_ca_to_buffer(value, ftype):
 
 
 class EpicsReceiver(object):
-    def __init__(self, pv_names, change_callback):
+    def __init__(self, pv_names, change_callback, use_archiver_precision=False):
         self.pvs = []
         self.change_callback = change_callback
         self.connected_channels = {pv_name: False for pv_name in pv_names}
+
+        automonitor_mask = DBE_VALUE | DBE_ALARM
+        if use_archiver_precision:
+            _logger.info("Using archiver precision.")
+            automonitor_mask |= DBE_LOG
 
         _logger.info("Starting PV connections.")
 
@@ -92,8 +97,7 @@ class EpicsReceiver(object):
                 callback=self.value_callback,
                 connection_callback=self.connection_callback,
                 form='time',
-                auto_monitor=True
-
+                auto_monitor=automonitor_mask
             ))
 
         _logger.info("Processed all PV connections.")

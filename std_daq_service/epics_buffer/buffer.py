@@ -20,7 +20,8 @@ STATS_INTERVAL = 10
 _logger = logging.getLogger("EpicsBuffer")
 
 
-def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None, redis_port=6379):
+def start_epics_buffer(service_name, redis_host, pv_names,
+                       pulse_id_pv=None, redis_port=6379, use_archiver_precision=False):
     _logger.debug(f'Connecting to PVs: {pv_names}')
 
     redis = Redis(host=redis_host, port=redis_port)
@@ -30,7 +31,7 @@ def start_epics_buffer(service_name, redis_host, pv_names, pulse_id_pv=None, red
         redis.xadd(pv_name, value, maxlen=PV_MAX_LEN)
         stats.record(pv_name, value)
 
-    EpicsReceiver(pv_names=pv_names, change_callback=on_pv_change)
+    EpicsReceiver(pv_names=pv_names, change_callback=on_pv_change, use_archiver_precision=use_archiver_precision)
 
     if pulse_id_pv:
         _logger.info(f"Adding pulse_id_pv {pulse_id_pv} to buffer.")

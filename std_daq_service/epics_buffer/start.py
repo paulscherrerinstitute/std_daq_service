@@ -24,6 +24,7 @@ def main():
 
     pulse_id_pv = config.get("pulse_id_pv")
     pv_names = config.get('pv_list')
+    use_archiver_precision = config.get("use_archiver_precision", False)
 
     if not pv_names:
         _logger.warning("Invalid config file. Must set pv_names list.", config)
@@ -32,7 +33,8 @@ def main():
                        redis_host=redis_host,
                        redis_port=redis_port,
                        pv_names=pv_names,
-                       pulse_id_pv=pulse_id_pv)
+                       pulse_id_pv=pulse_id_pv,
+                       use_archiver_precision=use_archiver_precision)
 
     _logger.info(f'Service {service_name} stopping.')
 
