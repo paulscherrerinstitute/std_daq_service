@@ -1,30 +1,16 @@
 import time
 from logging import getLogger
 
-import h5py
-
 from std_daq_service.broker.common import ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS, ACTION_REQUEST_FAIL
 
 _logger = getLogger("EpicsValidationService")
 
 
 class EpicsValidationService(object):
-    def __init__(self):
+    def __init__(self, file_validator):
         self.requests = {}
         self.headers = {}
-
-    def validate_file(self, request_id, output_file):
-        _logger.info(f"Validating request {request_id} file {output_file}.")
-        expected_channels = self.requests[request_id]['channels']
-
-        with h5py.File(output_file, mode='r') as input_file:
-
-            missing_channels = []
-            for channel in expected_channels:
-                if channel not in input_file:
-                    missing_channels.append(f"Missing pv {channel}")
-
-        return missing_channels
+        self.file_validator = file_validator
 
     def print_run_log(self, request_id, message):
         run_log_file = self.requests[request_id].get("run_log_file")
@@ -56,7 +42,7 @@ class EpicsValidationService(object):
         output_text += f'[{source}] Output file analysis:\n'
 
         try:
-            validation_result = self.validate_file(request_id, output_file)
+            validation_result = self.file_validator(request_id, self.requests[request_id])
         except Exception as e:
             validation_result = [f"Count not process output file: {e}"]
 
