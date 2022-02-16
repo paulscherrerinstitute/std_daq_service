@@ -73,6 +73,7 @@ def print_to_console_raw(request_id, request, header):
 
     combined_output = f'[{request_string}] ' \
                       f'{text_color_mapping[action]}{service_name}{RESET} ' \
+                      f'{text_color_mapping[action]}{action} ' \
                       f'{output_message}'
 
     print(combined_output)
