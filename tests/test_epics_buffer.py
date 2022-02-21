@@ -52,7 +52,7 @@ class TestEpicsBuffer(unittest.TestCase):
 
     def test_buffer(self):
         pulse_id_pv = 'ioc:pulse_id'
-        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3']
+        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3', 'ioc:missing']
 
         parameters = {
             'service_name': "test_buffer",
@@ -76,6 +76,8 @@ class TestEpicsBuffer(unittest.TestCase):
             sleep(2)
             data = redis.xread({name: 0 for name in pv_names}, count=100, block=1000)
 
+            self.assertEqual(set(channel[0].decode() for channel in data), set(pv_names))
+
             received_channels = set()
             for channel in data:
                 pv_name = channel[0]
@@ -89,6 +91,10 @@ class TestEpicsBuffer(unittest.TestCase):
                     value_bytes = data_point[1][b'value']
                     data_type = data_point[1][b'type']
                     shape_bytes = data_point[1][b'shape']
+                    connected = data_point[1][b'connected']
+
+                    if connected == b'0':
+                        continue
 
                     shape = struct.unpack(f"<{len(shape_bytes) // 4}I", shape_bytes)
 
