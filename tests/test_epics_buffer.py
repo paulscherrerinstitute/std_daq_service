@@ -38,7 +38,7 @@ class TestEpicsBuffer(unittest.TestCase):
 
             # First record from each PV is an empty one.
             for i in range(len(pv_names)):
-                self.assertEqual(buffer[i]['data']["status"], "UDF")
+                self.assertEqual(buffer[i]['data']["connected"], 0)
 
             # We should get at least 1 value update from each PV.
             pv_updates = set()
