@@ -10,23 +10,33 @@ _logger = logging.getLogger("EpicsWriterFile")
 
 
 def prepare_data_for_writing(pv_name, pv_data):
-
     n_data_points = len(pv_data)
 
-    dtypes_count = Counter(value[b'type'] for _, value in pv_data)
-    if len(dtypes_count) > 1:
-        _logger.warning(f'Multiple data types for {pv_name}: {dtypes_count}')
+    def get_prevalent_value(field: bytes):
+        field_count = Counter(value[field] for _, value in pv_data)
+        # This is the disconnected data_point.
+        del field_count[b'']
+
+        if len(field_count) == 0:
+            _logger.warning(f'No valid data points for {pv_name}.')
+            return
+
+        elif len(field_count) > 1:
+            _logger.warning(f'Multiple values in {pv_name} for {field}: {field_count}')
+            return
+
+        return field_count.most_common(1)[0][0]
+
+    dtype_bytes = get_prevalent_value(b'type')
+    # There is no valid data point from which to construct the datasets.
+    if dtype_bytes is None:
         return
-    dtype = dtypes_count.most_common(1)[0][0].decode()
+    dtype = dtype_bytes.decode()
     dataset_type = dtype
     if dataset_type == 'string':
         dataset_type = object
 
-    shape_count = Counter(value[b'shape'] for _, value in pv_data)
-    if len(shape_count) > 1:
-        _logger.warning(f'Multiple data shapes for {pv_name}: {dtypes_count}')
-        return
-    shape_bytes = shape_count.most_common(1)[0][0]
+    shape_bytes = get_prevalent_value(b'shape')
     dshape = struct.unpack(f"<{len(shape_bytes) // 4}I", shape_bytes)
     dataset_shape = [n_data_points] + list(dshape)
 
@@ -41,14 +51,18 @@ def prepare_data_for_writing(pv_name, pv_data):
         timestamp = float(value[b'id'].decode())
         dataset_timestamp[index] = timestamp
 
+        connected = int(value[b'connected'])
+        dataset_connected[index] = connected
+
+        # If not connected, there is nothing to be set -> the value is invalid.
+        if connected == 0:
+            continue
+
         if dtype == 'string':
             data_point_value = value[b'value'].decode()
         else:
-            data_point_value = np.frombuffer(value[b'value'], dtype=dtype).reshape(dshape)
+            data_point_value = np.frombuffer(value[b'value'], dtype=dataset_type).reshape(dshape)
         dataset_value[index] = data_point_value
-
-        connected = int(value[b'connected'])
-        dataset_connected[index] = connected
 
         status = value[b'status'].decode()
         dataset_status[index] = status
@@ -93,12 +107,15 @@ class EpicsH5Writer(object):
             _logger.warning(f"PV data for {pv_name} is empty.")
             return
 
+        self.file.create_group(pv_name)
+
         unpacked_data = prepare_data_for_writing(pv_name, pv_data)
-        n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
+        if unpacked_data:
+            n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
 
-        h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
-        self.file.create_dataset(f'{pv_name}/value', data=dataset_value, dtype=h5_dataset_type)
+            h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
+            self.file.create_dataset(f'{pv_name}/value', data=dataset_value, dtype=h5_dataset_type)
 
-        self.file.create_dataset(f'{pv_name}/timestamp', data=dataset_timestamp)
-        self.file.create_dataset(f'{pv_name}/connected', data=dataset_connected)
-        self.file.create_dataset(f'{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
+            self.file.create_dataset(f'{pv_name}/timestamp', data=dataset_timestamp)
+            self.file.create_dataset(f'{pv_name}/connected', data=dataset_connected)
+            self.file.create_dataset(f'{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
