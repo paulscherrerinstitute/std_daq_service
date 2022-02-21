@@ -10,9 +10,6 @@ _logger = logging.getLogger("EpicsWriterFile")
 
 
 def prepare_data_for_writing(pv_name, pv_data):
-    if not pv_data:
-        _logger.warning(f"PV data for {pv_name} is empty.")
-        return
 
     n_data_points = len(pv_data)
 
@@ -92,12 +89,11 @@ class EpicsH5Writer(object):
 
     def write_pv(self, pv_name, pv_data):
 
-        unpacked_data = prepare_data_for_writing(pv_name, pv_data)
-        if unpacked_data is None:
+        if not pv_data:
             _logger.warning(f"PV data for {pv_name} is empty.")
-            self.file.create_group(pv_name)
             return
 
+        unpacked_data = prepare_data_for_writing(pv_name, pv_data)
         n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
 
         h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
