@@ -100,10 +100,17 @@ class EpicsReceiver(object):
                 auto_monitor=automonitor_mask
             ))
 
+            # Initialize buffer with empty event.
+            self.change_callback(pvname, {
+                "id": time.time(),
+                "type": "",
+                "shape": "",
+                "value": "",
+                "connected": 0})
+
         _logger.info("Processed all PV connections.")
 
     def value_callback(self, pvname, value, timestamp, status, ftype, **kwargs):
-
         value, dtype, shape = convert_ca_to_buffer(value, ftype)
 
         self.change_callback(pvname, {
@@ -128,7 +135,7 @@ class EpicsReceiver(object):
             _logger.warning(f"Channel {pvname} disconnected.")
 
             self.change_callback(pvname, {
-                "id": time.time_ns(),
+                "id": time.time(),
                 "type": None,
                 "shape": None,
                 "value": None,
