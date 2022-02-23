@@ -80,7 +80,8 @@ class EpicsReceiver(object):
     def __init__(self, pv_names, change_callback, use_archiver_precision=False):
         self.pvs = []
         self.change_callback = change_callback
-        self.connected_channels = {pv_name: False for pv_name in pv_names}
+        # Initialization to None -> first disconnect is inserted in Redis, because compared value is b'0'
+        self.connected_channels = {pv_name: None for pv_name in pv_names}
 
         automonitor_mask = DBE_VALUE | DBE_ALARM
         if use_archiver_precision:
