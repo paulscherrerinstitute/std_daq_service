@@ -60,7 +60,7 @@ class TestEpicsWriter(unittest.TestCase):
         file_name = "test.h5"
         self.addCleanup(os.remove, file_name)
 
-        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3', "missing"]
+        pv_names = ['ioc:pv_1', 'ioc:pv_2', 'ioc:pv_3', "not_connected"]
         parameters = {
             'service_name': "test_buffer",
             'redis_host': "localhost",
@@ -102,8 +102,12 @@ class TestEpicsWriter(unittest.TestCase):
         with h5py.File(file_name, 'r') as input_file:
             self.assertTrue(pv_name in input_file)
 
-            if pv_name != "missing":
+            if pv_name not in ("not_connected", "missing"):
                 self.assertTrue(f'{pv_name}/value' in input_file)
+            elif pv_name == 'not_connected':
+                self.assertTrue(pv_name in input_file)
+            elif pv_name == "missing":
+                self.assertTrue(pv_name not in input_file)
 
             for key, value in metadata.items():
                 self.assertTrue(key in input_file)
