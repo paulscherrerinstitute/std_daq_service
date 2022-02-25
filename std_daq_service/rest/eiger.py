@@ -108,7 +108,6 @@ def set_eiger_config(config, config_file):
                         rc = os.system(f'git pull && git add {config_file} && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
                         if rc != 0:
                             response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
-                        # //todo restart the services with the new confi
                        
             if len(not_good_params) != 0:
                 params_str = ""
