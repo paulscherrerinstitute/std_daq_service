@@ -125,6 +125,7 @@ def set_eiger_cmd(cmd):
         return response
     if cmd == "START":
         if d.status == runStatus.IDLE:
+            d.nextframenumber = 1
             d.startDetector()
             return response
         else:
@@ -133,6 +134,7 @@ def set_eiger_cmd(cmd):
     elif cmd == "STOP":
         if d.status == runStatus.RUNNING:
             d.stop()
+            d.nextframenumber = 1
             return response
         else:
             response['response'] = "Nothing to do, the detector is not running."
