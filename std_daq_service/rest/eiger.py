@@ -98,16 +98,17 @@ def set_eiger_config(config, config_file):
                         # updates the value inside the config file
                         with open(config_file) as f:
                             content = json.load(f)
-                            
-                        content['bit_depth'] = int(eiger_config[param])
-                        with open(config_file, 'w') as f:
-                            f.seek(0)
-                            json.dump(content, f, indent='\t')
-                        # pushes the file to the repo
-                        os.chdir(os.path.dirname(config_file))
-                        rc = os.system(f'git pull && git add {config_file} && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
-                        if rc != 0:
-                            response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
+                        
+                        if content['bit_depth'] != int(eiger_config[param]):
+                            content['bit_depth'] = int(eiger_config[param])
+                            with open(config_file, 'w') as f:
+                                f.seek(0)
+                                json.dump(content, f, indent='\t')
+                            # pushes the file to the repo
+                            os.chdir(os.path.dirname(config_file))
+                            rc = os.system(f'git pull && git add {config_file} && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
+                            if rc != 0:
+                                response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
                        
             if len(not_good_params) != 0:
                 params_str = ""
