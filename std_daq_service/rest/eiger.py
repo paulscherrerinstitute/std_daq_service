@@ -1,4 +1,5 @@
 import os
+import json
 
 from slsdet import Eiger
 from slsdet.enums import timingMode, speedLevel, runStatus
