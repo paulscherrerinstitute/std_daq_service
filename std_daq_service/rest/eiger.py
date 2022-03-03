@@ -20,7 +20,7 @@ def get_eiger_config(det_name):
     response['exptime'] = d.exptime
     response['dr'] = d.dr
     response['tengiga'] = d.tengiga
-    response['speed'] = str(d.speed)
+    response['speed'] = str(d.readoutspeed)
     response['threshold'] = d.threshold
     return response
 
@@ -76,18 +76,18 @@ def set_eiger_config(config, config_file):
                     # [Eiger] [0 or full_speed|1 or half_speed|2 or quarter_speed]
                     if isinstance(eiger_config[param], int):
                         if eiger_config[param] == 0:
-                            d.speed = speedLevel.FULL_SPEED
+                            d.readoutspeed = speedLevel.FULL_SPEED
                         elif eiger_config[param] == 1:
-                            d.speed = speedLevel.HALF_SPEED
+                            d.readoutspeed = speedLevel.HALF_SPEED
                         elif eiger_config[param] == 2:
-                            d.speed = speedLevel.QUARTER_SPEED
+                            d.readoutspeed = speedLevel.QUARTER_SPEED
                     elif isinstance(eiger_config[param], str):
                         if eiger_config[param].upper() == "FULL_SPEED":
-                            d.speed = speedLevel.FULL_SPEED
+                            d.readoutspeed = speedLevel.FULL_SPEED
                         elif eiger_config[param].upper() == "HALF_SPEED":
-                            d.speed = speedLevel.HALF_SPEED
+                            d.readoutspeed = speedLevel.HALF_SPEED
                         elif eiger_config[param].upper() == "QUARTER_SPEED":
-                            d.speed = speedLevel.QUARTER_SPEED
+                            d.readoutspeed = speedLevel.QUARTER_SPEED
                 if param == "period":
                     d.period = eiger_config[param]
                 if param == "exptime":
