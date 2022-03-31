@@ -11,20 +11,25 @@ def extract_write_request(request_data):
         raise RuntimeError(f'Mandatory field missing: n_images')
     n_images = request_data['n_images']
 
-    # if 'sources' not in request_data:
-    #     raise RuntimeError('Mandatory field "sources" missing.')
-    # sources = request_data['sources']
+    if 'sources' not in request_data:
+        raise RuntimeError('Mandatory field "sources" missing.')
+    sources = request_data['sources']
     # if isinstance(request_data['sources'], list):
     #     raise RuntimeError('Field "sources" must be a list.')
 
-    return build_write_request(output_file=output_file, n_images=n_images)
+    if 'user_id' not in request_data:
+        raise RuntimeError('Mandatory field "user_id" missing.')
+    user_id = request_data['user_id']
+
+    return build_write_request(output_file=output_file, n_images=n_images, user_id=user_id)
 
 
 # TODO: Add back sources to request.
-def build_write_request(output_file, n_images):
+def build_write_request(output_file, n_images, user_id):
     return {
         "output_file": output_file,
         'n_images': n_images,
+        'user_id': user_id,
         'timestamp': datetime.datetime.now().timestamp()
     }
 

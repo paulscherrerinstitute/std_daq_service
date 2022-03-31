@@ -1,4 +1,5 @@
 import os
+import json
 
 from slsdet import Eiger
 from slsdet.enums import timingMode, speedLevel, runStatus
@@ -19,8 +20,8 @@ def get_eiger_config(det_name):
     response['exptime'] = d.exptime
     response['dr'] = d.dr
     response['tengiga'] = d.tengiga
-    response['speed'] = str(d.speed)
-    response['threshold'] = d.threshold
+    response['speed'] = str(d.readoutspeed)
+    response['vthreshold'] = d.vthreshold
     return response
 
 def get_eiger_status():
@@ -69,24 +70,26 @@ def set_eiger_config(config, config_file):
                         d.timing = timingMode.BURST_TRIGGER
                 if param == "frames":
                     d.frames = eiger_config[param]
+               if param == "vthreshold":
+                    d.vthreshold = eiger_config[param]
                 if param == "tengiga":
                     d.tengiga = eiger_config[param]
                 if param == "speed":
                     # [Eiger] [0 or full_speed|1 or half_speed|2 or quarter_speed]
                     if isinstance(eiger_config[param], int):
                         if eiger_config[param] == 0:
-                            d.speed = speedLevel.FULL_SPEED
+                            d.readoutspeed = speedLevel.FULL_SPEED
                         elif eiger_config[param] == 1:
-                            d.speed = speedLevel.HALF_SPEED
+                            d.readoutspeed = speedLevel.HALF_SPEED
                         elif eiger_config[param] == 2:
-                            d.speed = speedLevel.QUARTER_SPEED
+                            d.readoutspeed = speedLevel.QUARTER_SPEED
                     elif isinstance(eiger_config[param], str):
                         if eiger_config[param].upper() == "FULL_SPEED":
-                            d.speed = speedLevel.FULL_SPEED
+                            d.readoutspeed = speedLevel.FULL_SPEED
                         elif eiger_config[param].upper() == "HALF_SPEED":
-                            d.speed = speedLevel.HALF_SPEED
+                            d.readoutspeed = speedLevel.HALF_SPEED
                         elif eiger_config[param].upper() == "QUARTER_SPEED":
-                            d.speed = speedLevel.QUARTER_SPEED
+                            d.readoutspeed = speedLevel.QUARTER_SPEED
                 if param == "period":
                     d.period = eiger_config[param]
                 if param == "exptime":
@@ -96,17 +99,20 @@ def set_eiger_config(config, config_file):
                     # gitlab config runner
                     if eiger_config[param] in [4, 8, 16, 32]:
                         # updates the value inside the config file
-                        with open(config_file, 'r+') as f:
+                        with open(config_file) as f:
                             content = json.load(f)
-                            content['bit_depth'] = 16
-                            f.truncate(0)
-                            json.dump(content, f, indent='\t', separators=(',', ': '))
-                        # pushes the file to the repo
-                        #os.chdir(os.path.dirname(__file__))
-                        #rc = os.system("git pull && git add . && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push")
-                        #if rc != 0:
-                        #    response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
-
+                        
+                        if content['bit_depth'] != int(eiger_config[param]):
+                            content['bit_depth'] = int(eiger_config[param])
+                            with open(config_file, 'w') as f:
+                                f.seek(0)
+                                json.dump(content, f, indent='\t')
+                            # pushes the file to the repo
+                            os.chdir(os.path.dirname(config_file))
+                            rc = os.system(f'git pull && git add {config_file} && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
+                            if rc != 0:
+                                response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
+                       
             if len(not_good_params) != 0:
                 params_str = ""
                 for p in not_good_params:
@@ -123,6 +129,7 @@ def set_eiger_cmd(cmd):
         return response
     if cmd == "START":
         if d.status == runStatus.IDLE:
+            d.nextframenumber = 1
             d.startDetector()
             return response
         else:
@@ -131,6 +138,7 @@ def set_eiger_cmd(cmd):
     elif cmd == "STOP":
         if d.status == runStatus.RUNNING:
             d.stop()
+            d.nextframenumber = 1
             return response
         else:
             response['response'] = "Nothing to do, the detector is not running."
@@ -142,7 +150,7 @@ def set_eiger_cmd(cmd):
 def validate_det_param(param):
     list_of_eiger_params = ["triggers",
                             "timing", "frames", "period", "exptime",
-                            "dr", "speed", "tengiga", "threshold"]
+                            "dr", "speed", "tengiga", "vthreshold"]
     if param not in list_of_eiger_params:
         return False
     return True
@@ -164,6 +172,9 @@ eiger_schema = {
                 },
                 "speed": {
                     "type": "integer",
+                },
+                "vthreshold": {
+                    "type": "integer"
                 },
                 "frames": {
                     "type": "integer"

@@ -32,12 +32,14 @@ class RequestWriterService(object):
         self.interrupt_request.clear()
         self.current_request_id = request_id
         self.run_id += 1
-
+        
         n_images = request['n_images']
+        user_id = request['user_id']
         writer_stream_data = {
             'output_file': request['output_file'],
             'run_id': self.run_id,
             'n_images': n_images,
+            'user_id': user_id,
         }
 
         _logger.info(f"Starting write request for n_images {writer_stream_data['n_images']} "
