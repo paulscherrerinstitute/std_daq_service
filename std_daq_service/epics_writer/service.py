@@ -39,13 +39,12 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
         # Response in format [(b'pulse_id-0', {b'timestamp': b'1639480220636463612'})]
         received_pulse_id = int(response[0][0].decode().split('-')[0])
 
-
         if abs(original_pulse_id - received_pulse_id) > MAX_PULSE_ID_MISMATCH:
             raise RuntimeError(f"Received pulse_id {received_pulse_id} "
                                f"too far away from requested pulse_id {original_pulse_id}.")
 
         timestamp_ns = int(response[0][1]["timestamp".encode()].decode())
-        timestamp = timestamp_ns // (10 ^ 6)
+        timestamp = timestamp_ns // (10 ** 6)
 
         _logger.debug(f"Converted timestamp in nano {timestamp_ns} into milli {timestamp} format.")
 
