@@ -38,7 +38,7 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
 
         # Response in format [(b'pulse_id-0', {b'timestamp': b'1639480220636463612'})]
         received_pulse_id = int(response[0][0].decode().split('-')[0])
-        timestamp = int(response[0][1]["timestamp".encode()].decode())
+        timestamp = int(response[0][1]["timestamp".encode()].decode()) / (10 ^ 6)
 
         if abs(original_pulse_id - received_pulse_id) > MAX_PULSE_ID_MISMATCH:
             raise RuntimeError(f"Received pulse_id {received_pulse_id} "
