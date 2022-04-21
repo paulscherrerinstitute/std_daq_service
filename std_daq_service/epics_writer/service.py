@@ -51,7 +51,7 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
     stop_timestamp = read_timestamp(response=redis.xrange("pulse_id", min=stop_pulse_id, count=1),
                                     original_pulse_id=stop_pulse_id)
 
-    _logger.debug("Mapped to range from {start_timestamp} to {stop_timestamp}.")
+    _logger.debug(f"Mapped to range from {start_timestamp} to {stop_timestamp}.")
 
     return start_timestamp, stop_timestamp
 
