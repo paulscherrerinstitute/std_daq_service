@@ -58,6 +58,24 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
     return start_timestamp, stop_timestamp
 
 
+def get_pulse_id_timeline(redis: Redis, start_pulse_id, stop_pulse_id):
+    _logger.debug(f"Creating pulse_id timeline from {start_pulse_id} to {stop_pulse_id}.")
+    pulse_ids = redis.xrange("pulse_id", min=start_pulse_id, max=stop_pulse_id)
+
+    timeline = []
+
+    for pulse_id_record in pulse_ids:
+        # Response in format [(b'pulse_id-0', {b'timestamp': b'1639480220636463612'}), ...]
+        pulse_id = int(pulse_id_record[0][0].decode().split('-')[0])
+        epics_timestamp_ns = int(pulse_id_record[0][1][b"epics_timestamp"].decode())
+
+        timeline.append((epics_timestamp_ns, pulse_id))
+
+    _logger.debug(f"Generated timeline with n_elements={len(timeline)}")
+
+    return timeline
+
+
 def download_pv_data(redis: Redis, pv, start_timestamp, stop_timestamp):
     _logger.debug(f'Downloading PV {pv} data from {start_timestamp} to {stop_timestamp}.')
     data = []
@@ -73,6 +91,25 @@ def download_pv_data(redis: Redis, pv, start_timestamp, stop_timestamp):
 
     # Response in format [(b'event_timestamp-0', {b'json': b'JSON_STRING'})]
     return data
+
+
+def map_pv_data_to_pulse_id(pv_data, timeline):
+    last_i_timeline = 0
+
+    for index, data_point in enumerate(pv_data):
+        redis_id, value = data_point
+
+        timestamp = int(value[b'id'].decode())
+
+        # Timeline format: [(epics_timestamp_ns, pulse_id), ...]
+        for i_timeline in range(last_i_timeline, len(timeline)):
+            if timeline[i_timeline] >= timestamp:
+                value['pulse_id'] = timeline[i_timeline][1]
+                last_i_timeline = i_timeline
+                break
+        else:
+            raise ValueError(f"Cannot map timestamp {timestamp} to timeline. "
+                             f"Timeline min timestamp {timeline[0][0]} and max timestamp {timeline[-1][0]}.")
 
 
 class EpicsWriterService(object):
@@ -93,6 +130,7 @@ class EpicsWriterService(object):
         redis = Redis(host=self.redis_host, port=self.redis_port)
         try:
             start_timestamp, stop_timestamp = map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id)
+            pulse_id_timeline = get_pulse_id_timeline(redis, start_pulse_id, stop_pulse_id)
 
             with EpicsH5Writer(output_file=output_file) as writer:
                 writer.write_metadata(metadata)
@@ -100,6 +138,8 @@ class EpicsWriterService(object):
                 for pv_name in pv_list:
                     try:
                         pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
+                        map_pv_data_to_pulse_id(pv_data, pulse_id_timeline)
+
                         writer.write_pv(pv_name, pv_data)
                     except Exception as e:
                         _logger.exception(f"Error while writing PV {pv_name}.")
