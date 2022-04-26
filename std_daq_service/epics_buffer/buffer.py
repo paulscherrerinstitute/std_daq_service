@@ -41,9 +41,12 @@ def start_epics_buffer(service_name, redis_host, pv_names,
                 _logger.warning("Pulse_id PV empty.")
                 return
             pulse_id = int(value)
+            timestamp = int(timestamp * (10 ** 6))
 
             try:
-                redis.xadd(PULSE_ID_NAME, {"timestamp": time_ns()}, id=pulse_id, maxlen=PULSE_ID_MAX_LEN)
+                redis.xadd(PULSE_ID_NAME, {"buffer_timestamp": time_ns(),
+                                           'epics_timestamp': timestamp},
+                           id=pulse_id, maxlen=PULSE_ID_MAX_LEN)
             except Exception as e:
                 _logger.warning(f"Cannot insert pulse_id {pulse_id} to Redis. {str(e)}")
 

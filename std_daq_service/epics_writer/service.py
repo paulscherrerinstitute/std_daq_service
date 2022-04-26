@@ -1,6 +1,4 @@
-import json
 from logging import getLogger
-
 from redis import Redis
 
 from std_daq_service.epics_writer.writer import EpicsH5Writer
@@ -43,7 +41,7 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
             raise RuntimeError(f"Received pulse_id {received_pulse_id} "
                                f"too far away from requested pulse_id {original_pulse_id}.")
 
-        timestamp_ns = int(response[0][1]["timestamp".encode()].decode())
+        timestamp_ns = int(response[0][1]["buffer_timestamp".encode()].decode())
         timestamp = timestamp_ns // (10 ** 6)
 
         _logger.debug(f"Converted timestamp in nano {timestamp_ns} into milli {timestamp} format.")
@@ -60,7 +58,7 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
     return start_timestamp, stop_timestamp
 
 
-def download_pv_data(redis, pv, start_timestamp, stop_timestamp):
+def download_pv_data(redis: Redis, pv, start_timestamp, stop_timestamp):
     _logger.debug(f'Downloading PV {pv} data from {start_timestamp} to {stop_timestamp}.')
     data = []
 
