@@ -41,14 +41,14 @@ def prepare_data_for_writing(pv_name, pv_data):
     dataset_shape = [n_data_points] + list(dshape)
 
     dataset_value = np.zeros(shape=dataset_shape, dtype=dataset_type)
-    dataset_timestamp = np.zeros(shape=[n_data_points, 1], dtype='<f8')
+    dataset_timestamp = np.zeros(shape=[n_data_points, 1], dtype='<u8')
     dataset_status = np.zeros(shape=[n_data_points, 1], dtype=object)
     dataset_connected = np.zeros(shape=[n_data_points, 1], dtype='<u1')
 
     for index, data_point in enumerate(pv_data):
         redis_id, value = data_point
 
-        timestamp = float(value[b'id'].decode())
+        timestamp = int(value[b'id'].decode())
         dataset_timestamp[index] = timestamp
 
         connected = int(value[b'connected'])

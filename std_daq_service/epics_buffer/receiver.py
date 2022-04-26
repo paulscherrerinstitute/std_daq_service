@@ -113,6 +113,7 @@ class EpicsReceiver(object):
 
     def value_callback(self, pvname, value, timestamp, status, ftype, **kwargs):
         value, dtype, shape = convert_ca_to_buffer(value, ftype)
+        timestamp = int(timestamp * (10 ** 6))
 
         self.change_callback(pvname, {
             "id": timestamp,
