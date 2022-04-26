@@ -65,6 +65,9 @@ def prepare_data_for_writing(pv_name, pv_data):
         dataset_value[index] = data_point_value
 
         status = value[b'status'].decode()
+        print(status)
+        if status == [0]:
+            raise ValueError('sa')
         dataset_status[index] = status
 
     return n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status

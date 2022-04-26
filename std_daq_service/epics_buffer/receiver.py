@@ -103,7 +103,7 @@ class EpicsReceiver(object):
 
             # Initialize buffer with empty event.
             self.change_callback(pvname, {
-                "id": time.time(),
+                "id": int(time.time() * (10 ** 6)),
                 "type": "",
                 "shape": "",
                 "value": "",
@@ -138,7 +138,7 @@ class EpicsReceiver(object):
             _logger.warning(f"Channel {pvname} disconnected.")
 
             self.change_callback(pvname, {
-                "id": time.time(),
+                "id": int(time.time() * (10 ** 6)),
                 "type": None,
                 "shape": None,
                 "value": None,
