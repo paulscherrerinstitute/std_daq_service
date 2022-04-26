@@ -107,6 +107,7 @@ class EpicsReceiver(object):
                 "type": "",
                 "shape": "",
                 "value": "",
+                "status": "unknown",
                 "connected": 0})
 
         _logger.info("Processed all PV connections.")
@@ -141,6 +142,7 @@ class EpicsReceiver(object):
                 "type": None,
                 "shape": None,
                 "value": None,
+                "status": 'unknown',
                 "connected": 0}
             )
 
