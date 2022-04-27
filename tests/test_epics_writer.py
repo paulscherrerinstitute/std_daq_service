@@ -111,4 +111,4 @@ class TestEpicsWriter(unittest.TestCase):
 
             for key, value in metadata.items():
                 self.assertTrue(key in input_file)
-                self.assertEqual(input_file[key].value, metadata[key])
+                self.assertEqual(input_file[key][()].decode(), metadata[key])
