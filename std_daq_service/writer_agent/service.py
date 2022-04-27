@@ -32,9 +32,11 @@ class RequestWriterService(object):
         self.interrupt_request.clear()
         self.current_request_id = request_id
         self.run_id += 1
-        
+
         n_images = request['n_images']
-        user_id = request['user_id']
+        # TODO: Figure out how to decouple this and make it non mandatory.
+        user_id = request.get('user_id', 0)
+
         writer_stream_data = {
             'output_file': request['output_file'],
             'run_id': self.run_id,
