@@ -104,10 +104,10 @@ class EpicsReceiver(object):
             # Initialize buffer with empty event.
             self.change_callback(pvname, {
                 "id": int(time.time() * (10 ** 6)),
-                "type": None,
-                "shape": None,
-                "value": None,
-                "status": None,
+                "type": b'',
+                "shape": b'',
+                "value": b'',
+                "status": b'',
                 "connected": 0})
 
         _logger.info("Processed all PV connections.")
@@ -139,10 +139,10 @@ class EpicsReceiver(object):
 
             self.change_callback(pvname, {
                 "id": int(time.time() * (10 ** 6)),
-                "type": None,
-                "shape": None,
-                "value": None,
-                "status": None,
+                "type": b'',
+                "shape": b'',
+                "value": b'',
+                "status": b'',
                 "connected": 0}
             )
 
