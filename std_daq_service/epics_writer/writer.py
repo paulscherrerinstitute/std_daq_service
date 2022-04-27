@@ -32,15 +32,15 @@ def prepare_data_for_writing(pv_name, pv_data):
     if dtype_bytes is None:
         return
     dtype = dtype_bytes.decode()
-    dataset_type = dtype
-    if dataset_type == 'string':
-        dataset_type = object
+    dtype_dataset = dtype
+    if dtype_dataset == 'string':
+        dtype_dataset = object
 
     shape_bytes = get_prevalent_value(b'shape')
     dshape = struct.unpack(f"<{len(shape_bytes) // 4}I", shape_bytes)
     dataset_shape = [n_data_points] + list(dshape)
 
-    dataset_value = np.zeros(shape=dataset_shape, dtype=dataset_type)
+    dataset_value = np.zeros(shape=dataset_shape, dtype=dtype_dataset)
     dataset_timestamp = np.zeros(shape=[n_data_points, 1], dtype='<u8')
     dataset_status = np.zeros(shape=[n_data_points, 1], dtype=object)
     dataset_connected = np.zeros(shape=[n_data_points, 1], dtype='<u1')
@@ -55,19 +55,22 @@ def prepare_data_for_writing(pv_name, pv_data):
         dataset_connected[index] = connected
 
         # If not connected, there is nothing to be set -> the value is invalid.
+        # We need to initialize missing values to empty strings.
         if connected == 0:
+            dataset_status[index] = 'unknown'
+
+            if dtype == 'string':
+                dataset_value[index] = ''
+
             continue
 
         if dtype == 'string':
             data_point_value = value[b'value'].decode()
         else:
-            data_point_value = np.frombuffer(value[b'value'], dtype=dataset_type).reshape(dshape)
+            data_point_value = np.frombuffer(value[b'value'], dtype=dtype_dataset).reshape(dshape)
         dataset_value[index] = data_point_value
 
         status = value[b'status'].decode()
-        print(status)
-        if status == [0]:
-            raise ValueError('sa')
         dataset_status[index] = status
 
     return n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status
