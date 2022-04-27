@@ -65,9 +65,11 @@ def get_pulse_id_timeline(redis: Redis, start_pulse_id, stop_pulse_id):
     timeline = []
 
     for pulse_id_record in pulse_ids:
-        # Response in format [(b'pulse_id-0', {b'timestamp': b'1639480220636463612'}), ...]
-        pulse_id = int(pulse_id_record[0][0].decode().split('-')[0])
-        epics_timestamp_ns = int(pulse_id_record[0][1][b"epics_timestamp"].decode())
+        # Response in format [(b'pulse_id-0', {b'buffer_timestamp': b'1651066190677740000',
+        #                                      b'epics_timestamp': b'1651066190674197'}), ...]
+
+        pulse_id = int(pulse_id_record[0].decode().split('-')[0])
+        epics_timestamp_ns = int(pulse_id_record[1][b"epics_timestamp"].decode())
 
         timeline.append((epics_timestamp_ns, pulse_id))
 
@@ -103,13 +105,15 @@ def map_pv_data_to_pulse_id(pv_data, timeline):
 
         # Timeline format: [(epics_timestamp_ns, pulse_id), ...]
         for i_timeline in range(last_i_timeline, len(timeline)):
-            if timeline[i_timeline] >= timestamp:
+            if timeline[i_timeline][0] >= timestamp:
                 value['pulse_id'] = timeline[i_timeline][1]
                 last_i_timeline = i_timeline
                 break
         else:
+            min_distance = min(timestamp-timeline[0][0], timestamp-timeline[-1][0])
+            direction = 'after last point' if min_distance > 0 else 'before first point'
             raise ValueError(f"Cannot map timestamp {timestamp} to timeline. "
-                             f"Timeline min timestamp {timeline[0][0]} and max timestamp {timeline[-1][0]}.")
+                             f"Timestamp out of timeline by {min_distance/(10**9)} seconds {direction}.")
 
 
 class EpicsWriterService(object):
