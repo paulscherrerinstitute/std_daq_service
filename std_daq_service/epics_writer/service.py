@@ -111,7 +111,7 @@ def map_pv_data_to_pulse_id(pv_data, timeline):
         # Timeline format: [(epics_timestamp_ns, pulse_id), ...]
         for i_timeline in range(last_i_timeline, len(timeline)):
             if timeline[i_timeline][0] >= timestamp:
-                value['pulse_id'] = timeline[i_timeline][1]
+                value[b'pulse_id'] = timeline[i_timeline][1]
                 last_i_timeline = i_timeline
                 break
         else:

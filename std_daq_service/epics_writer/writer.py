@@ -44,6 +44,7 @@ def prepare_data_for_writing(pv_name, pv_data):
     dataset_timestamp = np.zeros(shape=[n_data_points, 1], dtype='<u8')
     dataset_status = np.zeros(shape=[n_data_points, 1], dtype=object)
     dataset_connected = np.zeros(shape=[n_data_points, 1], dtype='<u1')
+    dataset_pulse_id = np.zeros(shape=[n_data_points, 1], dtype='<u8')
 
     for index, data_point in enumerate(pv_data):
         redis_id, value = data_point
@@ -73,7 +74,9 @@ def prepare_data_for_writing(pv_name, pv_data):
         status = value[b'status'].decode()
         dataset_status[index] = status
 
-    return n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status
+        dataset_pulse_id[index] = value[b'pulse_id']
+
+    return n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status, dataset_pulse_id
 
 
 class EpicsH5Writer(object):
@@ -117,7 +120,8 @@ class EpicsH5Writer(object):
 
         unpacked_data = prepare_data_for_writing(pv_name, pv_data)
         if unpacked_data:
-            n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
+            n_data_points, dtype, dataset_timestamp, dataset_value, \
+                dataset_connected, dataset_status, dataset_pulse_id = unpacked_data
 
             h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
             self.file.create_dataset(f'{pv_name}/value', data=dataset_value, dtype=h5_dataset_type)
@@ -125,3 +129,4 @@ class EpicsH5Writer(object):
             self.file.create_dataset(f'{pv_name}/timestamp', data=dataset_timestamp)
             self.file.create_dataset(f'{pv_name}/connected', data=dataset_connected)
             self.file.create_dataset(f'{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
+            self.file.create_dataset(f'{pv_name}/pulse_id', data=dataset_pulse_id)
