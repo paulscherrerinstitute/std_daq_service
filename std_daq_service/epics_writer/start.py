@@ -9,6 +9,20 @@ from std_daq_service.start_utils import default_service_setup
 _logger = logging.getLogger("EpicsWriter")
 
 
+def start_epics_writer(service_name, broker_url, redis_host, redis_port, tag):
+    _logger.info(f'Epics buffer writer {service_name} listening on broker {broker_url} on buffer {redis_host}.')
+
+    service = EpicsWriterService(redis_host=redis_host, redis_port=redis_port)
+
+    listener = PrimaryBrokerService(broker_url=broker_url,
+                                    service_name=service_name,
+                                    tag=tag,
+                                    request_callback=service.on_request,
+                                    kill_callback=service.on_kill)
+
+    return service, listener
+
+
 def main():
     parser = argparse.ArgumentParser(description='Epics buffer writer service')
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
@@ -26,15 +40,7 @@ def main():
     redis_port = args.redis_port
     tag = args.tag
 
-    _logger.info(f'Epics buffer writer {service_name} listening on broker {args.broker_url} on buffer {redis_host}.')
-
-    service = EpicsWriterService(redis_host=redis_host, redis_port=redis_port)
-
-    listener = PrimaryBrokerService(broker_url=broker_url,
-                                    service_name=service_name,
-                                    tag=tag,
-                                    request_callback=service.on_request,
-                                    kill_callback=service.on_kill)
+    service, listener = start_epics_writer(service_name, broker_url, redis_host, redis_port, tag)
 
     try:
         listener.block()
@@ -42,7 +48,6 @@ def main():
         pass
 
     listener.stop()
-
     _logger.info(f'Service {args.service_name} stopping.')
 
 
