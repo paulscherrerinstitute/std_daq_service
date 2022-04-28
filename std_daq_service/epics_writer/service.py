@@ -60,12 +60,15 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
 
 
 def get_pulse_id_timeline(redis: Redis, start_pulse_id, stop_pulse_id):
-    _logger.debug(f"Creating pulse_id timeline from {start_pulse_id} to {stop_pulse_id}.")
 
-    # We pad the exact pulse_id range because the timestamp might be missaligned
-    pulse_ids = redis.xrange("pulse_id",
-                             min=max(start_pulse_id-TIMELINE_PULSE_ID_PAD, 0),
-                             max=stop_pulse_id+TIMELINE_PULSE_ID_PAD)
+    start_pulse_id = max(start_pulse_id-TIMELINE_PULSE_ID_PAD, 0)
+    stop_pulse_id = stop_pulse_id + TIMELINE_PULSE_ID_PAD
+
+    _logger.debug(f"Creating pulse_id timeline from {start_pulse_id} to {stop_pulse_id} "
+                  f"({TIMELINE_PULSE_ID_PAD} pulses padding.")
+
+    # We pad the exact pulse_id range because the timestamp might be misaligned.
+    pulse_ids = redis.xrange("pulse_id", min=start_pulse_id, max=stop_pulse_id)
 
     timeline = []
 
