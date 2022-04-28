@@ -7,7 +7,7 @@ _logger = getLogger("EpicsWriterService")
 
 # Max 10 seconds pulse_id mismatch.
 MAX_PULSE_ID_MISMATCH = 1000
-TIMELINE_PULSE_ID_PAD = 100
+TIMELINE_PULSE_ID_PAD = 1000
 
 
 def extract_request(request):
