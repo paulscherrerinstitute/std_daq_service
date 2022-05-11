@@ -28,21 +28,20 @@ def validate_file(request_id, request):
 
 def main():
     parser = argparse.ArgumentParser(description='Epics buffer writer service')
+    parser.add_argument("primary_service_name", type=str, help="Name of the primary service to listen to")
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
-    parser.add_argument("--tag", type=str, help="Tag to listen for on the broker",
-                        default="#")
 
     service_name, config, args = default_service_setup(parser)
 
     broker_url = args.broker_url
-    primary_tag = args.tag
+    primary_service_name = args.primary_service_name
 
     _logger.info(f'Epics validator {service_name} listening on broker {broker_url} '
-                 f'for primary service {primary_tag}.')
+                 f'for primary service {primary_service_name}.')
 
-    service = EpicsValidationService(file_validator=validate_file, tag=primary_tag)
-    client = BrokerClient(broker_url=broker_url, tag=primary_tag, status_callback=service.on_status_change)
+    service = EpicsValidationService(file_validator=validate_file, primary_service_name=primary_service_name)
+    client = BrokerClient(broker_url=broker_url, tag="#", status_callback=service.on_status_change)
 
     try:
         client.block()
