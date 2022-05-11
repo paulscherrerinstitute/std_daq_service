@@ -14,6 +14,7 @@ PV_MAX_LEN = 3600 * 24 * 10
 PULSE_ID_MAX_LEN = 3600 * 24 * 100
 # Name of the stream for pulse_id mapping.
 PULSE_ID_NAME = "pulse_id"
+PULSE_ID_NAME_REVERSE = "pulse_id_reverse"
 # Interval for printing out statistics.
 STATS_INTERVAL = 10
 
@@ -40,13 +41,20 @@ def start_epics_buffer(service_name, redis_host, pv_names,
             if not value:
                 _logger.warning("Pulse_id PV empty.")
                 return
+
             pulse_id = int(value)
-            timestamp = int(timestamp * (10 ** 6))
+
+            epics_timestamp = int(timestamp * (10 ** 6))
+            buffer_timestamp = time_ns()
 
             try:
-                redis.xadd(PULSE_ID_NAME, {"buffer_timestamp": time_ns(),
-                                           'epics_timestamp': timestamp},
+                redis.xadd(PULSE_ID_NAME, {"buffer_timestamp": buffer_timestamp,
+                                           'epics_timestamp': epics_timestamp},
                            id=pulse_id, maxlen=PULSE_ID_MAX_LEN)
+
+                redis.xadd(PULSE_ID_NAME_REVERSE, {"pulse_id": pulse_id,
+                                                   'epics_timestamp': epics_timestamp},
+                           maxlen=PULSE_ID_MAX_LEN)
             except Exception as e:
                 _logger.warning(f"Cannot insert pulse_id {pulse_id} to Redis. {str(e)}")
 

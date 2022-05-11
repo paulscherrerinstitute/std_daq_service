@@ -1,13 +1,14 @@
 from logging import getLogger
 from redis import Redis
 
+from std_daq_service.epics_buffer.buffer import PULSE_ID_NAME_REVERSE
 from std_daq_service.epics_writer.writer import EpicsH5Writer
 
 _logger = getLogger("EpicsWriterService")
 
 # Max 10 seconds pulse_id mismatch.
 MAX_PULSE_ID_MISMATCH = 1000
-TIMELINE_PULSE_ID_PAD = 1000
+TIMELINE_TIMESTAMP_PAD = 1000
 
 
 def extract_request(request):
@@ -59,24 +60,24 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
     return start_timestamp, stop_timestamp
 
 
-def get_pulse_id_timeline(redis: Redis, start_pulse_id, stop_pulse_id):
+def get_pulse_id_timeline(redis: Redis, first_timestamp, last_timestamp):
 
-    start_pulse_id = max(start_pulse_id-TIMELINE_PULSE_ID_PAD, 0)
-    stop_pulse_id = stop_pulse_id + TIMELINE_PULSE_ID_PAD
+    start_timestamp_id = max(first_timestamp-TIMELINE_TIMESTAMP_PAD, 0)
+    stop_timestamp_id = last_timestamp + TIMELINE_TIMESTAMP_PAD
 
-    _logger.debug(f"Creating pulse_id timeline from {start_pulse_id} to {stop_pulse_id} "
-                  f"({TIMELINE_PULSE_ID_PAD} pulses padding).")
+    _logger.debug(f"Creating timestamp timeline from {start_timestamp_id} to {stop_timestamp_id} "
+                  f"({TIMELINE_TIMESTAMP_PAD} timestamp padding).")
 
     # We pad the exact pulse_id range because the timestamp might be misaligned.
-    pulse_ids = redis.xrange("pulse_id", min=start_pulse_id, max=stop_pulse_id)
+    pulse_ids = redis.xrange(PULSE_ID_NAME_REVERSE, min=start_timestamp_id, max=stop_timestamp_id)
 
     timeline = []
 
     for pulse_id_record in pulse_ids:
-        # Response in format [(b'pulse_id-0', {b'buffer_timestamp': b'1651066190677740000',
+        # Response in format [(b'buffer_timestamp-0', {b'pulse_id': b'1651066190677740000',
         #                                      b'epics_timestamp': b'1651066190674197'}), ...]
 
-        pulse_id = int(pulse_id_record[0].decode().split('-')[0])
+        pulse_id = int(pulse_id_record[1][b"pulse_id"].decode())
         epics_timestamp_ns = int(pulse_id_record[1][b"epics_timestamp"].decode())
 
         timeline.append((epics_timestamp_ns, pulse_id))
@@ -142,7 +143,6 @@ class EpicsWriterService(object):
         redis = Redis(host=self.redis_host, port=self.redis_port)
         try:
             start_timestamp, stop_timestamp = map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id)
-            pulse_id_timeline = get_pulse_id_timeline(redis, start_pulse_id, stop_pulse_id)
 
             with EpicsH5Writer(output_file=output_file) as writer:
                 writer.write_metadata(metadata)
@@ -150,7 +150,12 @@ class EpicsWriterService(object):
                 for pv_name in pv_list:
                     try:
                         pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
-                        map_pv_data_to_pulse_id(pv_data, pulse_id_timeline)
+                        if pv_data:
+                            first_timestamp = int(pv_data[0][0].decode().split('-')[0])
+                            last_timestamp = int(pv_data[-1][0].decode().split('-')[0])
+
+                            pulse_id_timeline = get_pulse_id_timeline(redis, first_timestamp, last_timestamp)
+                            map_pv_data_to_pulse_id(pv_data, pulse_id_timeline)
 
                         writer.write_pv(pv_name, pv_data)
                     except Exception as e:
