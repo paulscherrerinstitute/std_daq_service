@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.2.24
+VERSION=1.2.27
 
 set -e
 
