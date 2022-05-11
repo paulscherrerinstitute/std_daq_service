@@ -7,10 +7,11 @@ _logger = getLogger("EpicsValidationService")
 
 
 class EpicsValidationService(object):
-    def __init__(self, file_validator):
+    def __init__(self, file_validator, tag):
         self.requests = {}
         self.headers = {}
         self.file_validator = file_validator
+        self.tag = tag
 
     def print_run_log(self, request_id, message):
         run_log_file = self.requests[request_id].get("run_log_file")
@@ -59,6 +60,9 @@ class EpicsValidationService(object):
     def on_status_change(self, request_id, request, header):
 
         source = header['source']
+        if source != self.tag:
+            return
+
         if request_id not in self.requests:
             _logger.debug(f"Received new request {request_id}.")
             self.requests[request_id] = request

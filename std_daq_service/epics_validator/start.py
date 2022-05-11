@@ -41,7 +41,7 @@ def main():
     _logger.info(f'Epics validator {service_name} listening on broker {broker_url} '
                  f'for primary service {primary_tag}.')
 
-    service = EpicsValidationService(file_validator=validate_file)
+    service = EpicsValidationService(file_validator=validate_file, tag=primary_tag)
     client = BrokerClient(broker_url=broker_url, tag=primary_tag, status_callback=service.on_status_change)
 
     try:
