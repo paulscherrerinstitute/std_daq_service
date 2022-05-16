@@ -125,6 +125,11 @@ def set_eiger_cmd(cmd):
     except RuntimeError as e:
         response['response'] = 'Problem connecting to the detector.'
         return response
+    try:
+        status = d.status
+    except RunTimeError as e:
+        response['response'] = "Problem getting the status from the detector. Error:"+e
+        return response
     if cmd == "START":
         if d.status == runStatus.IDLE:
             d.nextframenumber = 1
@@ -134,7 +139,7 @@ def set_eiger_cmd(cmd):
             response['response'] = "Not possible to start, the detector is not idle"
             return response
     elif cmd == "STOP":
-        if d.status == runStatus.RUNNING:
+        if status == runStatus.RUNNING:
             d.stop()
             d.nextframenumber = 1
             return response
