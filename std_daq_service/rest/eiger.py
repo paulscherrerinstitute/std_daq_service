@@ -21,7 +21,7 @@ def get_eiger_config(det_name):
     response['dr'] = d.dr
     response['tengiga'] = d.tengiga
     response['speed'] = str(d.readoutspeed)
-    response['threshold'] = d.threshold
+    response['vthreshold'] = d.vthreshold
     return response
 
 def get_eiger_status():
@@ -70,6 +70,8 @@ def set_eiger_config(config, config_file):
                         d.timing = timingMode.BURST_TRIGGER
                 if param == "frames":
                     d.frames = eiger_config[param]
+               if param == "vthreshold":
+                    d.vthreshold = eiger_config[param]
                 if param == "tengiga":
                     d.tengiga = eiger_config[param]
                 if param == "speed":
@@ -153,7 +155,7 @@ def set_eiger_cmd(cmd):
 def validate_det_param(param):
     list_of_eiger_params = ["triggers",
                             "timing", "frames", "period", "exptime",
-                            "dr", "speed", "tengiga", "threshold"]
+                            "dr", "speed", "tengiga", "vthreshold"]
     if param not in list_of_eiger_params:
         return False
     return True
@@ -175,6 +177,9 @@ eiger_schema = {
                 },
                 "speed": {
                     "type": "integer",
+                },
+                "vthreshold": {
+                    "type": "integer"
                 },
                 "frames": {
                     "type": "integer"

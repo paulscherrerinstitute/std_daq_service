@@ -1,14 +1,14 @@
-import json
 from logging import getLogger
-
 from redis import Redis
 
+from std_daq_service.epics_buffer.buffer import PULSE_ID_NAME_REVERSE
 from std_daq_service.epics_writer.writer import EpicsH5Writer
 
 _logger = getLogger("EpicsWriterService")
 
 # Max 10 seconds pulse_id mismatch.
 MAX_PULSE_ID_MISMATCH = 1000
+TIMELINE_TIMESTAMP_PAD = 1000
 
 
 def extract_request(request):
@@ -38,11 +38,15 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
 
         # Response in format [(b'pulse_id-0', {b'timestamp': b'1639480220636463612'})]
         received_pulse_id = int(response[0][0].decode().split('-')[0])
-        timestamp = int(response[0][1]["timestamp".encode()].decode())
 
         if abs(original_pulse_id - received_pulse_id) > MAX_PULSE_ID_MISMATCH:
             raise RuntimeError(f"Received pulse_id {received_pulse_id} "
                                f"too far away from requested pulse_id {original_pulse_id}.")
+
+        timestamp_ns = int(response[0][1]["buffer_timestamp".encode()].decode())
+        timestamp = timestamp_ns // (10 ** 6)
+
+        _logger.debug(f"Converted timestamp in nano {timestamp_ns} into milli {timestamp} format.")
 
         return timestamp
 
@@ -51,12 +55,39 @@ def map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id):
     stop_timestamp = read_timestamp(response=redis.xrange("pulse_id", min=stop_pulse_id, count=1),
                                     original_pulse_id=stop_pulse_id)
 
-    _logger.debug("Mapped to range from {start_timestamp} to {stop_timestamp}.")
+    _logger.debug(f"Mapped to range from {start_timestamp} to {stop_timestamp}.")
 
     return start_timestamp, stop_timestamp
 
 
-def download_pv_data(redis, pv, start_timestamp, stop_timestamp):
+def get_pulse_id_timeline(redis: Redis, first_timestamp, last_timestamp):
+
+    start_timestamp_id = max(first_timestamp-TIMELINE_TIMESTAMP_PAD, 0)
+    stop_timestamp_id = last_timestamp + TIMELINE_TIMESTAMP_PAD
+
+    _logger.debug(f"Creating timestamp timeline from {start_timestamp_id} to {stop_timestamp_id} "
+                  f"({TIMELINE_TIMESTAMP_PAD} timestamp padding).")
+
+    # We pad the exact pulse_id range because the timestamp might be misaligned.
+    pulse_ids = redis.xrange(PULSE_ID_NAME_REVERSE, min=start_timestamp_id, max=stop_timestamp_id)
+
+    timeline = []
+
+    for pulse_id_record in pulse_ids:
+        # Response in format [(b'buffer_timestamp-0', {b'pulse_id': b'1651066190677740000',
+        #                                      b'epics_timestamp': b'1651066190674197'}), ...]
+
+        pulse_id = int(pulse_id_record[1][b"pulse_id"].decode())
+        epics_timestamp_ns = int(pulse_id_record[1][b"epics_timestamp"].decode())
+
+        timeline.append((epics_timestamp_ns, pulse_id))
+
+    _logger.debug(f"Generated timeline with n_elements={len(timeline)}")
+
+    return timeline
+
+
+def download_pv_data(redis: Redis, pv, start_timestamp, stop_timestamp):
     _logger.debug(f'Downloading PV {pv} data from {start_timestamp} to {stop_timestamp}.')
     data = []
 
@@ -71,6 +102,27 @@ def download_pv_data(redis, pv, start_timestamp, stop_timestamp):
 
     # Response in format [(b'event_timestamp-0', {b'json': b'JSON_STRING'})]
     return data
+
+
+def map_pv_data_to_pulse_id(pv_data, timeline):
+    last_i_timeline = 0
+
+    for index, data_point in enumerate(pv_data):
+        redis_id, value = data_point
+
+        timestamp = int(value[b'id'].decode())
+
+        # Timeline format: [(epics_timestamp_ns, pulse_id), ...]
+        for i_timeline in range(last_i_timeline, len(timeline)):
+            if timeline[i_timeline][0] >= timestamp:
+                value[b'pulse_id'] = timeline[i_timeline][1]
+                last_i_timeline = i_timeline
+                break
+        else:
+            min_distance = min(timestamp-timeline[0][0], timestamp-timeline[-1][0])
+            direction = 'after last point' if min_distance > 0 else 'before first point'
+            raise ValueError(f"Cannot map timestamp {timestamp} to timeline. "
+                             f"Timestamp out of timeline by {min_distance/(10**9)} seconds {direction}.")
 
 
 class EpicsWriterService(object):
@@ -98,6 +150,13 @@ class EpicsWriterService(object):
                 for pv_name in pv_list:
                     try:
                         pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
+                        if pv_data:
+                            first_timestamp = int(pv_data[0][0].decode().split('-')[0])
+                            last_timestamp = int(pv_data[-1][0].decode().split('-')[0])
+
+                            pulse_id_timeline = get_pulse_id_timeline(redis, first_timestamp, last_timestamp)
+                            map_pv_data_to_pulse_id(pv_data, pulse_id_timeline)
+
                         writer.write_pv(pv_name, pv_data)
                     except Exception as e:
                         _logger.exception(f"Error while writing PV {pv_name}.")

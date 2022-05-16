@@ -80,7 +80,8 @@ class EpicsReceiver(object):
     def __init__(self, pv_names, change_callback, use_archiver_precision=False):
         self.pvs = []
         self.change_callback = change_callback
-        self.connected_channels = {pv_name: False for pv_name in pv_names}
+        # Initialization to None -> first disconnect is inserted in Redis, because compared value is b'0'
+        self.connected_channels = {pv_name: None for pv_name in pv_names}
 
         automonitor_mask = DBE_VALUE | DBE_ALARM
         if use_archiver_precision:
@@ -102,16 +103,18 @@ class EpicsReceiver(object):
 
             # Initialize buffer with empty event.
             self.change_callback(pvname, {
-                "id": time.time(),
-                "type": "",
-                "shape": "",
-                "value": "",
+                "id": int(time.time() * (10 ** 6)),
+                "type": b'',
+                "shape": b'',
+                "value": b'',
+                "status": b'',
                 "connected": 0})
 
         _logger.info("Processed all PV connections.")
 
     def value_callback(self, pvname, value, timestamp, status, ftype, **kwargs):
         value, dtype, shape = convert_ca_to_buffer(value, ftype)
+        timestamp = int(timestamp * (10 ** 6))
 
         self.change_callback(pvname, {
             "id": timestamp,
@@ -135,10 +138,11 @@ class EpicsReceiver(object):
             _logger.warning(f"Channel {pvname} disconnected.")
 
             self.change_callback(pvname, {
-                "id": time.time(),
-                "type": None,
-                "shape": None,
-                "value": None,
+                "id": int(time.time() * (10 ** 6)),
+                "type": b'',
+                "shape": b'',
+                "value": b'',
+                "status": b'',
                 "connected": 0}
             )
 

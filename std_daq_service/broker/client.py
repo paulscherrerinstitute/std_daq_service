@@ -27,7 +27,7 @@ class BrokerClient(BrokerClientBase):
             return
 
         request_id = header_frame.correlation_id
-        _logger.info(f"Received status for request_id {request_id}.")
+        _logger.debug(f"Received status for request_id {request_id}.")
 
         request = json.loads(body.decode())
         header = header_frame.headers
@@ -37,7 +37,7 @@ class BrokerClient(BrokerClientBase):
     def send_request(self, request, header=None):
         header = header or {}
 
-        _logger.info(f'Sending request to tag {self.tag} with header {header} and message {request}')
+        _logger.debug(f'Sending request to tag {self.tag} with header {header} and message {request}')
 
         body = json.dumps(request).encode()
         request_id = str(uuid.uuid4())

@@ -32,42 +32,51 @@ def prepare_data_for_writing(pv_name, pv_data):
     if dtype_bytes is None:
         return
     dtype = dtype_bytes.decode()
-    dataset_type = dtype
-    if dataset_type == 'string':
-        dataset_type = object
+    dtype_dataset = dtype
+    if dtype_dataset == 'string':
+        dtype_dataset = object
 
     shape_bytes = get_prevalent_value(b'shape')
     dshape = struct.unpack(f"<{len(shape_bytes) // 4}I", shape_bytes)
     dataset_shape = [n_data_points] + list(dshape)
 
-    dataset_value = np.zeros(shape=dataset_shape, dtype=dataset_type)
-    dataset_timestamp = np.zeros(shape=[n_data_points, 1], dtype='<f8')
+    dataset_value = np.zeros(shape=dataset_shape, dtype=dtype_dataset)
+    dataset_timestamp = np.zeros(shape=[n_data_points, 1], dtype='<u8')
     dataset_status = np.zeros(shape=[n_data_points, 1], dtype=object)
     dataset_connected = np.zeros(shape=[n_data_points, 1], dtype='<u1')
+    dataset_pulse_id = np.zeros(shape=[n_data_points, 1], dtype='<u8')
 
     for index, data_point in enumerate(pv_data):
         redis_id, value = data_point
 
-        timestamp = float(value[b'id'].decode())
+        timestamp = int(value[b'id'].decode())
         dataset_timestamp[index] = timestamp
 
         connected = int(value[b'connected'])
         dataset_connected[index] = connected
 
         # If not connected, there is nothing to be set -> the value is invalid.
+        # We need to initialize missing values to empty strings.
         if connected == 0:
+            dataset_status[index] = 'unknown'
+
+            if dtype == 'string':
+                dataset_value[index] = ''
+
             continue
 
         if dtype == 'string':
             data_point_value = value[b'value'].decode()
         else:
-            data_point_value = np.frombuffer(value[b'value'], dtype=dataset_type).reshape(dshape)
+            data_point_value = np.frombuffer(value[b'value'], dtype=dtype_dataset).reshape(dshape)
         dataset_value[index] = data_point_value
 
         status = value[b'status'].decode()
         dataset_status[index] = status
 
-    return n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status
+        dataset_pulse_id[index] = value[b'pulse_id']
+
+    return n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status, dataset_pulse_id
 
 
 class EpicsH5Writer(object):
@@ -111,11 +120,13 @@ class EpicsH5Writer(object):
 
         unpacked_data = prepare_data_for_writing(pv_name, pv_data)
         if unpacked_data:
-            n_data_points, dtype, dataset_timestamp, dataset_value, dataset_connected, dataset_status = unpacked_data
+            n_data_points, dtype, dataset_timestamp, dataset_value, \
+                dataset_connected, dataset_status, dataset_pulse_id = unpacked_data
 
             h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
-            self.file.create_dataset(f'{pv_name}/value', data=dataset_value, dtype=h5_dataset_type)
+            self.file.create_dataset(f'{pv_name}/data', data=dataset_value, dtype=h5_dataset_type)
 
             self.file.create_dataset(f'{pv_name}/timestamp', data=dataset_timestamp)
             self.file.create_dataset(f'{pv_name}/connected', data=dataset_connected)
             self.file.create_dataset(f'{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
+            self.file.create_dataset(f'{pv_name}/pulse_id', data=dataset_pulse_id)
