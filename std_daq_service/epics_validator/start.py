@@ -24,7 +24,7 @@ def validate_file(request_id, request):
         validation_data = []
         for channel in expected_channels:
             if channel not in input_file:
-                validation_data.append(f"[{channel}] Missing data")
+                validation_data.append(f"[{channel}] No data")
                 continue
 
             pulse_id_map = input_file[channel].get('pulse_id', None)

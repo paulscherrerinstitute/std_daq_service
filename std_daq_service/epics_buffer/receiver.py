@@ -131,7 +131,7 @@ class EpicsReceiver(object):
             return
 
         self.connected_channels[pvname] = conn
-        _logger.debug(f"Channel {pvname} changed connected status to conntected:{conn}.")
+        _logger.debug(f"Channel {pvname} changed connected status to connected:{conn}.")
 
         # We send updates only when we transition from a connected to a disconnected state.
         if not conn:
