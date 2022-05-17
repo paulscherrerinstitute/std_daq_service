@@ -8,7 +8,8 @@ _logger = getLogger("EpicsWriterService")
 
 # Max 10 seconds pulse_id mismatch.
 MAX_PULSE_ID_MISMATCH = 1000
-TIMELINE_TIMESTAMP_PAD = 1000
+TIMELINE_TIMESTAMP_PAD = 5
+EMPTY_PULSE_ID_MAPPING = 0
 
 
 def extract_request(request):
@@ -105,24 +106,26 @@ def download_pv_data(redis: Redis, pv, start_timestamp, stop_timestamp):
 
 
 def map_pv_data_to_pulse_id(pv_data, timeline):
-    last_i_timeline = 0
+    i_data = 0
+    i_timeline = 0
+    while i_timeline < len(timeline) and i_data < len(pv_data):
+        t_timestamp = timeline[i_timeline][0]
 
-    for index, data_point in enumerate(pv_data):
+        data_point = pv_data[i_data]
         redis_id, value = data_point
+        d_timestamp = int(value[b'id'].decode())
 
-        timestamp = int(value[b'id'].decode())
+        if d_timestamp < t_timestamp:
+            value[b'pulse_id'] = EMPTY_PULSE_ID_MAPPING
+            i_data += 1
+            continue
 
-        # Timeline format: [(epics_timestamp_ns, pulse_id), ...]
-        for i_timeline in range(last_i_timeline, len(timeline)):
-            if timeline[i_timeline][0] >= timestamp:
-                value[b'pulse_id'] = timeline[i_timeline][1]
-                last_i_timeline = i_timeline
-                break
-        else:
-            min_distance = min(timestamp-timeline[0][0], timestamp-timeline[-1][0])
-            direction = 'after last point' if min_distance > 0 else 'before first point'
-            raise ValueError(f"Cannot map timestamp {timestamp} to timeline. "
-                             f"Timestamp out of timeline by {min_distance/(10**9)} seconds {direction}.")
+        if i_timeline + 1 < len(timeline) and timeline[i_timeline+1][0] < d_timestamp:
+            i_timeline += 1
+            continue
+
+        value[b'pulse_id'] = timeline[i_timeline][1]
+        i_data += 1
 
 
 class EpicsWriterService(object):
@@ -151,10 +154,7 @@ class EpicsWriterService(object):
                     try:
                         pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
                         if pv_data:
-                            first_timestamp = int(pv_data[0][0].decode().split('-')[0])
-                            last_timestamp = int(pv_data[-1][0].decode().split('-')[0])
-
-                            pulse_id_timeline = get_pulse_id_timeline(redis, first_timestamp, last_timestamp)
+                            pulse_id_timeline = get_pulse_id_timeline(redis, start_timestamp, stop_timestamp)
                             map_pv_data_to_pulse_id(pv_data, pulse_id_timeline)
 
                         writer.write_pv(pv_name, pv_data)

@@ -165,4 +165,26 @@ class TestEpicsWriter(unittest.TestCase):
             ioc_process.terminate()
             recv_process.terminate()
 
+    def test_pulse_id_mapping(self):
+        # [(redis_id, {b'id': timestamp})]
+        pv_data = [(0, {b'id': b'1'}),
+                   (0, {b'id': b'4'}),
+                   (0, {b'id': b'7'}),
+                   (0, {b'id': b'8'}),
+                   (0, {b'id': b'10'}),
+                   (0, {b'id': b'11'}),
+                   (0, {b'id': b'33'})]
 
+        # [(epics_timestamp_ns, pulse_id)]
+        timeline = [(5, 5000),
+                    (10, 10000),
+                    (15, 15000),
+                    (20, 20000),
+                    (25, 25000),
+                    (30, 30000)]
+
+        expected_pulse_ids = [0, 0, 5000, 5000, 5000, 10000, 30000]
+
+        map_pv_data_to_pulse_id(pv_data, timeline)
+        pulse_ids = [x[1][b'pulse_id'] for x in pv_data]
+        self.assertEqual(pulse_ids, expected_pulse_ids)
