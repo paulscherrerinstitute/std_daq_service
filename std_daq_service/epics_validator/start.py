@@ -39,7 +39,9 @@ def validate_file(request_id, request):
                         break
 
                 n_pulses_after_end = 0
-                for pulse_id in pulse_id_map[::-1]:
+                for i in range(len(pulse_id_map)-1, -1, -1):
+                    pulse_id = pulse_id_map[i]
+
                     if pulse_id >= stop_pulse_id:
                         n_pulses_after_end += 1
                     else:
