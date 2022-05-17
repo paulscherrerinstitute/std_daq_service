@@ -146,6 +146,7 @@ class EpicsWriterService(object):
         redis = Redis(host=self.redis_host, port=self.redis_port)
         try:
             start_timestamp, stop_timestamp = map_pulse_id_to_timestamp_range(redis, start_pulse_id, stop_pulse_id)
+            pulse_id_timeline = get_pulse_id_timeline(redis, start_timestamp, stop_timestamp)
 
             with EpicsH5Writer(output_file=output_file) as writer:
                 writer.write_metadata(metadata)
@@ -154,7 +155,6 @@ class EpicsWriterService(object):
                     try:
                         pv_data = download_pv_data(redis, pv_name, start_timestamp, stop_timestamp)
                         if pv_data:
-                            pulse_id_timeline = get_pulse_id_timeline(redis, start_timestamp, stop_timestamp)
                             map_pv_data_to_pulse_id(pv_data, pulse_id_timeline)
 
                         writer.write_pv(pv_name, pv_data)
