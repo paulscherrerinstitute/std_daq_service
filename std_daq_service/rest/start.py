@@ -62,9 +62,7 @@ def start_rest_api(service_name, broker_url, tag, config_file):
             if 'config' in config_new:
                 response = make_response(jsonify(set_eiger_config(config_new, config_file)),200,)
             if 'cmd' in config_new:
-                if config_new['cmd'].upper() == 'STOP':
-                    response = make_response(jsonify(set_eiger_cmd(config_new['cmd'].upper())),200,)
-                elif config_new['cmd'].upper() == 'START':
+                if config_new['cmd'].upper() in ['STOP', 'START', 'SET_CONFIG']:
                     response = make_response(jsonify(set_eiger_cmd(config_new['cmd'].upper())),200,)
                 elif config_new['cmd'].upper() == 'STATUS':
                     response = make_response(jsonify(get_eiger_status()),200,)

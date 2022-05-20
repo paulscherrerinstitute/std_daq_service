@@ -70,7 +70,7 @@ def set_eiger_config(config, config_file):
                         d.timing = timingMode.BURST_TRIGGER
                 if param == "frames":
                     d.frames = eiger_config[param]
-               if param == "vthreshold":
+                if param == "vthreshold":
                     d.vthreshold = eiger_config[param]
                 if param == "tengiga":
                     d.tengiga = eiger_config[param]
@@ -108,11 +108,11 @@ def set_eiger_config(config, config_file):
                                 f.seek(0)
                                 json.dump(content, f, indent='\t')
                             # pushes the file to the repo
-                            os.chdir(os.path.dirname(config_file))
-                            rc = os.system(f'git pull && git add {config_file} && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
-                            if rc != 0:
-                                response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
-                       
+                            #os.chdir(os.path.dirname(config_file))
+                            #rc = os.system(f'git pull && git add {config_file} && git commit -m "[LOG] Config change (bit depth: {eiger_config[param]})" && git push')
+                            #if rc != 0:
+                            #    response['response'] = 'request_success (WARNING: Problem pushing bit depth changes to repo)'
+
             if len(not_good_params) != 0:
                 params_str = ""
                 for p in not_good_params:
@@ -120,17 +120,24 @@ def set_eiger_config(config, config_file):
                 response = {'response': 'Problem with parameters: '+params_str}
     return response
 
+def validate_hostname(hostname_list) -> bool:
+    ref_hostnamelist = ["beb058", "beb059"]
+    return all(item in hostname_list for item in ref_hostnamelist)    
+
 def set_eiger_cmd(cmd):
     response = {'response': 'request_success'}
     try:
         d = Eiger()
+        if not validate_hostname(d.hostname) and cmd != "SET_CONFIG":
+            raise RuntimeError("Detector's hostname not valid.")
     except RuntimeError as e:
         response['response'] = 'Problem connecting to the detector.'
         return response
     try:
-        status = d.status
-    except RunTimeError as e:
-        response['response'] = "Problem getting the status from the detector. Error:"+e
+        if cmd != "SET_CONFIG":
+            d.validateUDPConfiguration()
+    except RuntimeError as e:
+        response['response'] = str(e)
         return response
     if cmd == "START":
         if d.status == runStatus.IDLE:
@@ -140,8 +147,17 @@ def set_eiger_cmd(cmd):
         else:
             response['response'] = "Not possible to start, the detector is not idle"
             return response
+    elif cmd == "SET_CONFIG":
+        d.config = "/home/dbe/git/sf_daq_buffer/eiger/xbl-daq-28/500k.config"
+        try:
+            d.validateUDPConfiguration()
+        except RuntimeError as e:
+            response['response'] = str(e)
+            return response
+        response['response'] = "Detector successfully configured."
+        return response
     elif cmd == "STOP":
-        if status == runStatus.RUNNING:
+        if d.status == runStatus.RUNNING:
             d.stop()
             d.nextframenumber = 1
             return response
