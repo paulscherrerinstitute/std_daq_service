@@ -1,5 +1,6 @@
 import os
 import json
+import time
 
 from slsdet import Eiger
 from slsdet.enums import timingMode, speedLevel, runStatus
@@ -159,8 +160,18 @@ def set_eiger_cmd(cmd):
     elif cmd == "STOP":
         if d.status == runStatus.RUNNING:
             d.stop()
-            d.nextframenumber = 1
-            return response
+            limit_timeout = 5 # sec
+            timestep = 0.5
+            counter = 0
+            while (d.status != runStatus.IDLE) and (counter < limit_timeout):
+                time.sleep(timestep)
+                counter += timestep
+            if d.status == runStatus.IDLE:
+                d.nextframenumber = 1
+                return response
+            else:
+                response['response'] = "Warning: STOP successfully sent but detector is not IDLE."
+                return response
         else:
             response['response'] = "Nothing to do, the detector is not running."
             return response
