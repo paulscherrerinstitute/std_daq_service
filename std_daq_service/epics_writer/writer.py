@@ -124,9 +124,9 @@ class EpicsH5Writer(object):
                 dataset_connected, dataset_status, dataset_pulse_id = unpacked_data
 
             h5_dataset_type = dtype if dtype != "string" else h5py.special_dtype(vlen=str)
-            self.file.create_dataset(f'{pv_name}/data', data=dataset_value, dtype=h5_dataset_type)
+            self.file.create_dataset(f'data/{pv_name}/data', data=dataset_value, dtype=h5_dataset_type)
 
-            self.file.create_dataset(f'{pv_name}/timestamp', data=dataset_timestamp)
-            self.file.create_dataset(f'{pv_name}/connected', data=dataset_connected)
-            self.file.create_dataset(f'{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
-            self.file.create_dataset(f'{pv_name}/pulse_id', data=dataset_pulse_id)
+            self.file.create_dataset(f'data/{pv_name}/timestamp', data=dataset_timestamp)
+            self.file.create_dataset(f'data/{pv_name}/connected', data=dataset_connected)
+            self.file.create_dataset(f'data/{pv_name}/status', data=dataset_status, dtype=h5py.special_dtype(vlen=str))
+            self.file.create_dataset(f'data/{pv_name}/pulse_id', data=dataset_pulse_id)
