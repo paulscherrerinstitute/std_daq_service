@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import sys
 
 from flask import Flask, jsonify, make_response, request
 
@@ -20,8 +21,7 @@ class NoTraceBackWithLineNumber(Exception):
         if type(msg).__name__ in ["ConnectionError", "ReadTimeout"]:
             print(
                 "\n ConnectionError/ReadTimeout: it seems that the server "
-                "is not running (check xbl-daq-32 pco writer service "
-                "(pco_writer-pco{1-2}), ports, etc).\n"
+                "is not running...\n"
             )
         try:
             ln = sys.exc_info()[-1].tb_lineno
@@ -44,28 +44,27 @@ def start_rest_api(service_name, broker_url, tag, config_file):
 
     @app.route("/alive", methods=["GET"])
     def alive():
-        return jsonify({"status": 200, "alive": "Yes"})
+        return jsonify({"status": 200, "alive": "True"})
 
     @app.route("/write_sync", methods=["POST"])
     def write_sync_request():
-        error_msg = ""
+        response_dict = {}
+
         try:
             message = extract_write_request(request.json)
         except Exception as e:
-            error_msg = str(e)
+            error_msg = str(StdDaqAPIError(e))
 
-        response_dict = {}
-
-        if error_msg == "":
+        if not error_msg:
             request_id, broker_response = manager.write_sync(message)
-
             response_dict = {
                 "request_id": request_id,
                 "response": build_user_response(response=broker_response),
             }
-
-        if error_msg != "":
+        elif error_msg:
             response_dict["error"] = error_msg
+        else:
+            response_dict["error"] = "Something went wrong..."
         return jsonify(response_dict)
 
     @app.route("/write_async", methods=["POST"])
@@ -74,14 +73,15 @@ def start_rest_api(service_name, broker_url, tag, config_file):
         try:
             message = extract_write_request(request.json)
         except Exception as e:
-            error_msg = str(e)
+            error_msg = str(StdDaqAPIError(e))
 
-        if error_msg == "":
+        if not error_msg:
             request_id = manager.write_async(message)
             response_dict = {"request_id": request_id}
-        else:
+        elif error_msg:
             response_dict["error"] = error_msg
-
+        else:
+            response_dict["error"] = "Something went wrong..."
         return jsonify(response_dict)
 
     @app.route("/write_kill", methods=["POST"])
@@ -96,9 +96,8 @@ def start_rest_api(service_name, broker_url, tag, config_file):
             try:
                 broker_response = manager.kill_sync(request_id)
             except Exception as e:
-                error_msg = str(e)
-                response_dict["error"] = error_msg
-            if error_msg == "":
+                response_dict["error"] = str(StdDaqAPIError(e))
+            if "error" not in response_dict:
                 response_dict = {
                     "request_id": request_id,
                     "response": build_user_response(response=broker_response),
