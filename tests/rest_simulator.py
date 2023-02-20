@@ -10,9 +10,8 @@ from threading import Thread, Event
 
 _logger = logging.getLogger("StartStopWriterRestInterface")
 
-def extract_write_parameters_from_request(json_request_str):
-    json_request = json.loads(json_request_str)
 
+def extract_write_parameters_from_request(json_request):
     if 'output_file' not in json_request:
         raise RuntimeError(f'Mandatory field missing: output_file')
     output_file = json_request['output_file']
@@ -147,7 +146,8 @@ def start_rest_api(detector_name, rest_port):
 
     @app.route("/write_sync", methods=['POST'])
     def write_sync_request():
-        output_file, n_images = extract_write_parameters_from_request(request.json)
+        json_request = request.json
+        output_file, n_images = extract_write_parameters_from_request(json_request)
 
         writer_status = manager.write_sync(output_file, n_images)
 
@@ -157,7 +157,8 @@ def start_rest_api(detector_name, rest_port):
 
     @app.route('/write_async', methods=['POST'])
     def write_async_request():
-        output_file, n_images = extract_write_parameters_from_request(request.json)
+        json_request = request.json
+        output_file, n_images = extract_write_parameters_from_request(json_request)
 
         writer_status = manager.write_async(output_file, n_images)
 
@@ -191,8 +192,9 @@ def start_rest_api(detector_name, rest_port):
 
     @app.route('/config', methods=['POST'])
     def set_config_request():
-        new_config = dict(manager.daq_config)
         change_request = request.json
+
+        new_config = dict(manager.daq_config)
         new_config.update(change_request)
 
         valid_fields = ['bit_depth', 'detector_name', 'detector_type', 'image_pixel_height',
