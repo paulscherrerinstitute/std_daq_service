@@ -3,7 +3,7 @@
 The writer agent is the service responsible for receiving the write commands from the broker and coordinate the stream of assembled images to the std-det-writer service, that creates the hdf5 file with the images.
 
 ```bash
-usage: start.py [-h] [--broker_url BROKER_URL]
+usage: start_rest.py [-h] [--broker_url BROKER_URL]
                 [--log_level {CRITICAL,ERROR,WARNING,INFO,DEBUG}]
                 service_name detector_name
 
@@ -24,5 +24,5 @@ optional arguments:
 To start the service, from the writer_agent folder, for example:
 
 ```bash
-python start.py writer_agent cSAXS.EG01V01
+python start_rest.py writer_agent cSAXS.EG01V01
 ```

@@ -5,7 +5,7 @@
 The flask-based rest proxy service interacts with the broker and allows to trigger commands to the writer agent based on a ```service_tag``` and ```tag```. 
 
 ```bash
-usage: start.py [-h] [--broker_url BROKER_URL]
+usage: start_rest.py [-h] [--broker_url BROKER_URL]
                 [--log_level {CRITICAL,ERROR,WARNING,INFO,DEBUG}]
                 service_name tag
 
@@ -27,7 +27,7 @@ optional arguments:
 To start the service, from the rest folder, for example:
 
 ```bash
-python start.py rest eiger
+python start_rest.py rest eiger
 ```
 
 ---
