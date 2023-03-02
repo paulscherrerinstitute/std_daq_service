@@ -8,6 +8,9 @@ class GFUdpPacketGenerator(object):
         self.image_pixel_width = image_pixel_width
         self.image_filename = image_filename
 
+        self.quadrant_height = image_pixel_height // 2
+        self.quadrant_width = image_pixel_width // 2
+
         if image_filename:
             self.image = tifffile.imread(image_filename)
             # Scale image to 12 bits - (2 ** 12 - 1)
@@ -50,13 +53,15 @@ class GFUdpPacketGenerator(object):
     def _get_module_image(self, i_module):
         # Crop the needed quadrant from the image
         if self.quadrant_id == 0:
-            quadrant_data = self.image[:quadrant_height, :quadrant_width]  # NW
+            quadrant_data = self.image[:self.quadrant_height, :self.quadrant_width]  # NW
         elif self.quadrant_id == 1:
-            quadrant_data = self.image[:quadrant_height, quadrant_width:]  # NE
+            quadrant_data = self.image[:self.quadrant_height, self.quadrant_width:]  # NE
         elif self.quadrant_id == 2:
-            quadrant_data = self.image[quadrant_height:, :quadrant_width]  # SW
+            quadrant_data = self.image[self.quadrant_height:, :self.quadrant_width]  # SW
         elif self.quadrant_id == 3:
-            quadrant_data = self.image[quadrant_height:, quadrant_width:]  # SE
+            quadrant_data = self.image[self.quadrant_height:, self.quadrant_width:]  # SE
+        else:
+            raise ValueError(f"Unknown quadrant_id={self.quadrant_id}.")
 
         # Get even (link_id == 0) or odd (link_id == 1) lines of the quadrant.
         module_data = quadrant_data[self.link_id::2]
@@ -71,7 +76,7 @@ class GFUdpPacketGenerator(object):
         packets = []
 
         # First n-1 packets are the same.
-        for i_packet in range(self.frame_n_packets) - 1:
+        for i_packet in range(self.frame_n_packets - 1):
             packet_header = self._generate_packet_header(i_module, i_packet)
             packet_image_bytes = self._generate_packet_image_bytes(
                 i_packet, self.n_packet_rows, self.packet_n_data_bytes)
@@ -140,3 +145,9 @@ class GFUdpPacketGenerator(object):
         packet_header.scan_id = scan_id
 
         return bytes(packet_header) + packet_bytes
+
+    def get_n_modules(self):
+        return len(self.module_packets)
+
+    def get_n_packets(self):
+        return len(self.module_packets[0])
