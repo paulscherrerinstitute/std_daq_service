@@ -53,7 +53,11 @@ class StartStopRestManager(object):
         self.sim_thread = Thread(target=self._sim_async)
 
         self.writer_state = {'state': 'READY',
-                             'acquisition': None}
+                             'acquisition': {
+                                 'state': 'FINISHED',
+                                 'info': {},
+                                 'stats': {}
+                             }}
 
         self.daq_config = {
           "detector_name": "Eiger9M",
