@@ -3,7 +3,8 @@ from setuptools import setup
 setup(
     name='std_daq_service',
     install_requires=[
-        'pcaspy'
+        'pcaspy',
+        'tifffile'
     ],
     entry_points='''
         [console_scripts]

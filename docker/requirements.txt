@@ -6,4 +6,5 @@ pika
 redis
 redis-py
 pcaspy
+tifffile
 h5py=3.1.0
