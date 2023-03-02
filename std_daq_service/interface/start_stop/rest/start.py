@@ -3,8 +3,9 @@ import logging
 
 from flask import Flask
 
-from std_daq_service.rest.start_stop.manager import StartStopRestManager
-from std_daq_service.rest.start_stop.rest import register_rest_interface
+from std_daq_service.interface.start_stop.rest.manager import StartStopRestManager
+from std_daq_service.interface.start_stop.rest.rest import register_rest_interface
+from std_daq_service.interface.start_stop.utils import get_stream_addresses
 
 _logger = logging.getLogger(__name__)
 
@@ -13,9 +14,8 @@ def start_api(beamline_name, detector_name, rest_port):
     _logger.info(f'Starting Start Stop REST for detector_name={detector_name} on beamline_name={beamline_name} '
                  f'(rest_port={rest_port}).')
 
-    image_metadata_stream = f'{detector_name}-image'
-    writer_control_stream = f'{detector_name}-writer'
-    writer_status_stream = f'{detector_name}-writer-status'
+    image_metadata_stream, writer_control_stream, writer_status_stream = get_stream_addresses(detector_name)
+
 
     app = Flask(detector_name)
     ctx = None
