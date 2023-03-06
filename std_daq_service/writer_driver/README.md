@@ -24,5 +24,5 @@ optional arguments:
 To start the service, from the writer_agent folder, for example:
 
 ```bash
-python start_rest.py writer_agent cSAXS.EG01V01
+python start_rest.py writer_driver cSAXS.EG01V01
 ```

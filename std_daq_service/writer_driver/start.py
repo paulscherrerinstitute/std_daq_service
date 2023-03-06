@@ -3,13 +3,13 @@ import logging
 
 from std_daq_service.broker.common import TEST_BROKER_URL
 from std_daq_service.broker.primary_service import PrimaryBrokerService
-from std_daq_service.writer_agent.service import RequestWriterService
+from std_daq_service.writer_driver.service import RequestWriterService
 
 _logger = logging.getLogger('RequestWriteService')
 
 IPC_URL_BASE = "ipc:///tmp/std-daq-"
 INPUT_IPC_URL_SUFFIX = "-assembler"
-OUTPUT_IPC_URL_SUFFIX = "-writer_agent"
+OUTPUT_IPC_URL_SUFFIX = "-writer_driver"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Broker service starter.')

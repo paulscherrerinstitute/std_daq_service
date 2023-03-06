@@ -6,7 +6,7 @@ from std_daq_service.broker.client import BrokerClient
 from std_daq_service.broker.common import TEST_BROKER_URL, ACTION_REQUEST_START, ACTION_REQUEST_SUCCESS
 from std_daq_service.broker.primary_service import PrimaryBrokerService
 from std_daq_service.protocol import ImageMetadata
-from std_daq_service.writer_agent.service import RequestWriterService
+from std_daq_service.writer_driver.service import RequestWriterService
 
 
 class TestRequestWriteService(unittest.TestCase):
