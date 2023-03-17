@@ -7,8 +7,6 @@ WRITE_ASYNC_ENDPOINT = "/write_async"
 STATUS_ENDPOINT = "/status"
 STOP_ENDPOINT = "/stop"
 CONFIG_ENDPOINT = '/config'
-DAQ_CONFIG_FIELDS = ['bit_depth', 'detector_name', 'detector_type', 'image_pixel_height',
-                     'image_pixel_width', 'n_modules', 'start_udp_port']
 
 
 def register_rest_interface(app, manager):
