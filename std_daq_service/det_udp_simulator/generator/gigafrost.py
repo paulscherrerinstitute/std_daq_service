@@ -1,6 +1,9 @@
 import tifffile
 import numpy as np
 
+from std_buffer.gigafrost.data import calculate_udp_packet_info, GfUdpPacket
+from std_buffer.gigafrost.udp_sim_gf import GF_N_MODULES
+
 
 class GFUdpPacketGenerator(object):
     def __init__(self, image_pixel_height, image_pixel_width, image_filename=None):
@@ -96,10 +99,10 @@ class GFUdpPacketGenerator(object):
         i_pixel = 0
         packet_starting_row = n_rows_per_packet * i_packet
 
-        for i_module_row in range(n_rows_packet) + packet_starting_row:
+        for i_module_row in range(n_rows_per_packet) + packet_starting_row:
             for i_module_col in range(n_cols_packet):
                 pixel_value = module_image[i_module_row, i_module_col]
-                packet_image_bytes |= pixel_value << (i_pixel * 12)
+                n_bytes_per_packet |= pixel_value << (i_pixel * 12)
                 i_pixel += 1
 
         return packet_image_bytes.to_bytes(n_bytes_per_packet, 'little')

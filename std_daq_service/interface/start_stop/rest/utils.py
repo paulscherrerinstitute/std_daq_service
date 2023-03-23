@@ -1,5 +1,10 @@
 import os
 import re
+from collections import OrderedDict
+
+
+DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type', 'bit_depth',
+                     'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port']
 
 
 def get_parameters_from_write_request(json_request):
@@ -44,3 +49,16 @@ def validate_n_images(n_images_str):
         raise RuntimeError(f'Invalid n_images={n_images}. Must be an integer >= 1.')
 
     return n_images
+
+
+def update_config(old_config, config_updates):
+    new_config = OrderedDict({param: config_updates.get(param, old_config[param])
+                              for param in DAQ_CONFIG_FIELDS})
+
+    validate_config(new_config)
+
+    return new_config
+
+
+def validate_config(new_config):
+    pass
