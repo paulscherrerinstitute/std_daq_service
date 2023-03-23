@@ -5,6 +5,7 @@ setup(
     install_requires=[
         'std_buffer',
         'pcaspy',
+        'ansible_runner',
         'tifffile'
     ],
     entry_points='''
