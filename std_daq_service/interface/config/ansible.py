@@ -1,17 +1,22 @@
 import ansible_runner
 import time
 
-class AnsibleInterface(object):
+DEFAULT_DEPLOYMENT_FOLDER = '/etc/std_daq/deployment'
+INVENTORY_FILE = '/inventory.yml'
+SERVICE_FILE = '/inventory.yml'
+
+
+class AnsibleConfigDriver(object):
     status_mapping = {
         'starting': 'Execution started',
         'successful': 'Done',
         'running': 'Running tasks',
     }
 
-    def __init__(self, ansible_repo_folder='/etc/std_daq/deployment', status_callback=lambda x:None):
+    def __init__(self, ansible_repo_folder=DEFAULT_DEPLOYMENT_FOLDER, status_callback=lambda x: None):
         self.repo_folder = ansible_repo_folder
-        self.services_file = ansible_repo_folder + '/services.yml'
-        self.inventory_file = ansible_repo_folder + '/inventory.yml'
+        self.services_file = ansible_repo_folder + SERVICE_FILE
+        self.inventory_file = ansible_repo_folder + INVENTORY_FILE
 
         self.status = {'state': None, 'status': None, 'deployment_id': None, 'deployment_start': None}
         self.status_callback = status_callback
@@ -72,11 +77,3 @@ class AnsibleInterface(object):
         )
 
         return self.status
-
-
-def status_callback(status):
-    print(status)
-
-
-ansible_interface = AnsibleInterface('/home/babic_a/git/staging.gf/', status_callback)
-print(ansible_interface.deploy())
