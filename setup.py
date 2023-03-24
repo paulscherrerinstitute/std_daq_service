@@ -7,8 +7,9 @@ setup(
         'pyzmq',
         'pcaspy',
         'ansible_runner',
-        'opencv',
-        'tifffile'
+        'opencv-python',
+        'tifffile',
+        'protobuf'
     ],
     entry_points='''
         [console_scripts]
