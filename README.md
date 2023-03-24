@@ -7,7 +7,7 @@ Documentation of interfaces:
 - [Broker command line interface](std_daq_service/cli/README.md)
 
 Documentation of services:
-- [Writer agent](std_daq_service/writer_agent/README.md)
+- [Writer agent](std_daq_service/writer_driver/README.md)
 - [Epics buffer](std_daq_service/epics_buffer/README.md)
 - [Epics writer](std_daq_service/epics_writer/README.md)
 

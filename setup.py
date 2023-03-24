@@ -4,8 +4,10 @@ setup(
     name='std_daq_service',
     install_requires=[
         'std_buffer',
+        'pyzmq',
         'pcaspy',
         'ansible_runner',
+        'opencv',
         'tifffile'
     ],
     entry_points='''

@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, Response
 
 from std_daq_service.interface.start_stop.rest.utils import get_parameters_from_write_request
 
@@ -7,9 +7,10 @@ WRITE_ASYNC_ENDPOINT = "/write_async"
 STATUS_ENDPOINT = "/status"
 STOP_ENDPOINT = "/stop"
 CONFIG_ENDPOINT = '/config'
+LIVE_STREAM_ENDPOINT = '/live'
 
 
-def register_rest_interface(app, manager):
+def register_rest_interface(app, manager, live_stream_generator):
     @app.route(WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
         json_request = request.json
@@ -63,3 +64,9 @@ def register_rest_interface(app, manager):
         return jsonify({"status": "ok",
                         "message": f"DAQ configured for bit_depth={daq_config['bit_depth']}.",
                         'config': daq_config})
+
+    @app.route(LIVE_STREAM_ENDPOINT)
+    def live_stream():
+        return Response(live_stream_generator,
+                        mimetype='multipart/x-mixed-replace; boundary=frame')
+
