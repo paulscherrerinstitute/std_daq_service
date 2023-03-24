@@ -5,7 +5,7 @@ from flask import Flask
 
 from std_daq_service.interface.start_stop.rest.manager import StartStopRestManager
 from std_daq_service.interface.start_stop.rest.rest import register_rest_interface
-from std_daq_service.interface.start_stop.utils import get_stream_addresses
+from std_daq_service.interface.start_stop.utils import get_stream_addresses, generate_mjpg_image_stream
 
 _logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def start_api(beamline_name, detector_name, rest_port):
     config_driver = None
     rest_manager = StartStopRestManager(ctx, writer_driver, config_driver)
 
-    register_rest_interface(app, rest_manager)
+    register_rest_interface(app, rest_manager, generate_mjpg_image_stream)
 
     try:
         app.run(host='0.0.0.0', port=rest_port)

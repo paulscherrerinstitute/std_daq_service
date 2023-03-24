@@ -4,7 +4,9 @@ setup(
     name='std_daq_service',
     install_requires=[
         'std_buffer',
+        'pyzmq',
         'pcaspy',
+        'opencv',
         'tifffile'
     ],
     entry_points='''
