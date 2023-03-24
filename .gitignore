@@ -146,3 +146,6 @@ ENV/
 sls_detectors_package/
 
 ignore_*
+/std_daq_service/interface/start_stop/rest/static/bundle.js
+/std_daq_service/interface/start_stop/rest/static/bundle.js.LICENSE.txt
+/std_daq_service/interface/start_stop/rest/node_modules/
