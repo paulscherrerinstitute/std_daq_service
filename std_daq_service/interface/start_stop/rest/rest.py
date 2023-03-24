@@ -1,4 +1,4 @@
-from flask import request, jsonify, Response
+from flask import request, jsonify, Response, render_template
 
 from std_daq_service.interface.start_stop.rest.utils import get_parameters_from_write_request
 
@@ -11,6 +11,11 @@ LIVE_STREAM_ENDPOINT = '/live'
 
 
 def register_rest_interface(app, manager, live_stream_generator):
+
+    @app.route('/')
+    def index():
+        return render_template("index.html")
+
     @app.route(WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
         json_request = request.json
