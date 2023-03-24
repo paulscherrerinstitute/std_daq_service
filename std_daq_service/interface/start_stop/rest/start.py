@@ -1,8 +1,11 @@
 import argparse
 import logging
 
+import zmq
 from flask import Flask
 
+from std_daq_service.interface.config.ansible import AnsibleConfigDriver
+from std_daq_service.interface.start_stop.driver import WriterDriver
 from std_daq_service.interface.start_stop.rest.manager import StartStopRestManager
 from std_daq_service.interface.start_stop.rest.rest import register_rest_interface
 from std_daq_service.interface.start_stop.utils import get_stream_addresses
@@ -16,11 +19,11 @@ def start_api(beamline_name, detector_name, rest_port):
 
     image_metadata_stream, writer_control_stream, writer_status_stream = get_stream_addresses(detector_name)
 
-
     app = Flask(detector_name)
-    ctx = None
-    writer_driver = None
-    config_driver = None
+    ctx = zmq.Context()
+
+    writer_driver = WriterDriver(ctx, image_metadata_stream, writer_control_stream, writer_status_stream)
+    config_driver = AnsibleConfigDriver()
     rest_manager = StartStopRestManager(ctx, writer_driver, config_driver)
 
     register_rest_interface(app, rest_manager)
