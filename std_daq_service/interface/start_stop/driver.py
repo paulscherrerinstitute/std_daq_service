@@ -12,6 +12,7 @@ STATS_INTERVAL_TIME = 0.5
 WRITER_STATUS_TIMEOUT_MS = 500
 # In seconds.
 RECV_TIMEOUT_MS = 200
+SYNC_WINDOW_SIZE = 2
 
 WRITER_STATUS_POLL_INTERVAL = 0.5
 WRITER_STATUS_POLL_N_ATTEMPTS = 10
@@ -20,8 +21,9 @@ WRITER_STATUS_POLL_N_ATTEMPTS = 10
 class WriterStatusTracker(object):
     EMPTY_STATS = {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}
 
-    def __init__(self, ctx, in_status_address, out_status_address):
+    def __init__(self, ctx, in_status_address, out_status_address, n_max_active_requests):
         self.ctx = ctx
+        self.n_max_active_requests = n_max_active_requests
         self.stop_event = Event()
         
         self.status = {'state': 'READY', 'acquisition': {'state': "FINISHED", 'info': {}, 'stats': dict(self.EMPTY_STATS)}}
@@ -82,6 +84,8 @@ class WriterStatusTracker(object):
             self.status['acquisition']['state'] = 'ACQUIRING_IMAGES'
             self.status['acquisition']['stats']['n_write_completed'] += 1
 
+        # TODO: release semaphore
+
         # Send out write progress updates on STATS_INTERVAL_TIME intervals.
         current_time = time()
         if current_time - self.last_status_send_time > STATS_INTERVAL_TIME:
@@ -100,6 +104,7 @@ class WriterStatusTracker(object):
 
         self.last_status_send_time = 0
         self._current_run_id = run_id
+        # TODO: Init semaphor
 
         # Send status update as soon as writer starts.
         self.status_sender.send_json(self.status)
@@ -116,6 +121,8 @@ class WriterStatusTracker(object):
         self.status_sender.send_json(self.status)
 
     def log_write_request(self, run_id, image_id):
+        # TODO: acquire semaphore
+
         if run_id != self._current_run_id:
             _logger.warning(f"Received write_request for image_id={image_id}, run_id={run_id} while the _current_run_id={self._current_run_id}.")
             return
@@ -143,7 +150,7 @@ class WriterDriver(object):
     def __init__(self, ctx, command_address, in_status_address, out_status_address, image_metadata_address):
         self.ctx = ctx
         self.stop_event = Event()
-        self.status = WriterStatusTracker(ctx, in_status_address, out_status_address)
+        self.status = WriterStatusTracker(ctx, in_status_address, out_status_address, SYNC_WINDOW_SIZE)
 
         _logger.info(f'Starting writer driver with command_address:{command_address} \
                                                    in_status_address:{in_status_address} \
