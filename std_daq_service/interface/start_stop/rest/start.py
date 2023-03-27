@@ -19,7 +19,7 @@ def start_api(beamline_name, detector_name, rest_port):
 
     image_metadata_stream, writer_control_stream, writer_status_stream = get_stream_addresses(detector_name)
 
-    app = Flask(detector_name)
+    app = Flask(detector_name, template_folder='static/')
     ctx = zmq.Context()
 
     writer_driver = WriterDriver(ctx, image_metadata_stream, writer_control_stream, writer_status_stream)

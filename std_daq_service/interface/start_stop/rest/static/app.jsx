@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ReactDOM from 'react-dom';
 import { Chip, Grid, Stack, Alert } from '@mui/material';
 
 function App() {
@@ -9,7 +10,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'https://example.com/api/data'
+        'status'
       );
       setState(result.data.state);
     };
@@ -47,4 +48,5 @@ function App() {
   );
 }
 
-export default App;
+ReactDOM.render(<App />, document.getElementById('root'));
+//export default App;
