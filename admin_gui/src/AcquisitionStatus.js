@@ -1,11 +1,15 @@
 import React from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {
   Chip,
   Grid,
   Paper,
   LinearProgress,
-  Typography
+  Typography,
+    Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from '@mui/material';
 
 function AcquisitionStatus(props) {
@@ -42,37 +46,65 @@ function AcquisitionStatus(props) {
         <Grid item> {status_chip} </Grid>
       </Grid>
 
-      <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Start time:</Typography></Grid>
-        <Grid item> {state.writer.acquisition.start_time || 'N/A'} </Grid>
-      </Grid>
-      <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>End time:</Typography></Grid>
-        <Grid item> {state.writer.acquisition.end_time || 'N/A'} </Grid>
-      </Grid>
-
-      <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Number of received images:</Typography></Grid>
-        <Grid item> {state.writer.acquisition.stats.n_write_requested || 'N/A'} </Grid>
-      </Grid>
-      <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Number of written images:</Typography></Grid>
-        <Grid item> {state.writer.acquisition.stats.n_write_completed || 'N/A'} </Grid>
-      </Grid>
-
-      <Grid container alignItems="center" spacing={1}>
+<Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Acquistion progress:</Typography></Grid>
-        <Grid item> {progress || 100}% </Grid>
+        <Grid item> {progress} </Grid>
       </Grid>
-
       <LinearProgress variant="determinate" value={progress} />
-      {/*    <TextField*/}
-      {/*      label="Number of Images"*/}
-      {/*      value={response.writer.acquisition.info.n_images}*/}
-      {/*      disabled*/}
-      {/*      margin="dense"*/}
-      {/*      variant="outlined"*/}
-      {/*    />*/}
+
+
+
+
+         <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Info</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">N requested images:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.info.n_images || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">Output file:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.info.output_file || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">Run ID:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.info.run_id || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">Number of written images:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.stats.n_write_completed || 'N/A'} </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stats</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">Start time:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.start_time || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">End time:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.end_time || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">Number of received images:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.stats.n_write_requested || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2">Number of written images:</Typography></Grid>
+            <Grid item> {state.writer.acquisition.stats.n_write_completed || 'N/A'} </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+
+
+
       {/*    <TextField*/}
       {/*      label="Output File"*/}
       {/*      value={response.writer.acquisition.info.output_file}*/}
