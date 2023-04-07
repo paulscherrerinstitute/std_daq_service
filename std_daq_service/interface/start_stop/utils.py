@@ -2,14 +2,16 @@ import zmq
 import numpy as np
 import cv2
 
+IPC_BASE = "ipc:///tmp"
 
 def get_stream_addresses(detector_name):
 
-    image_metadata_stream = f'{detector_name}-image'
-    writer_control_stream = f'{detector_name}-writer'
-    writer_status_stream = f'{detector_name}-writer-status'
+    command_address = f'{IPC_BASE}/{detector_name}-writer'
+    in_status_address = f'{IPC_BASE}/{detector_name}-writer-status-sync'
+    out_status_address = f'{IPC_BASE}/{detector_name}-writer-status'
+    image_metadata_address = f'{IPC_BASE}/{detector_name}-image'
 
-    return image_metadata_stream, writer_control_stream, writer_status_stream
+    return command_address, in_status_address, out_status_address, image_metadata_address
 
 
 def generate_mjpg_image_stream(ctx, image_stream_url):

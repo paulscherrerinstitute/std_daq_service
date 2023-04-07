@@ -29,7 +29,7 @@ class StartStopRestManager(object):
         return self.get_status()
 
     def get_status(self):
-        return self.writer_driver.get_state()
+        return self.writer_driver.get_status()
 
     def get_config(self):
         return self.config_driver.get_config()

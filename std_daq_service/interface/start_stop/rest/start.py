@@ -17,12 +17,12 @@ def start_api(beamline_name, detector_name, rest_port):
     _logger.info(f'Starting Start Stop REST for detector_name={detector_name} on beamline_name={beamline_name} '
                  f'(rest_port={rest_port}).')
 
-    image_metadata_stream, writer_control_stream, writer_status_stream = get_stream_addresses(detector_name)
+    command_address, in_status_address, out_status_address, image_metadata_address = get_stream_addresses(detector_name)
 
     app = Flask(detector_name, template_folder='static/')
     ctx = zmq.Context()
 
-    writer_driver = WriterDriver(ctx, image_metadata_stream, writer_control_stream, writer_status_stream)
+    writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
     config_driver = AnsibleConfigDriver()
     rest_manager = StartStopRestManager(ctx, writer_driver, config_driver)
 

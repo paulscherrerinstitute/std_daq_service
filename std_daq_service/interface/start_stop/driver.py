@@ -148,14 +148,14 @@ class WriterDriver(object):
     STOP_COMMAND = 'STOP'
 
     def __init__(self, ctx, command_address, in_status_address, out_status_address, image_metadata_address):
-        self.ctx = ctx
-        self.stop_event = Event()
-        self.status = WriterStatusTracker(ctx, in_status_address, out_status_address, SYNC_WINDOW_SIZE)
-
         _logger.info(f'Starting writer driver with command_address:{command_address} \
                                                    in_status_address:{in_status_address} \
                                                    out_status_address:{out_status_address} \
                                                    image_metadata_address:{image_metadata_address}')
+
+        self.ctx = ctx
+        self.stop_event = Event()
+        self.status = WriterStatusTracker(ctx, in_status_address, out_status_address, SYNC_WINDOW_SIZE)
 
         # Inter-thread communication (send commands from user to communication thread)
         self.user_command_sender = self.ctx.socket(zmq.PUSH)
