@@ -9,7 +9,9 @@ setup(
         'ansible_runner',
         'opencv-python',
         'tifffile',
-        'protobuf'
+        'protobuf',
+        'flask',
+        'flask-cors'
     ],
     entry_points='''
         [console_scripts]
