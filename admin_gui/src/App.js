@@ -16,6 +16,7 @@ import {
   TextField, Paper, Typography
 } from '@mui/material';
 import WriterControl from "./WriterControl";
+import DaqConfig from "./DaqConfig";
 
 function App() {
   const [state, setState] = useState({
@@ -27,7 +28,10 @@ function App() {
         info: {},
         stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
       }
-    }
+    },
+    config: {
+      detector_type: '', detector_name: '', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
+      n_modules: 0, start_udp_port: 0 }
   });
   const [isVideoLoaded, setIsVideoLoaded] = useState(true);
 
@@ -36,7 +40,14 @@ function App() {
       const result = await axios(
         'http://localhost:5000/status'
       );
-      setState(result.data)
+
+      const result_config = await axios(
+        'http://localhost:5000/config'
+      );
+
+      let new_data = result.data;
+      new_data.config = result_config.data;
+      setState(new_data);
     };
 
     const interval = setInterval(() => {
@@ -55,6 +66,7 @@ function App() {
       <Grid item xs={3}>
         <WriterControl state={state.writer} />
         <AcquisitionStatus state={state.writer.acquisition} />
+        <DaqConfig state={state.config.config} />
       </Grid>
       <Grid item xs={9}>
         {isVideoLoaded ? (
