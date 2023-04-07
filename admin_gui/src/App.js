@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import WriterStatus from './WriterStatus'
+import AcquisitionStatus from './AcquisitionStatus'
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
 import {
@@ -19,7 +19,14 @@ import {
 function App() {
   const [state, setState] = useState({
     status: "",
-    message: ""
+    message: "",
+    writer: {
+      state: "",
+      acquisition: {
+        info: {},
+        stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
+      }
+    }
   });
   const [isVideoLoaded, setIsVideoLoaded] = useState(true);
 
@@ -45,7 +52,7 @@ function App() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={4}>
-        <WriterStatus state={state} />
+        <AcquisitionStatus state={state} />
       </Grid>
       <Grid item xs={8}>
         {isVideoLoaded ? (
