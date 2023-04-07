@@ -1,7 +1,5 @@
 from flask import request, jsonify
 
-from std_daq_service.interface.start_stop.rest.utils import get_parameters_from_write_request
-
 START_ENDPOINT = "/start"
 STOP_ENDPOINT = "/stop"
 STATUS_ENDPOINT = "/status"

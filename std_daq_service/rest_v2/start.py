@@ -5,10 +5,10 @@ import zmq
 from flask import Flask
 
 from std_daq_service.interface.config.ansible import AnsibleConfigDriver
-from std_daq_service.interface.start_stop.driver import WriterDriver
-from std_daq_service.interface.start_stop.rest.manager import StartStopRestManager
-from std_daq_service.interface.start_stop.rest.rest import register_rest_interface
-from std_daq_service.interface.start_stop.utils import get_stream_addresses, generate_mjpg_image_stream
+from std_daq_service.writer_driver.start_stop import WriterDriver
+from std_daq_service.rest_v2.manager import StartStopRestManager
+from std_daq_service.rest_v2.rest import register_rest_interface
+from std_daq_service.writer_driver.utils import get_stream_addresses, generate_mjpg_image_stream
 
 _logger = logging.getLogger(__name__)
 

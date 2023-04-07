@@ -3,9 +3,7 @@ import argparse
 import json
 import logging
 
-from std_daq_service.interface.start_stop.utils import get_stream_addresses
-from std_daq_service.udp_simulator.generator.gigafrost import GFUdpPacketGenerator
-from std_daq_service.udp_simulator.generator.udp_stream import generate_udp_stream
+from std_daq_service.writer_driver.utils import get_stream_addresses
 
 _logger = logging.getLogger(__name__)
 

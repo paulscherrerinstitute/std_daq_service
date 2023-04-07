@@ -1,6 +1,6 @@
 from flask import request, jsonify, Response, render_template
 
-from std_daq_service.interface.start_stop.rest.utils import get_parameters_from_write_request
+from std_daq_service.rest_v2.utils import get_parameters_from_write_request
 
 WRITE_SYNC_ENDPOINT = "/write_sync"
 WRITE_ASYNC_ENDPOINT = "/write_async"

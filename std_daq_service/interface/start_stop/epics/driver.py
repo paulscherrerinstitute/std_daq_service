@@ -2,7 +2,7 @@ import logging
 import requests
 from pcaspy import Driver
 
-from std_daq_service.interface.start_stop.rest.rest import WRITE_ASYNC_ENDPOINT, STOP_ENDPOINT, CONFIG_ENDPOINT, \
+from std_daq_service.rest_v2.rest import WRITE_ASYNC_ENDPOINT, STOP_ENDPOINT, CONFIG_ENDPOINT, \
     STATUS_ENDPOINT, DAQ_CONFIG_FIELDS
 
 _logger = logging.getLogger("EpicsStartStopRestDriver")
