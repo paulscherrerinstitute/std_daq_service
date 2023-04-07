@@ -15,6 +15,7 @@ import {
   Checkbox,
   TextField, Paper, Typography
 } from '@mui/material';
+import WriterControl from "./WriterControl";
 
 function App() {
   const [state, setState] = useState({
@@ -52,6 +53,7 @@ function App() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={3}>
+        <WriterControl state={state.writer} />
         <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
       <Grid item xs={9}>
