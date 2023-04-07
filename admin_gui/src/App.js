@@ -51,10 +51,10 @@ function App() {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={4}>
+      <Grid item xs={3}>
         <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
-      <Grid item xs={8}>
+      <Grid item xs={9}>
         {isVideoLoaded ? (
           <img
             src="https://example.com/mjpeg-video-stream"
