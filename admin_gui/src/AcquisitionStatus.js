@@ -16,6 +16,8 @@ function AcquisitionStatus(props) {
   const { state } = props;
   let status_chip;
   let progress = state.stats.n_write_completed / state.stats.n_write_requested;
+  let n_gbytes = 123.43;
+  let n_seconds = 321;
 
   switch (state.state) {
     case 'READY':
@@ -48,14 +50,17 @@ function AcquisitionStatus(props) {
 
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Acquisition progress:</Typography></Grid>
-        <Grid item> {progress} </Grid>
+        <Grid item> {progress || 0}% </Grid>
       </Grid>
 
       <LinearProgress variant="determinate" value={progress} />
 
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Info</Typography>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Info:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" >{n_gbytes} GB</Typography></Grid>
+          </Grid>
         </AccordionSummary>
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
@@ -75,7 +80,10 @@ function AcquisitionStatus(props) {
 
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stats</Typography>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stats:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2">{n_seconds} seconds</Typography></Grid>
+          </Grid>
         </AccordionSummary>
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
