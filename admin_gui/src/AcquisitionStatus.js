@@ -15,9 +15,9 @@ import {
 function AcquisitionStatus(props) {
   const { state } = props;
   let status_chip;
-  let progress = state.writer.acquisition.stats.n_write_completed / state.writer.acquisition.stats.n_write_requested;
+  let progress = state.stats.n_write_completed / state.stats.n_write_requested;
 
-  switch (state.writer.acquisition.state) {
+  switch (state.state) {
     case 'READY':
       status_chip = <Chip label="Ready" color="warning" />;
       break;
@@ -46,35 +46,29 @@ function AcquisitionStatus(props) {
         <Grid item> {status_chip} </Grid>
       </Grid>
 
-<Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Acquistion progress:</Typography></Grid>
+      <Grid container alignItems="center" spacing={1}>
+        <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Acquisition progress:</Typography></Grid>
         <Grid item> {progress} </Grid>
       </Grid>
+
       <LinearProgress variant="determinate" value={progress} />
 
-
-
-
-         <Accordion>
+      <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
           <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Info</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">N requested images:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.info.n_images || 'N/A'} </Grid>
+            <Grid item> {state.info.n_images || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Output file:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.info.output_file || 'N/A'} </Grid>
+            <Grid item> {state.info.output_file || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Run ID:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.info.run_id || 'N/A'} </Grid>
-          </Grid>
-          <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">Number of written images:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.stats.n_write_completed || 'N/A'} </Grid>
+            <Grid item> {state.info.run_id || 'N/A'} </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
@@ -86,67 +80,22 @@ function AcquisitionStatus(props) {
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Start time:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.start_time || 'N/A'} </Grid>
+            <Grid item> {state.stats.start_time || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">End time:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.end_time || 'N/A'} </Grid>
+            <Grid item> {state.stats.end_time || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Number of received images:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.stats.n_write_requested || 'N/A'} </Grid>
+            <Grid item> {state.stats.n_write_requested || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Number of written images:</Typography></Grid>
-            <Grid item> {state.writer.acquisition.stats.n_write_completed || 'N/A'} </Grid>
+            <Grid item> {state.stats.n_write_completed || 'N/A'} </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
-
-
-
-      {/*    <TextField*/}
-      {/*      label="Output File"*/}
-      {/*      value={response.writer.acquisition.info.output_file}*/}
-      {/*      disabled*/}
-      {/*      fullWidth*/}
-      {/*      margin="dense"*/}
-      {/*      variant="outlined"*/}
-      {/*    />*/}
-      {/*    <TextField*/}
-      {/*      label="Number of Completed Image Writes"*/}
-      {/*      value={response.writer.acquisition.stats.n_write_completed}*/}
-      {/*      disabled*/}
-      {/*      margin="dense"*/}
-      {/*      variant="outlined"*/}
-      {/*    />*/}
-      {/*    <TextField*/}
-      {/*      label="Number of Requested Image Writes"*/}
-      {/*      value={response.writer.acquisition.stats.n_write_requested}*/}
-      {/*      disabled*/}
-      {/*      margin="dense"*/}
-      {/*      variant="outlined"*/}
-      {/*    />*/}
-      {/*    <TextField*/}
-      {/*      label="Start Time"*/}
-      {/*      value={new Date(*/}
-      {/*        response.writer.acquisition.stats.start_time * 1000*/}
-      {/*      ).toLocaleString()}*/}
-      {/*      disabled*/}
-      {/*      margin="dense"*/}
-      {/*      variant="outlined"*/}
-      {/*    />*/}
-      {/*    <TextField*/}
-      {/*      label="Stop Time"*/}
-      {/*      value={new Date(*/}
-      {/*        response.writer.acquisition.stats.stop_time * 1000*/}
-      {/*      ).toLocaleString()}*/}
-      {/*      disabled*/}
-      {/*      margin="dense"*/}
-      {/*      variant="outlined"*/}
-      {/*    />*/}
-      {/*  </FormGroup>*/}
-      {/*</FormControl>*/}
     </Paper>
   );
 }

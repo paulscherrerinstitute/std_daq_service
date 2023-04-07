@@ -52,7 +52,7 @@ function App() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={4}>
-        <AcquisitionStatus state={state} />
+        <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
       <Grid item xs={8}>
         {isVideoLoaded ? (
