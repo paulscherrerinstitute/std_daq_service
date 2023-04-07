@@ -149,3 +149,27 @@ ignore_*
 /std_daq_service/interface/start_stop/rest/static/bundle.js
 /std_daq_service/interface/start_stop/rest/static/bundle.js.LICENSE.txt
 /std_daq_service/interface/start_stop/rest/node_modules/
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+admin_gui/node_modules
+admin_gui/.pnp
+.pnp.js
+
+# testing
+admin_gui/coverage
+
+# production
+admin_gui/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
