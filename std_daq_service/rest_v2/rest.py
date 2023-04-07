@@ -55,7 +55,7 @@ def register_rest_interface(app, manager, live_stream_generator):
         daq_config = manager.get_config()
         return jsonify({"status": "ok",
                         "message": f"DAQ configured for bit_depth={daq_config['bit_depth']}.",
-                        'config': manager.daq_config})
+                        'config': daq_config})
 
     @app.route(CONFIG_ENDPOINT, methods=['POST'])
     def set_config_request():

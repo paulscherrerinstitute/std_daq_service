@@ -50,9 +50,9 @@ class AnsibleConfigDriver(object):
 
     def get_servers_facts(self):
         result = ansible_runner.run(
-                private_data_dir=self.repo_folder,
-                inventory=self.inventory_file, module='setup',
-                quiet=True, status_handler=self._status_handler
+            private_data_dir=self.repo_folder,
+            inventory=self.inventory_file, module='setup',
+            quiet=True, status_handler=self._status_handler
         )
 
         if self.status['state'] != 'successful':
@@ -62,18 +62,27 @@ class AnsibleConfigDriver(object):
 
     def configure(self):
         ansible_runner.run(
-                private_data_dir=self.repo_folder,
-                inventory=self.inventory_file, playbook=self.services_file, tags='config',
-                quiet=True, status_handler=self._status_handler, event_handler=self._event_handler
+            private_data_dir=self.repo_folder,
+            inventory=self.inventory_file, playbook=self.services_file, tags='config',
+            quiet=True, status_handler=self._status_handler, event_handler=self._event_handler
         )
 
         return self.status
 
     def deploy(self):
         result = ansible_runner.run(
-                private_data_dir=self.repo_folder,
-                inventory=self.inventory_file, playbook=self.services_file, tags='all',
-                quiet=True, status_handler=self._status_handler, event_handler=self._event_handler
+            private_data_dir=self.repo_folder,
+            inventory=self.inventory_file, playbook=self.services_file, tags='all',
+            quiet=True, status_handler=self._status_handler, event_handler=self._event_handler
         )
 
         return self.status
+
+    def get_config(self):
+        return {"detector_name": "Eiger9M",
+                "detector_type": "eiger",
+                "n_modules": 72,
+                "bit_depth": 32,
+                "image_pixel_height": 2016,
+                "image_pixel_width": 2016,
+                "start_udp_port": 2000}
