@@ -1,5 +1,6 @@
 import React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import axios from 'axios';
 
 import {
   Chip,
@@ -10,13 +11,17 @@ import {
   AccordionDetails,
   AccordionSummary,
     TextField,
-    Button
+    Button,
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 
 function WriterControl(props) {
   const { state } = props;
   const [numImages, setNumImages] = React.useState(100);
   const [outputFolder, setOutputFolder] = React.useState('/tmp/');
+  const [open, setOpen] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
+
   let status_chip;
 
   let start_button_disabled = true;
@@ -28,7 +33,7 @@ function WriterControl(props) {
       start_button_disabled = false;
       break;
     case 'WRITING':
-      status_chip = <Chip variant="outlined" label="Writing" color="error" />;
+      status_chip = <Chip variant="outlined" label="Writing" color="info" />;
       stop_button_disabled = false;
       break;
     default:
@@ -36,18 +41,38 @@ function WriterControl(props) {
       break;
   };
 
-
-
   const handleStartClick = () => {
-    // Send JSON request to REST API with numImages and outputFolder values
-    console.log('Start button clicked!');
-    console.log('Num Images: ', numImages);
-    console.log('Output Folder: ', outputFolder);
+    axios.post('http://localhost:5000/write_async', {
+      n_images: numImages,
+      output_file: outputFolder,
+    }).then(response => {
+        if (response.data.status === "error") {
+          setErrorMessage(response.data.message);
+          setOpen(true);
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data.message);
+        setOpen(true);
+      });
+  };
+
+  const handleCloseErrorDialog = () => {
+    setOpen(false);
   };
 
   const handleStopClick = () => {
-    // Send JSON request to REST API to stop writing process
-    console.log('Stop button clicked!');
+    axios.post('http://localhost:5000/stop')
+      .then(response => {
+        if (response.data.status === "error") {
+          setErrorMessage(response.data.message);
+          setOpen(true);
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data.message);
+        setOpen(true);
+      });
   };
 
   const handleNumImagesChange = (event) => {
@@ -115,6 +140,17 @@ function WriterControl(props) {
           </Grid>
         </AccordionDetails>
       </Accordion>
+
+
+      <Dialog open={open} onClose={handleCloseErrorDialog}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{errorMessage}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseErrorDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
     </Paper>
   );
