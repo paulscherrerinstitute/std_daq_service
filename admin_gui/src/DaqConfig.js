@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
 import {
   Chip,
   Grid,
@@ -44,6 +43,9 @@ function DaqConfig(props) {
         <Grid item> <Typography variant="subtitle2">Start UDP port:</Typography></Grid>
         <Grid item> {state.start_udp_port} </Grid>
       </Grid>
+
+      <Button variant="outlined" >Edit</Button>
+
     </Paper>
   );
 }
