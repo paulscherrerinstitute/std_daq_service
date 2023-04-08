@@ -14,26 +14,52 @@ import {
 
 function AcquisitionStatus(props) {
   const { state } = props;
+
+  function secondsSinceUnixTimestamp(unixTimestamp) {
+  const now = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
+  const diff = now - unixTimestamp; // difference in seconds
+  return Math.round(diff); // round to nearest second
+}
+
+
   let status_chip;
-  let progress = state.stats.n_write_completed / state.stats.n_write_requested;
-  let n_gbytes = 123.43;
-  let n_seconds = 321;
+  let progress = (state.stats.n_write_completed / state.info.n_images) * 100;
+  let progress_text = state.stats.n_write_completed + "/" + state.info.n_images;
+
+  const get_n_seconds = (start_time, stop_time) => {
+    const now = stop_time || Math.floor(Date.now() / 1000);
+    const diff = (now - start_time).toFixed(0);
+    if (diff <= -0) {
+      return 0;
+    }
+    return diff;
+  };
+  let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
+
+  function formatTimestamp(unixTimestamp) {
+    const date = new Date(unixTimestamp * 1000);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    const second = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  }
 
   switch (state.state) {
-    case 'READY':
-      status_chip = <Chip label="Ready" color="warning" />;
+    case 'WAITING_FOR_IMAGES':
+      status_chip = <Chip label="Waiting for detector" color="warning" />;
       break;
     case 'ACQUIRING_IMAGES':
-      status_chip = <Chip label="Finished" color="warning" />;
+      status_chip = <Chip label="Acquiring" color="info" />;
       break;
-      case 'FINISHED':
-         status_chip = <Chip label="Finished" color="success" />;
-          break;
+    case 'FINISHED':
+       status_chip = <Chip label="Finished" color="success" />;
+        break;
     case 'FAILED':
       status_chip = <Chip label="Failed" color="error" />;
       break;
-      // WAITING_FOR_IMAGESu
-
     default:
       status_chip = <Chip label="Unknown" color="error" />;
       break;
@@ -50,7 +76,7 @@ function AcquisitionStatus(props) {
 
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Acquisition progress:</Typography></Grid>
-        <Grid item> {progress || 0}% </Grid>
+        <Grid item> {progress.toFixed(2) || 0}% </Grid>
       </Grid>
 
       <LinearProgress variant="determinate" value={progress} />
@@ -59,20 +85,24 @@ function AcquisitionStatus(props) {
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Info:</Typography></Grid>
-            <Grid item> <Typography variant="subtitle2" >{n_gbytes} GB</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" >{n_seconds} seconds</Typography></Grid>
           </Grid>
         </AccordionSummary>
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">N requested images:</Typography></Grid>
-            <Grid item> {state.info.n_images || 'N/A'} </Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Start time:</Typography></Grid>
+            <Grid item> {state.stats.start_time || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">Output file:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stop time:</Typography></Grid>
+            <Grid item> {state.stats.stop_time || 'N/A'} </Grid>
+          </Grid>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Output file:</Typography></Grid>
             <Grid item> {state.info.output_file || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">Run ID:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Run ID:</Typography></Grid>
             <Grid item> {state.info.run_id || 'N/A'} </Grid>
           </Grid>
         </AccordionDetails>
@@ -82,24 +112,20 @@ function AcquisitionStatus(props) {
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stats:</Typography></Grid>
-            <Grid item> <Typography variant="subtitle2">{n_seconds} seconds</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2">{progress_text} images</Typography></Grid>
           </Grid>
         </AccordionSummary>
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">Start time:</Typography></Grid>
-            <Grid item> {state.stats.start_time || 'N/A'} </Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Requested images:</Typography></Grid>
+            <Grid item> {state.info.n_images || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">End time:</Typography></Grid>
-            <Grid item> {state.stats.end_time || 'N/A'} </Grid>
-          </Grid>
-          <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">Number of received images:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Buffered images:</Typography></Grid>
             <Grid item> {state.stats.n_write_requested || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2">Number of written images:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Written images:</Typography></Grid>
             <Grid item> {state.stats.n_write_completed || 'N/A'} </Grid>
           </Grid>
         </AccordionDetails>
