@@ -14,15 +14,6 @@ import {
 
 function AcquisitionStatus(props) {
   const { state } = props;
-
-  function secondsSinceUnixTimestamp(unixTimestamp) {
-  const now = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
-  const diff = now - unixTimestamp; // difference in seconds
-  return Math.round(diff); // round to nearest second
-}
-
-
-  let status_chip;
   let progress = (state.stats.n_write_completed / state.info.n_images) * 100;
   let progress_text = state.stats.n_write_completed + "/" + state.info.n_images;
 
@@ -37,6 +28,9 @@ function AcquisitionStatus(props) {
   let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
 
   function formatTimestamp(unixTimestamp) {
+    if (unixTimestamp === null) {
+      return "N/A";
+    }
     const date = new Date(unixTimestamp * 1000);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -47,12 +41,17 @@ function AcquisitionStatus(props) {
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   }
 
+  let status_chip;
+  console.log(state.state);
   switch (state.state) {
-    case 'WAITING_FOR_IMAGES':
+    case 'WAITING_IMAGES':
       status_chip = <Chip label="Waiting for detector" color="warning" />;
       break;
     case 'ACQUIRING_IMAGES':
       status_chip = <Chip label="Acquiring" color="info" />;
+      break;
+    case 'FLUSHING_IMAGES':
+      status_chip = <Chip label="Flushing" color="info" />;
       break;
     case 'FINISHED':
        status_chip = <Chip label="Finished" color="success" />;
@@ -91,11 +90,11 @@ function AcquisitionStatus(props) {
         <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Start time:</Typography></Grid>
-            <Grid item> {state.stats.start_time || 'N/A'} </Grid>
+            <Grid item> {formatTimestamp(state.stats.start_time) || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stop time:</Typography></Grid>
-            <Grid item> {state.stats.stop_time || 'N/A'} </Grid>
+            <Grid item> {formatTimestamp(state.stats.stop_time) || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Output file:</Typography></Grid>
