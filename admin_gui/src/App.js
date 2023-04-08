@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AcquisitionStatus from './AcquisitionStatus'
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
+import EditIcon from '@mui/icons-material/Edit';
 
 import {
   Chip,
@@ -29,9 +30,9 @@ function App() {
         stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
       }
     },
-    config: {
+    config: { config:{
       detector_type: '', detector_name: '', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
-      n_modules: 0, start_udp_port: 0 }
+      n_modules: 0, start_udp_port: 0 }}
   });
   const [isVideoLoaded, setIsVideoLoaded] = useState(true);
 
