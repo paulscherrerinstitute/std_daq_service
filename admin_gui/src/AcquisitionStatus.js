@@ -74,6 +74,11 @@ function AcquisitionStatus(props) {
       </Grid>
 
       <Grid container alignItems="center" spacing={1}>
+        <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Message:</Typography></Grid>
+        <Grid item> {state.message} </Grid>
+      </Grid>
+
+      <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Acquisition progress:</Typography></Grid>
         <Grid item> {progress.toFixed(2) || 0}% </Grid>
       </Grid>
