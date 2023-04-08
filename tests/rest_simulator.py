@@ -8,6 +8,8 @@ from time import time, sleep
 from flask import Flask, request, jsonify, make_response
 from threading import Thread, Event
 
+from flask_cors import CORS
+
 _logger = logging.getLogger("StartStopWriterRestInterface")
 
 
@@ -143,8 +145,10 @@ class StartStopRestManager(object):
         _logger.info("Shutting down manager.")
         self.driver.close()
 
+
 def start_rest_api(detector_name, rest_port):
     app = Flask(detector_name)
+    CORS(app)
     ctx = None
     manager = StartStopRestManager(ctx=ctx, detector_name=detector_name)
 
