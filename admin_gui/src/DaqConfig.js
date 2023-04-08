@@ -14,7 +14,7 @@ import {
 
 function DaqConfig(props) {
   const { state } = props;
-  console.log(state);
+
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
       <Typography variant="h6" gutterBottom>DAQ config</Typography>
