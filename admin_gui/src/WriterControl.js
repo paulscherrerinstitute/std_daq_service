@@ -21,8 +21,11 @@ function WriterControl(props) {
   const [outputFolder, setOutputFolder] = React.useState('/tmp/');
   const [open, setOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
+  const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
+  const [filename_example, setFilenameExample] = React.useState(generate_filename(generate_run_id(), filename_suffix));
 
   let status_chip;
+
 
   let start_button_disabled = true;
   let stop_button_disabled = true;
@@ -37,14 +40,34 @@ function WriterControl(props) {
       stop_button_disabled = false;
       break;
     default:
-      status_chip = <Chip variant="outlined" label="Unknown" color="error" />;
+      status_chip = <Chip variant="outlined" label="..." color="error" />;
       break;
   };
 
+  function generate_run_id() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hour = now.getHours().toString().padStart(2, '0');
+    const minute = now.getMinutes().toString().padStart(2, '0');
+    const second = now.getSeconds().toString().padStart(2, '0');
+    const millisecond = now.getMilliseconds().toString().padStart(3, '0');
+    const timestamp = `${year}${month}${day}_${hour}${minute}${second}.${millisecond}`;
+    return timestamp;
+  }
+
+  function generate_filename(run_id, suffix) {
+    return `${run_id}_${suffix}.h5`;
+  }
+
   const handleStartClick = () => {
+    const run_id = generate_run_id();
+
     axios.post('http://localhost:5000/write_async', {
       n_images: numImages,
-      output_file: outputFolder,
+      run_id: run_id,
+      output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' + generate_filename(run_id, filename_suffix),
     }).then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
@@ -79,6 +102,11 @@ function WriterControl(props) {
     setNumImages(event.target.value);
   };
 
+  const handleFilenameSuffixChange = (event) => {
+    setFilenameSuffix(event.target.value);
+    setFilenameExample(generate_filename(generate_run_id(), event.target.value));
+  }
+
   const handleOutputFolderChange = (event) => {
     setOutputFolder(event.target.value);
   };
@@ -109,6 +137,13 @@ function WriterControl(props) {
           </Button>
         </Grid>
       </Grid>
+
+      <Grid item fullWidth sx={{ my: 2 }}>
+        <TextField label="Filename suffix" type="text" defaultValue={filename_suffix} fullWidth onChange={handleFilenameSuffixChange}/>
+        <Typography variant="caption" color="textSecondary">Example: {filename_example}</Typography>
+      </Grid>
+
+
 
       <Accordion sx={{ mt: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
