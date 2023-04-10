@@ -67,9 +67,8 @@ function App() {
       <Grid item xs={3}>
         <WriterControl state={state.writer} />
         <AcquisitionStatus state={state.writer.acquisition} />
-        <DaqConfig state={state.config.config} />
       </Grid>
-      <Grid item xs={9}>
+      <Grid item xs={6}>
         {isVideoLoaded ? (
           <img
             src="https://example.com/mjpeg-video-stream"
@@ -79,6 +78,9 @@ function App() {
         ) : (
           <Alert severity="error">Live stream failed. Try to reload page.</Alert>
         )}
+      </Grid>
+      <Grid item xs={3}>
+        <DaqConfig state={state.config.config} />
       </Grid>
     </Grid>
   );
