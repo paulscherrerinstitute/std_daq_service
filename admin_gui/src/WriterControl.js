@@ -138,7 +138,7 @@ function WriterControl(props) {
         </Grid>
       </Grid>
 
-      <Grid item fullWidth sx={{ my: 2 }}>
+      <Grid item sx={{ my: 2 }}>
         <TextField label="Filename suffix" type="text" defaultValue={filename_suffix} fullWidth onChange={handleFilenameSuffixChange}/>
         <Typography variant="caption" color="textSecondary">Example: {filename_example}</Typography>
       </Grid>

@@ -19,6 +19,7 @@ import {
 import WriterControl from "./WriterControl";
 import DaqConfig from "./DaqConfig";
 import DaqStats from "./DaqStats";
+import LiveStream from "./LiveStream";
 
 function App() {
   const [state, setState] = useState({
@@ -35,7 +36,7 @@ function App() {
       detector_type: '...', detector_name: '...', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
       n_modules: 0, start_udp_port: 0 }}
   });
-  const [isVideoLoaded, setIsVideoLoaded] = useState(true);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,10 +60,6 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleVideoLoadError = () => {
-    setIsVideoLoaded(false);
-  };
-
   return (
     <Grid container spacing={2}>
       <Grid item xs={3}>
@@ -70,16 +67,7 @@ function App() {
         <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
       <Grid item xs={6}>
-        {isVideoLoaded ? (
-          <img
-            src="http://127.0.0.1:5001/live"
-            alt="Live video stream"
-            onError={handleVideoLoadError}
-            style={{top: 0, left: 0, width: '100%', height: 'auto' }}
-          />
-        ) : (
-          <Alert severity="error">Live stream failed. Try to reload page.</Alert>
-        )}
+        <LiveStream state={state.config.config} />
       </Grid>
       <Grid item xs={3}>
         <DaqStats state={state.config.config} />
