@@ -48,7 +48,6 @@ function AcquisitionStatus(props) {
   }
 
   let status_chip;
-  console.log(state);
   switch (state.state) {
     case 'WAITING_IMAGES':
       status_chip = <Chip label="Waiting for detector" color="warning" />;
