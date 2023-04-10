@@ -15,9 +15,15 @@ import {
 function AcquisitionStatus(props) {
   const { state } = props;
   let progress = (state.stats.n_write_completed / state.info.n_images) * 100;
+  if (!progress) {
+    progress = 0;
+  }
   let progress_text = state.stats.n_write_completed + "/" + state.info.n_images;
 
   const get_n_seconds = (start_time, stop_time) => {
+    if (!start_time) {
+      return 0;
+    }
     const now = stop_time || Math.floor(Date.now() / 1000);
     const diff = (now - start_time).toFixed(0);
     if (diff <= -0) {
@@ -42,7 +48,7 @@ function AcquisitionStatus(props) {
   }
 
   let status_chip;
-  console.log(state.state);
+  console.log(state);
   switch (state.state) {
     case 'WAITING_IMAGES':
       status_chip = <Chip label="Waiting for detector" color="warning" />;

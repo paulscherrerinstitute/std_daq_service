@@ -22,17 +22,17 @@ import DaqStats from "./DaqStats";
 
 function App() {
   const [state, setState] = useState({
-    status: "",
-    message: "",
+    status: "...",
+    message: "...",
     writer: {
-      state: "",
+      state: "...",
       acquisition: {
-        info: {},
+        info: {n_images: 0, output_file: "...", run_id: "..."},
         stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
       }
     },
     config: { config:{
-      detector_type: '', detector_name: '', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
+      detector_type: '...', detector_name: '...', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
       n_modules: 0, start_udp_port: 0 }}
   });
   const [isVideoLoaded, setIsVideoLoaded] = useState(true);
@@ -72,9 +72,10 @@ function App() {
       <Grid item xs={6}>
         {isVideoLoaded ? (
           <img
-            src="https://example.com/mjpeg-video-stream"
+            src="http://127.0.0.1:5001/live"
             alt="Live video stream"
             onError={handleVideoLoadError}
+            style={{top: 0, left: 0, width: '100%', height: 'auto' }}
           />
         ) : (
           <Alert severity="error">Live stream failed. Try to reload page.</Alert>
