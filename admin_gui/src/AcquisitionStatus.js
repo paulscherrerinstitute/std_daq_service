@@ -60,7 +60,7 @@ function AcquisitionStatus(props) {
       status_chip = <Chip label="Failed" color="error" />;
       break;
     default:
-      status_chip = <Chip label="Unknown" color="error" />;
+      status_chip = <Chip label="..." color="error" />;
       break;
   };
 
