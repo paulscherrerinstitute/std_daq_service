@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import SettingsIcon from '@material-ui/icons/Settings'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Chip,
@@ -44,7 +45,7 @@ function DaqConfig(props) {
         <Grid item> {state.start_udp_port} </Grid>
       </Grid>
 
-      <Button variant="outlined" >Edit</Button>
+      <Button variant="contained" endIcon={<SettingsIcon/>}>Edit</Button>
 
     </Paper>
   );
