@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import WriterControl from "./WriterControl";
 import DaqConfig from "./DaqConfig";
+import DaqStats from "./DaqStats";
 
 function App() {
   const [state, setState] = useState({
@@ -80,6 +81,7 @@ function App() {
         )}
       </Grid>
       <Grid item xs={3}>
+        <DaqStats state={state.config.config} />
         <DaqConfig state={state.config.config} />
       </Grid>
     </Grid>
