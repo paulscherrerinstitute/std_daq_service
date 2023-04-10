@@ -101,7 +101,7 @@ function AcquisitionStatus(props) {
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stop time:</Typography></Grid>
             <Grid item> {formatTimestamp(state.stats.stop_time) || 'N/A'} </Grid>
           </Grid>
-          <Grid container alignItems="center" spacing={1}>
+          <Grid container alignItems="center" spacing={0}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Output file:</Typography></Grid>
             <Grid item> {state.info.output_file || 'N/A'} </Grid>
           </Grid>
