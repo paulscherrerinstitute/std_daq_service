@@ -38,6 +38,10 @@ function AcquisitionLog() {
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   }
 
+  function get_duration(acq) {
+    return acq.stats.stop_time - acq.stats.start_time;
+  }
+
   function get_color_for_message(message) {
     if (!message) {
       return "error";
@@ -67,22 +71,19 @@ function AcquisitionLog() {
               <TableCell style={{ width: '50px' }}>Actions</TableCell>
               <TableCell style={{ width: '140px' }}>Stop time</TableCell>
               <TableCell style={{ width: '50px' }}>Images</TableCell>
+              <TableCell style={{ width: '50px' }}>Duration</TableCell>
               <TableCell>Message</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {acqs.map((acq, index) => (
               <TableRow key={index}>
-                {/*<TableCell style={{ width: '50px' }}><Chip label="Success" color='success' size="small" />*/}
-
-                {/*</TableCell>*/}
                <TableCell style={{ width: '50px' }}>
                   <AttachFileIcon fontSize="small"/>
                   <InfoOutlinedIcon fontSize="small"/>
                 </TableCell> <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
                 <TableCell align="right" style={{ width: '50px' }}>{acq.info.n_images}</TableCell>
-
-
+                <TableCell align="right" style={{ width: '50px' }}>{get_duration(acq).toFixed(2)}s</TableCell>
                 <TableCell>
                   <Chip label={acq.message || "N/A"} color={get_color_for_message(acq.message)} size="small" />
                   </TableCell>

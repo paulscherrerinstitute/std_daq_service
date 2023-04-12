@@ -79,23 +79,23 @@ class StartStopRestManager(object):
         self.logs = [
             {"message": "Completed", "state": "FINISHED",
              "info": {"n_images": 100, "output_file": "/tmp/test_output.h5", "run_id": 2362},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-19, "stop_time": time()}},
 
             {"message": "Completed", "state": "FINISHED",
              "info": {"n_images": 1000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-10, "stop_time": time()}},
 
             {"message": "Interrupted",
              "info": {"n_images": 10000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-7.03, "stop_time": time()}},
 
             {"message": "Error: cannot write file",
              "info": {"n_images": 100000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-6.99, "stop_time": time()}},
 
             {"message": "Interrupted",
              "info": {"n_images": 1000000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-34995.12, "stop_time": time()}},
         ]
 
     def write_sync(self, output_file, n_images):
