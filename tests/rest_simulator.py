@@ -71,6 +71,11 @@ class StartStopRestManager(object):
           "start_udp_port": 2000
         }
 
+        self.statistics = {
+            "bytes_per_second": 12345678,
+            "images_per_second": 1500
+        }
+
 
     def write_sync(self, output_file, n_images):
         if self.writer_state['state'] != "READY":
@@ -197,6 +202,12 @@ def start_rest_api(detector_name, rest_port):
         return jsonify({"status": "ok",
                         "message": f"DAQ configured for bit_depth={bit_depth}.",
                         'config': manager.daq_config})
+
+    @app.route('/stats', methods=['GET'])
+    def get_statistics():
+        return jsonify({"status": "ok",
+                        "message": f"DAQ statistics for {detector_name}.",
+                        'stats': manager.statistics})
 
     @app.route('/config', methods=['POST'])
     def set_config_request():
