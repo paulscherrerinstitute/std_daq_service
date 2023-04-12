@@ -20,6 +20,7 @@ import WriterControl from "./WriterControl";
 import DaqConfig from "./DaqConfig";
 import DaqStats from "./DaqStats";
 import LiveStream from "./LiveStream";
+import AcquisitionLog from "./AcquisitionLog";
 
 function App() {
   const [state, setState] = useState({
@@ -68,6 +69,7 @@ function App() {
       </Grid>
       <Grid item xs={6}>
         <LiveStream state={state.config.config} />
+        <AcquisitionLog />
       </Grid>
       <Grid item xs={3}>
         <DaqStats state={state.config.config} />

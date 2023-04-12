@@ -76,6 +76,22 @@ class StartStopRestManager(object):
             "images_per_second": 1500
         }
 
+        self.logs = [
+            {"info": {"n_images": 10000, "output_file": "/tmp/test_output.h5", "run_id": 2362},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
+
+            {"info": {"n_images": 20000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+
+            {"info": {"n_images": 30000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+
+            {"info": {"n_images": 20000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+
+            {"info": {"n_images": 30000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+        ]
 
     def write_sync(self, output_file, n_images):
         if self.writer_state['state'] != "READY":
@@ -208,6 +224,12 @@ def start_rest_api(detector_name, rest_port):
         return jsonify({"status": "ok",
                         "message": f"DAQ statistics for {detector_name}.",
                         'stats': manager.statistics})
+
+    @app.route('/logs', methods=['GET'])
+    def get_logs():
+        return jsonify({"status": "ok",
+                        "message": f"DAQ logs for {detector_name}.",
+                        'stats': manager.logs})
 
     @app.route('/config', methods=['POST'])
     def set_config_request():
