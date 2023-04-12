@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import SettingsIcon from '@material-ui/icons/Settings'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EditDaqConfigModal from './DaqConfigEdit';
 import {
   Chip,
   Grid,
@@ -15,9 +16,19 @@ import {
 
 function DaqConfig(props) {
   const { state } = props;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleEditButtonClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
+        <EditDaqConfigModal isOpen={isModalOpen} onClose={handleCloseModal} init_config={state} />
       <Typography variant="h6" gutterBottom>DAQ config</Typography>
 
       <Grid container alignItems="center" spacing={1}>
@@ -45,7 +56,7 @@ function DaqConfig(props) {
         <Grid item> {state.start_udp_port} </Grid>
       </Grid>
 
-      <Button variant="contained" endIcon={<SettingsIcon/>}>Edit</Button>
+      <Button variant="contained" onClick={handleEditButtonClick} endIcon={<SettingsIcon/>}>Edit</Button>
 
     </Paper>
   );
