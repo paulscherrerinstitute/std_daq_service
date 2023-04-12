@@ -22,18 +22,14 @@ function DaqStats(props) {
     setIsVideoLoaded(false);
   };
 
-  const handleNewImage = () => {
-    console.log('new_image');
-  }
-
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
       <Typography variant="h6" gutterBottom>Live stream</Typography>
       {isVideoLoaded ? (
         <img src="http://127.0.0.1:5001/live" alt="Live video stream"
              onError={handleVideoLoadError}
-             onChange={handleNewImage}
             style={{top: 0, left: 0, width: '100%', height: 'auto' }} />
+
         ) : (
           <Alert severity="error">Live stream failed. Try to reload page.</Alert>
         )}
