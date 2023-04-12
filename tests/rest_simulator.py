@@ -77,20 +77,25 @@ class StartStopRestManager(object):
         }
 
         self.logs = [
-            {"info": {"n_images": 10000, "output_file": "/tmp/test_output.h5", "run_id": 2362},
+            {"message": "Completed", "state": "FINISHED",
+             "info": {"n_images": 100, "output_file": "/tmp/test_output.h5", "run_id": 2362},
              "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
 
-            {"info": {"n_images": 20000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+            {"message": "Completed", "state": "FINISHED",
+             "info": {"n_images": 1000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
 
-            {"info": {"n_images": 30000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+            {"message": "Interrupted",
+             "info": {"n_images": 10000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
 
-            {"info": {"n_images": 20000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+            {"message": "Error: cannot write file",
+             "info": {"n_images": 100000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
 
-            {"info": {"n_images": 30000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": None}},
+            {"message": "Interrupted",
+             "info": {"n_images": 1000000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
+             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": None, "stop_time": time()}},
         ]
 
     def write_sync(self, output_file, n_images):
@@ -102,6 +107,7 @@ class StartStopRestManager(object):
                              'acquisition': {
                                  'info': {'n_images': n_images, 'output_file': output_file},
                                  'state': "FINISHED",
+                                 'message': 'Completed successfully',
                                  'stats': {'start_time': time(),
                                            'stop_time': time()+2,
                                            'n_write_requested': n_images,

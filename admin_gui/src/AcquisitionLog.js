@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Chip} from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 function AcquisitionLog() {
   const [acqs, setAcqs] = useState([]);
@@ -37,6 +38,24 @@ function AcquisitionLog() {
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   }
 
+  function get_color_for_message(message) {
+    if (!message) {
+      return "error";
+    }
+
+    if (message === "Completed") {
+      return "success";
+    }
+
+    if (message === "Interrupted") {
+      return "warning";
+    }
+
+    if (message.startsWith('Error')) {
+      return "error";
+    }
+  }
+
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
       <Typography variant="h6" gutterBottom>Acquisition Log</Typography>
@@ -44,7 +63,8 @@ function AcquisitionLog() {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell style={{ width: '50px' }}></TableCell>
+              {/*<TableCell style={{ width: '50px' }}></TableCell>*/}
+              <TableCell style={{ width: '50px' }}>Actions</TableCell>
               <TableCell style={{ width: '140px' }}>Stop time</TableCell>
               <TableCell style={{ width: '50px' }}>Images</TableCell>
               <TableCell>Message</TableCell>
@@ -53,10 +73,19 @@ function AcquisitionLog() {
           <TableBody>
             {acqs.map((acq, index) => (
               <TableRow key={index}>
-                <TableCell style={{ width: '50px' }}><Chip label="Success" color='success' size="small" /></TableCell>
-                <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
-                <TableCell style={{ width: '50px' }}>{acq.info.n_images}</TableCell>
-                <TableCell>{acq.message || "N/A"}</TableCell>
+                {/*<TableCell style={{ width: '50px' }}><Chip label="Success" color='success' size="small" />*/}
+
+                {/*</TableCell>*/}
+               <TableCell style={{ width: '50px' }}>
+                  <AttachFileIcon fontSize="small"/>
+                  <InfoOutlinedIcon fontSize="small"/>
+                </TableCell> <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
+                <TableCell align="right" style={{ width: '50px' }}>{acq.info.n_images}</TableCell>
+
+
+                <TableCell>
+                  <Chip label={acq.message || "N/A"} color={get_color_for_message(acq.message)} size="small" />
+                  </TableCell>
               </TableRow>
             ))}
           </TableBody>
