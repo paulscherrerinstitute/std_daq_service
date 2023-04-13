@@ -108,7 +108,7 @@ function DaqDeployment() {
             <Grid item> {formatTimestamp(state.stats.stop_time) || 'N/A'} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Run ID:</Typography></Grid>
+            <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Deployment ID:</Typography></Grid>
             <Grid item> {state.deployment_id || 'N/A'} </Grid>
           </Grid>
         </AccordionDetails>

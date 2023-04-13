@@ -83,7 +83,7 @@ class StartStopRestManager(object):
         self.deployment = {
             'status': 'SUCCESS',
             'deployment_id': '1234',
-            'stats': {'start_time': time() - 5, 'end_time': time()}
+            'stats': {'start_time': time() - 5, 'stop_time': time()}
         }
 
     def write_sync(self, output_file, n_images):

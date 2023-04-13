@@ -34,6 +34,8 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   const handleSaveAndDeploy = () => {
     // Perform save and deploy logic here
     console.log('Saving and deploying daq config:', config);
+
+    onClose();
   };
 
   return (
