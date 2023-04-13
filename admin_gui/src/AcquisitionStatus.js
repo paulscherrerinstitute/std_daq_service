@@ -34,7 +34,7 @@ function AcquisitionStatus(props) {
   let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
 
   function formatTimestamp(unixTimestamp) {
-    if (unixTimestamp === null) {
+    if (!unixTimestamp) {
       return "N/A";
     }
     const date = new Date(unixTimestamp * 1000);
