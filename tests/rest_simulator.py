@@ -1,8 +1,10 @@
 import argparse
+import copy
 import logging
 import json
 import os
 import re
+from collections import deque
 
 from time import time, sleep
 from flask import Flask, request, jsonify, make_response
@@ -76,27 +78,7 @@ class StartStopRestManager(object):
             "images_per_second": 1500
         }
 
-        self.logs = [
-            {"message": "Completed", "state": "FINISHED",
-             "info": {"n_images": 100, "output_file": "/tmp/test_output.h5", "run_id": 2362},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-19, "stop_time": time()}},
-
-            {"message": "Completed", "state": "FINISHED",
-             "info": {"n_images": 1000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-10, "stop_time": time()}},
-
-            {"message": "Interrupted",
-             "info": {"n_images": 10000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-7.03, "stop_time": time()}},
-
-            {"message": "Error: cannot write file",
-             "info": {"n_images": 100000, "output_file": "/tmp/test_output1.h5", "run_id": 36132},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-6.99, "stop_time": time()}},
-
-            {"message": "Interrupted",
-             "info": {"n_images": 1000000, "output_file": "/tmp/test_output2.h5", "run_id": 52332},
-             "stats": {"n_write_completed": 0, "n_write_requested": 0, "start_time": time()-34995.12, "stop_time": time()}},
-        ]
+        self.logs = deque(maxlen=50)
 
     def write_sync(self, output_file, n_images):
         if self.writer_state['state'] != "READY":
@@ -137,6 +119,8 @@ class StartStopRestManager(object):
         self.writer_state['acquisition']['stats']['n_write_completed'] = \
         self.writer_state['acquisition']['stats']['n_write_requested']
         self.writer_state['state'] = 'READY'
+
+        self.logs.append(copy.deepcopy(self.writer_state['acquisition']))
 
     def write_async(self, output_file, n_images):
         if self.writer_state['state'] != "READY":
@@ -235,7 +219,7 @@ def start_rest_api(detector_name, rest_port):
     def get_logs(n_logs):
         return jsonify({"status": "ok",
                         "message": f"DAQ logs for {detector_name}.",
-                        'logs': manager.logs[:n_logs]})
+                        'logs': list(manager.logs)[-n_logs:]})
 
     @app.route('/config', methods=['POST'])
     def set_config_request():

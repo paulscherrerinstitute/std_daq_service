@@ -23,7 +23,7 @@ function AcquisitionLog() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get('http://localhost:5000/logs/3');
+        const result = await axios.get('http://localhost:5000/logs/5');
 
         if (result.data.status === 'ok') {
           setAcqs(result.data.logs);
