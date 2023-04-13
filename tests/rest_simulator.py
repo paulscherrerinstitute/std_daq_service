@@ -102,14 +102,18 @@ class StartStopRestManager(object):
         n_images = self.writer_state['acquisition']['info']['n_images']
 
         for i in range(n_images):
-            sleep(1)
+            sleep(0.1)
 
             if self.stop_event.is_set():
+                self.writer_state['acquisition']['message'] = 'Interrupted'
                 break
 
             self.writer_state['acquisition']['state'] = 'ACQUIRING_IMAGES'
             self.writer_state['acquisition']['stats']['n_write_requested'] = i + 1
             self.writer_state['acquisition']['stats']['n_write_completed'] = i
+
+        else:
+            self.writer_state['acquisition']['message'] = 'Completed'
 
         self.writer_state['acquisition']['state'] = 'FLUSHING_IMAGES'
         sleep(2)
