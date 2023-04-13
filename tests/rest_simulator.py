@@ -231,11 +231,11 @@ def start_rest_api(detector_name, rest_port):
                         "message": f"DAQ statistics for {detector_name}.",
                         'stats': manager.statistics})
 
-    @app.route('/logs', methods=['GET'])
-    def get_logs():
+    @app.route('/logs/<int:n_logs>', methods=['GET'])
+    def get_logs(n_logs):
         return jsonify({"status": "ok",
                         "message": f"DAQ logs for {detector_name}.",
-                        'stats': manager.logs})
+                        'logs': manager.logs[:n_logs]})
 
     @app.route('/config', methods=['POST'])
     def set_config_request():
