@@ -80,6 +80,12 @@ class StartStopRestManager(object):
 
         self.logs = deque(maxlen=50)
 
+        self.deployment = {
+            'status': 'SUCCESS',
+            'deployment_id': '1234',
+            'stats': {'start_time': time() - 5, 'end_time': time()}
+        }
+
     def write_sync(self, output_file, n_images):
         if self.writer_state['state'] != "READY":
             raise RuntimeError('Cannot start writing until writer state is READY. '
@@ -224,6 +230,12 @@ def start_rest_api(detector_name, rest_port):
         return jsonify({"status": "ok",
                         "message": f"DAQ logs for {detector_name}.",
                         'logs': list(manager.logs)[-n_logs:]})
+    @app.route('/deployment', methods=['GET'])
+    def get_deployment_status():
+
+        return jsonify({"status": "ok",
+                        "message": f"Deployment for {detector_name}.",
+                        'deployment': manager.deployment})
 
     @app.route('/config', methods=['POST'])
     def set_config_request():

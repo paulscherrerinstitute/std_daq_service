@@ -21,6 +21,7 @@ import DaqConfig from "./DaqConfig";
 import DaqStats from "./DaqStats";
 import LiveStream from "./LiveStream";
 import AcquisitionLog from "./AcquisitionLog";
+import DaqDeployment from "./DaqDeployment";
 
 function App() {
   const [state, setState] = useState({
@@ -74,6 +75,7 @@ function App() {
       <Grid item xs={3}>
         <DaqStats state={state.config.config} />
         <DaqConfig state={state.config.config} />
+        <DaqDeployment/>
       </Grid>
     </Grid>
   );
