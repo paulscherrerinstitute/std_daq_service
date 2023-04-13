@@ -17,7 +17,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
 
   useEffect(() => {
     setConfig(init_config);
-  }, []);
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
