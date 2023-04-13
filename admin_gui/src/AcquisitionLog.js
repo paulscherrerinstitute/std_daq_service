@@ -1,21 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Chip} from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Chip,
+  Alert
+} from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 function AcquisitionLog() {
-  const [acqs, setAcqs] = useState([]);
+  const [acqs, setAcqs] = useState([{stats: '...', info: '...'}]);
+  const [restError, setRestError] = useState(false);
+  const [restErrorText, setRestErrorText] = useState("Unknown")
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get('http://localhost:5000/logs');
-        setAcqs(result.data.stats);
+        const result = await axios.get('http://localhost:5000/logs/3');
+
+        if (result.data.status === 'ok') {
+          setAcqs(result.data.logs);
+          setRestError(false);
+        } else {
+          setRestError(true);
+          setRestErrorText(result.data.message);
+          console.log(result.data);
+        }
+
       } catch (error) {
-        console.error('Error fetching acquisition log:', error);
+        setRestError(true);
+        setRestErrorText(error.message);
+        console.log(error);
       }
-    };
+    }
 
     const interval = setInterval(() => {
       fetchData();
@@ -63,6 +87,9 @@ function AcquisitionLog() {
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
       <Typography variant="h6" gutterBottom>Acquisition Log</Typography>
+      {restError ? (
+           <Alert severity="error">Log loading failed. Error message: {restErrorText}</Alert>
+          ) : (
       <TableContainer>
         <Table size="small">
           <TableHead>
@@ -92,8 +119,9 @@ function AcquisitionLog() {
           </TableBody>
         </Table>
       </TableContainer>
+          )}
     </Paper>
-  );
+  )
 }
 
 export default AcquisitionLog;
