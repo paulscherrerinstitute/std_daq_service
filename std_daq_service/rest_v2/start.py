@@ -7,6 +7,7 @@ from flask import Flask
 
 from std_daq_service.rest_v2.deployment import AnsibleConfigDriver
 from std_daq_service.rest_v2.simulation import UdpSimulatorManager
+from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 from std_daq_service.rest_v2.manager import StartStopRestManager, generate_mjpg_image_stream
@@ -32,10 +33,12 @@ def start_api(beamline_name, detector_config, rest_port):
 
     writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
     config_driver = AnsibleConfigDriver()
+    stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
+
     rest_manager = StartStopRestManager(ctx, writer_driver, config_driver)
     sim_manager = UdpSimulatorManager(detector_type)
 
-    register_rest_interface(app, rest_manager, generate_mjpg_image_stream, sim_manager)
+    register_rest_interface(app, rest_manager, generate_mjpg_image_stream, sim_manager, stats_driver, detector_name)
 
     try:
         app.run(host='0.0.0.0', port=rest_port)

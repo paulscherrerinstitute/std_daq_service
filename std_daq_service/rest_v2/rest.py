@@ -20,7 +20,7 @@ DAQ_LOGS_ENDPOINT = '/daq/logs'
 DEPLOYMENT_STATUS_ENDPOINT = '/deployment/status'
 
 
-def register_rest_interface(app, manager, live_stream_generator, sim_manager):
+def register_rest_interface(app, manager, live_stream_generator, sim_manager, stats_driver, detector_name):
 
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
@@ -94,7 +94,10 @@ def register_rest_interface(app, manager, live_stream_generator, sim_manager):
 
     @app.route(DAQ_STATS_ENDPOINT)
     def get_daq_stats_request():
-        pass
+        stats = stats_driver.get_stats()
+        return jsonify({"status": "ok",
+                        "message": f"DAQ statistics for {detector_name}.",
+                        'stats': stats})
 
     @app.route(DAQ_LOGS_ENDPOINT)
     def get_daq_logs_request():
