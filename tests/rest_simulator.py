@@ -86,6 +86,13 @@ class StartStopRestManager(object):
             'stats': {'start_time': time() - 5, 'stop_time': time()}
         }
 
+        self.simulator = {
+            'status': 'READY',
+            'stats': {
+                'bytes_per_second': 0,
+                'images_per_second': 0}
+        }
+
     def write_sync(self, output_file, n_images):
         if self.writer_state['state'] != "READY":
             raise RuntimeError('Cannot start writing until writer state is READY. '
@@ -230,12 +237,39 @@ def start_rest_api(detector_name, rest_port):
         return jsonify({"status": "ok",
                         "message": f"DAQ logs for {detector_name}.",
                         'logs': list(manager.logs)[-n_logs:]})
-    @app.route('/deployment', methods=['GET'])
-    def get_deployment_status():
 
+    @app.route('/deployment/status', methods=['GET'])
+    def get_deployment_status():
         return jsonify({"status": "ok",
                         "message": f"Deployment for {detector_name}.",
                         'deployment': manager.deployment})
+
+    @app.route('/simulator/status', methods=['GET'])
+    def get_simulator_status():
+        return jsonify({"status": "ok",
+                        "message": f"Simulator for {detector_name}.",
+                        'simulator': manager.simulator})
+
+
+    @ app.route('/simulator/start', methods=['POST'])
+    def start_simulator():
+        manager.simulator = {
+            'status': 'STREAMING',
+            'stats': {
+                'bytes_per_second': 1024 * 1024 * 2,
+                'images_per_second': 10}
+        }
+        return get_simulator_status()
+
+    @ app.route('/simulator/stop', methods=['POST'])
+    def stop_simulator():
+        manager.simulator = {
+            'status': 'READY',
+            'stats': {
+                'bytes_per_second': 0,
+                'images_per_second': 0}
+        }
+        return get_simulator_status()
 
     @app.route('/config', methods=['POST'])
     def set_config_request():

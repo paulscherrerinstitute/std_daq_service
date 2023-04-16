@@ -22,6 +22,7 @@ import DaqStats from "./DaqStats";
 import LiveStream from "./LiveStream";
 import AcquisitionLog from "./AcquisitionLog";
 import DaqDeployment from "./DaqDeployment";
+import SimulatorControl from "./SimulatorControl";
 
 function App() {
   const [state, setState] = useState({
@@ -76,6 +77,7 @@ function App() {
         <DaqStats state={state.config.config} />
         <DaqConfig state={state.config.config} />
         <DaqDeployment/>
+        <SimulatorControl/>
       </Grid>
     </Grid>
   );
