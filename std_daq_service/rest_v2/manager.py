@@ -44,6 +44,9 @@ class StartStopRestManager(object):
 
         return new_config
 
+    def get_logs(self, n_logs):
+        return self.writer_driver.status.get_logs(n_logs)
+
     def close(self):
         _logger.info("Shutting down manager.")
         self.writer_driver.close()

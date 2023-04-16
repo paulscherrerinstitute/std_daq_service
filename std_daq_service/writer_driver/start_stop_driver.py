@@ -1,3 +1,5 @@
+import copy
+from collections import deque
 from threading import Thread, Event, Lock
 from google.protobuf.json_format import MessageToDict
 from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata
@@ -13,6 +15,7 @@ WRITER_STATUS_TIMEOUT_MS = 500
 # In seconds.
 RECV_TIMEOUT_MS = 200
 SYNC_WINDOW_SIZE = 2
+N_LOGS = 50
 
 WRITER_STATUS_POLL_INTERVAL = 0.5
 WRITER_STATUS_POLL_N_ATTEMPTS = 10
@@ -31,6 +34,7 @@ class WriterStatusTracker(object):
 
         self.last_status_send_time = 0
         self._current_run_id = None
+        self.logs = deque(maxlen=N_LOGS)
 
         self.status_receiver = self.ctx.socket(zmq.PULL)
         self.status_receiver.RCVTIMEO = WRITER_STATUS_TIMEOUT_MS
@@ -114,6 +118,7 @@ class WriterStatusTracker(object):
             self.status['state'] = 'READY'
             self.status['acquisition']['state'] = 'FINISHED'
             self.status['acquisition']['stats']['stop_time'] = time()
+            self.logs.append(copy.deepcopy(self.status['acquisition']))
 
         self._current_run_id = None
 
@@ -129,6 +134,9 @@ class WriterStatusTracker(object):
 
         with self.status_lock:
             self.status['acquisition']['stats']['n_write_requested'] += 1
+
+    def get_logs(self, n_logs):
+        return self.logs[-n_logs:]
 
     def close(self):
         _logger.info("Closing writer status.")
@@ -175,6 +183,8 @@ class WriterDriver(object):
 
         self.image_meta = ImageMetadata()
         self.writer_command = WriterCommand()
+
+        self.logs = deque(maxlen=50)
 
         self.communication_t = Thread(target=self._communication_thread)
         self.communication_t.start()
@@ -296,3 +306,5 @@ class WriterDriver(object):
         else:
             raise RuntimeError(f"Writer cannot reach target_state={target_state}. Last status:\n{status}")
 
+    def get_logs(self, n_logs=5):
+        return []

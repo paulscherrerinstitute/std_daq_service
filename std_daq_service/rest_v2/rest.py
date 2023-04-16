@@ -15,7 +15,7 @@ SIM_STOP_ENDPOINT = '/simulation/stop'
 DAQ_LIVE_STREAM_ENDPOINT = '/daq/live'
 DAQ_CONFIG_ENDPOINT = '/daq/config'
 DAQ_STATS_ENDPOINT = '/daq/stats'
-DAQ_LOGS_ENDPOINT = '/daq/logs'
+DAQ_LOGS_ENDPOINT = '/daq/logs/<int:n_logs>'
 
 DEPLOYMENT_STATUS_ENDPOINT = '/deployment/status'
 
@@ -62,15 +62,20 @@ def register_rest_interface(app, manager, live_stream_generator, sim_manager, st
 
     @app.route(SIM_STATUS_ENDPOINT)
     def get_sim_status_request():
-        pass
+        status = sim_manager.get_status()
+        return jsonify({"status": "ok",
+                        "message": f"Simulator for {detector_name}.",
+                        'simulator': status})
 
     @app.route(SIM_START_ENDPOINT)
     def start_sim_request():
-        pass
+        sim_manager.start()
+        return get_sim_status_request()
 
     @app.route(SIM_STOP_ENDPOINT)
     def stop_sim_request():
-        pass
+        sim_manager.stop()
+        return get_sim_status_request()
 
     @app.route(DAQ_LIVE_STREAM_ENDPOINT)
     def get_daq_live_stream_request():
@@ -100,8 +105,11 @@ def register_rest_interface(app, manager, live_stream_generator, sim_manager, st
                         'stats': stats})
 
     @app.route(DAQ_LOGS_ENDPOINT)
-    def get_daq_logs_request():
-        pass
+    def get_daq_logs_request(n_logs):
+        logs = manager.get_logs(n_logs)
+        return jsonify({"status": "ok",
+                        "message": f"DAQ logs for {detector_name}.",
+                        'logs': logs})
 
     @app.route(DEPLOYMENT_STATUS_ENDPOINT)
     def get_deployment_status_request():
