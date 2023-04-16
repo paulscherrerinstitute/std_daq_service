@@ -4,8 +4,8 @@ import logging
 import zmq
 from flask import Flask
 
-from std_daq_service.rest_v2.ansible import AnsibleConfigDriver
-from std_daq_service.writer_driver.start_stop import WriterDriver
+from std_daq_service.rest_v2.deployment import AnsibleConfigDriver
+from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 from std_daq_service.rest_v2.manager import StartStopRestManager, generate_mjpg_image_stream
 from std_daq_service.rest_v2.rest import register_rest_interface
 from std_daq_service.writer_driver.utils import get_stream_addresses
@@ -27,6 +27,7 @@ def start_api(beamline_name, detector_name, rest_port):
     writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
     config_driver = AnsibleConfigDriver()
     rest_manager = StartStopRestManager(ctx, writer_driver, config_driver)
+    sim_manager = SimulationRestManager()
 
     register_rest_interface(app, rest_manager, generate_mjpg_image_stream)
 

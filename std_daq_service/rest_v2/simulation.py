@@ -2,7 +2,7 @@ import logging
 import threading
 from threading import Event
 
-from std_daq_service.udp_simulator.generator.gigafrost import GFUdpPacketGenerator
+from std_daq_service.det_udp_simulator.generator.gigafrost import GFUdpPacketGenerator
 
 _logger = logging.getLogger("StartStopRestManager")
 
