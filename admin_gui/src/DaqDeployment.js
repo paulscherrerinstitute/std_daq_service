@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import LaunchIcon from '@material-ui/icons/Launch';
-import SettingsIcon from '@material-ui/icons/Settings'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Chip,
@@ -10,15 +8,13 @@ import {
     Accordion,
   AccordionDetails,
   AccordionSummary,
-    TextField,
-    Button
 } from '@mui/material';
 import axios from "axios";
 
 function DaqDeployment() {
   const [ state, setState ] = useState(
-      {status: '...', message: '...', deployment_id: '...', stats: {start_time: 0, end_time: 0}});
-  const deployment_url = "http://localhost:5000/deployment";
+      {status: '...', message: '...', deployment_id: 'N/A', stats: {start_time: 0, end_time: 0}});
+  const deployment_url = "http://localhost:5000/deployment/status";
 
   let status_chip;
   switch (state.status) {
@@ -40,6 +36,7 @@ function DaqDeployment() {
     if (!unixTimestamp) {
       return "N/A";
     }
+
     const date = new Date(unixTimestamp * 1000);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -47,6 +44,7 @@ function DaqDeployment() {
     const hour = String(date.getHours()).padStart(2, '0');
     const minute = String(date.getMinutes()).padStart(2, '0');
     const second = String(date.getSeconds()).padStart(2, '0');
+
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   }
 
@@ -62,7 +60,6 @@ function DaqDeployment() {
     return diff;
   };
   let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,7 +84,7 @@ function DaqDeployment() {
       </Grid>
 
       <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2">Message:</Typography></Grid>
+        <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Message:</Typography></Grid>
         <Grid item> {state.message} </Grid>
       </Grid>
 
@@ -98,18 +95,18 @@ function DaqDeployment() {
             <Grid item> <Typography variant="subtitle2" >{n_seconds} seconds</Typography></Grid>
           </Grid>
         </AccordionSummary>
-          <AccordionDetails>
+        <AccordionDetails>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Start time:</Typography></Grid>
-            <Grid item> {formatTimestamp(state.stats.start_time) || 'N/A'} </Grid>
+            <Grid item> {formatTimestamp(state.stats.start_time)} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Stop time:</Typography></Grid>
-            <Grid item> {formatTimestamp(state.stats.stop_time) || 'N/A'} </Grid>
+            <Grid item> {formatTimestamp(state.stats.stop_time)} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Deployment ID:</Typography></Grid>
-            <Grid item> {state.deployment_id || 'N/A'} </Grid>
+            <Grid item> {state.deployment_id} </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
