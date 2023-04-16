@@ -2,11 +2,14 @@ import logging
 import threading
 from threading import Event
 
-from std_daq_service.det_udp_simulator.generator.gigafrost import GFUdpPacketGenerator
+from std_daq_service.det_udp_simulator.gigafrost import GFUdpPacketGenerator
 
 _logger = logging.getLogger("StartStopRestManager")
 
-DETECTOR_GF = 'gf'
+DETECTOR_GF = 'gigafrost'
+DETECTOR_JF = 'jungfrau'
+DETECTOR_EG = 'eiger'
+
 
 class UdpSimulatorManager(object):
     def __init__(self, detector_type):
@@ -18,7 +21,7 @@ class UdpSimulatorManager(object):
         self.stop_event = Event()
         self._generator_thread = threading.Thread()
 
-    def start(self, n_images):
+    def start(self, n_images=None):
         pass
 
     def stop(self):
