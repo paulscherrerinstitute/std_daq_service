@@ -76,12 +76,12 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
                         "message": f"Simulator for {detector_name}.",
                         'simulator': status})
 
-    @app.route(SIM_START_ENDPOINT)
+    @app.route(SIM_START_ENDPOINT, methods=['POST'])
     def start_sim_request():
         sim_manager.start()
         return get_sim_status_request()
 
-    @app.route(SIM_STOP_ENDPOINT)
+    @app.route(SIM_STOP_ENDPOINT, methods=['POST'])
     def stop_sim_request():
         sim_manager.stop()
         return get_sim_status_request()
