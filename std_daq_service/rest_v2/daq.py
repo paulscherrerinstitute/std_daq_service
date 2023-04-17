@@ -63,7 +63,18 @@ class AnsibleConfigDriver(object):
 
         return self.status, result
 
-    def configure(self):
+    def get_config(self):
+        return {"detector_name": "Eiger9M",
+                "detector_type": "eiger",
+                "n_modules": 72,
+                "bit_depth": 32,
+                "image_pixel_height": 2016,
+                "image_pixel_width": 2016,
+                "start_udp_port": 2000}
+
+    def set_config(self, daq_config):
+        # TODO: Overwrite the proper config file.
+
         ansible_runner.run(
             private_data_dir=self.repo_folder,
             inventory=self.inventory_file, playbook=self.services_file, tags='config',
@@ -81,37 +92,31 @@ class AnsibleConfigDriver(object):
 
         return self.status
 
-    def get_config(self):
-        return {"detector_name": "Eiger9M",
-                "detector_type": "eiger",
-                "n_modules": 72,
-                "bit_depth": 32,
-                "image_pixel_height": 2016,
-                "image_pixel_width": 2016,
-                "start_udp_port": 2000}
-
 
 class DaqRestManager(object):
-    def __init__(self, daq_config, stats_driver: ImageMetadataStatsDriver, config_driver: AnsibleConfigDriver):
-        self.daq_config = daq_config
+    def __init__(self, stats_driver: ImageMetadataStatsDriver, config_driver: AnsibleConfigDriver):
         self.stats_driver = stats_driver
         self.config_driver = config_driver
+        self.deployment_status = config_driver.status
+
+    def _set_status(self, deployment_status):
+        self.deployment_status = deployment_status
 
     def get_config(self):
         return self.config_driver.get_config()
 
     def set_config(self, config_updates):
-        new_config = update_config(self.get_config(), config_updates)
-        self.config_driver.deploy_config(new_config)
+        new_daq_config = update_config(self.get_config(), config_updates)
+        self.config_driver.deploy(new_daq_config)
 
     def get_stats(self):
-        pass
+        return self.stats_driver.get_stats()
 
-    def get_logs(self, n_logs):
-        pass
+    def get_logs(self, n_logs=0):
+        return list(self.stats_driver.get_stats())[-n_logs:]
 
     def get_deployment_status(self):
-        pass
+        return self.deployment_status
 
     def close(self):
-        pass
+        self.stats_driver.close()

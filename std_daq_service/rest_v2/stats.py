@@ -1,3 +1,4 @@
+from copy import deepcopy
 from threading import Thread, Event
 from time import time
 
