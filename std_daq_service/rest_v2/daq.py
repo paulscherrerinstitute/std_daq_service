@@ -3,6 +3,7 @@ import time
 
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import update_config
+from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
 DEFAULT_DEPLOYMENT_FOLDER = '/etc/std_daq/deployment'
 INVENTORY_FILE = '/inventory.yml'
@@ -21,7 +22,8 @@ class AnsibleConfigDriver(object):
         self.services_file = ansible_repo_folder + SERVICE_FILE
         self.inventory_file = ansible_repo_folder + INVENTORY_FILE
 
-        self.status = {'state': None, 'status': None, 'deployment_id': None, 'deployment_start': None}
+        self.status = {'state': 'Done', 'status': 'Deployment completed.', 'deployment_id': None,
+                       'stats': {'start_time': 0, 'end_time': 0}}
         self.status_callback = status_callback
 
     def _status_handler(self, data, runner_config):
@@ -94,10 +96,12 @@ class AnsibleConfigDriver(object):
 
 
 class DaqRestManager(object):
-    def __init__(self, stats_driver: ImageMetadataStatsDriver, config_driver: AnsibleConfigDriver):
+    def __init__(self, stats_driver: ImageMetadataStatsDriver, config_driver: AnsibleConfigDriver,
+                 writer_driver: WriterDriver):
         self.stats_driver = stats_driver
         self.config_driver = config_driver
         self.deployment_status = config_driver.status
+        self.writer_driver = writer_driver
 
     def _set_status(self, deployment_status):
         self.deployment_status = deployment_status
@@ -112,8 +116,8 @@ class DaqRestManager(object):
     def get_stats(self):
         return self.stats_driver.get_stats()
 
-    def get_logs(self, n_logs=0):
-        return list(self.stats_driver.get_stats())[-n_logs:]
+    def get_logs(self, n_logs):
+        return self.writer_driver.get_logs(n_logs)
 
     def get_deployment_status(self):
         return self.deployment_status

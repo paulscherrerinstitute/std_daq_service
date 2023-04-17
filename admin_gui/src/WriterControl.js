@@ -64,7 +64,7 @@ function WriterControl(props) {
   const handleStartClick = () => {
     const run_id = generate_run_id();
 
-    axios.post('http://localhost:5000/write_async', {
+    axios.post('http://localhost:5000/writer/write_async', {
       n_images: numImages,
       run_id: run_id,
       output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' + generate_filename(run_id, filename_suffix),

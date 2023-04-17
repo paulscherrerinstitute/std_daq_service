@@ -123,5 +123,5 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(DAQ_DEPLOYMENT_STATUS_ENDPOINT)
     def get_deployment_status_request():
         return jsonify({"status": "ok",
-                        "message": f"DAQ logs for {detector_name}.",
+                        "message": f"Deployment status for {detector_name}.",
                         'deployment': daq_manager.get_deployment_status()})

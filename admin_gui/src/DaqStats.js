@@ -23,7 +23,7 @@ function DaqStats() {
 
   const n_images = state.images_per_second;
   const frequency_text = `${n_images.toFixed(2)} Hz`;
-  const stats_url = "http://localhost:5000/stats";
+  const stats_url = "/daq/stats";
 
   let status_chip;
   if (n_mbytes > 0) {

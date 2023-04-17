@@ -136,7 +136,7 @@ class WriterStatusTracker(object):
             self.status['acquisition']['stats']['n_write_requested'] += 1
 
     def get_logs(self, n_logs):
-        return self.logs[-n_logs:]
+        return list(self.logs)[-n_logs:]
 
     def close(self):
         _logger.info("Closing writer status.")
@@ -306,5 +306,5 @@ class WriterDriver(object):
         else:
             raise RuntimeError(f"Writer cannot reach target_state={target_state}. Last status:\n{status}")
 
-    def get_logs(self, n_logs=5):
-        return []
+    def get_logs(self, n_logs):
+        return self.status.get_logs(n_logs)

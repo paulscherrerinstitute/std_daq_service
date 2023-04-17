@@ -36,7 +36,7 @@ def start_api(beamline_name, daq_config, rest_port):
 
     stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
     config_driver = AnsibleConfigDriver()
-    daq_manager = DaqRestManager(stats_driver=stats_driver, config_driver=config_driver)
+    daq_manager = DaqRestManager(stats_driver=stats_driver, config_driver=config_driver, writer_driver=writer_driver)
 
     sim_manager = SimulationRestManager(daq_config=daq_config)
 

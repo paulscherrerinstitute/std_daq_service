@@ -14,7 +14,20 @@ import axios from "axios";
 function DaqDeployment() {
   const [ state, setState ] = useState(
       {status: '...', message: '...', deployment_id: 'N/A', stats: {start_time: 0, end_time: 0}});
-  const deployment_url = "http://localhost:5000/deployment/status";
+  const deployment_url = "/daq/deployment";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios(deployment_url);
+      setState(result.data.deployment);
+    };
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   let status_chip;
   switch (state.status) {
@@ -61,18 +74,7 @@ function DaqDeployment() {
   };
   let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios(deployment_url);
-      setState(result.data.deployment);
-    };
 
-    const interval = setInterval(() => {
-      fetchData();
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>

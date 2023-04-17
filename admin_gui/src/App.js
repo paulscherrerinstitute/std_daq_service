@@ -33,11 +33,11 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'http://localhost:5000/writer/status'
+        '/writer/status'
       );
 
       const result_config = await axios(
-        'http://localhost:5000/daq/config'
+        '/daq/config'
       );
 
       let new_data = result.data;

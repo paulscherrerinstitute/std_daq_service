@@ -32,7 +32,7 @@ function SimulatorControl(props) {
    useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get('http://localhost:5000/simulator/status');
+        const result = await axios.get('/simulation/status');
 
         if (result.data.status === 'ok') {
           setState(result.data.simulator);
@@ -72,7 +72,7 @@ function SimulatorControl(props) {
   }
 
   const handleStartClick = () => {
-    axios.post('http://localhost:5000/simulator/start').then(response => {
+    axios.post('/simulation/start').then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
           setOpen(true);
@@ -89,7 +89,7 @@ function SimulatorControl(props) {
   };
 
   const handleStopClick = () => {
-    axios.post('http://localhost:5000/simulator/stop')
+    axios.post('/simulation/stop')
       .then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
