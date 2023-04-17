@@ -1,6 +1,7 @@
 import logging
 
 import cv2
+import numpy as np
 import zmq
 
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver

@@ -11,7 +11,8 @@ setup(
         'tifffile',
         'protobuf',
         'flask',
-        'flask-cors'
+        'flask-cors',
+        'numpy'
     ],
     entry_points='''
         [console_scripts]
