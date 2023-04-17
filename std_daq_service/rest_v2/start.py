@@ -43,6 +43,8 @@ def start_api(beamline_name, daq_config, rest_port):
     register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_manager=sim_manager)
 
     try:
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
         app.run(host='0.0.0.0', port=rest_port)
     finally:
         _logger.info("Starting shutdown procedure.")
