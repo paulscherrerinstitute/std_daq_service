@@ -11,7 +11,7 @@ from std_daq_service.rest_v2.simulation import SimulationRestManager
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
-from std_daq_service.rest_v2.writer import WriterRestManager, generate_mjpg_image_stream
+from std_daq_service.rest_v2.writer import WriterRestManager
 from std_daq_service.rest_v2.rest import register_rest_interface
 from std_daq_service.writer_driver.utils import get_stream_addresses
 from flask_cors import CORS
@@ -21,14 +21,13 @@ _logger = logging.getLogger(__name__)
 
 def start_api(beamline_name, daq_config, rest_port):
     detector_name = daq_config['detector_name']
-    detector_type = daq_config['detector_type']
 
     _logger.info(f'Starting Start Stop REST for detector_name={detector_name} on beamline_name={beamline_name} '
                  f'(rest_port={rest_port}).')
 
     command_address, in_status_address, out_status_address, image_metadata_address = get_stream_addresses(detector_name)
 
-    app = Flask(detector_name, template_folder='static/')
+    app = Flask(detector_name, static_folder='static')
     CORS(app)
     ctx = zmq.Context()
 

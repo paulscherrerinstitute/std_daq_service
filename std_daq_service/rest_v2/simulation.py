@@ -45,7 +45,8 @@ class SimulationRestManager(object):
 
     def stop(self):
         self.stop_event.set()
-        self._generator_thread.join()
+        if self._generator_thread is not None:
+            self._generator_thread.join()
 
         self.status = 'READY'
         self._generator_thread = None

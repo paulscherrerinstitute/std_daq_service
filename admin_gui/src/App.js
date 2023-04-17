@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AcquisitionStatus from './AcquisitionStatus'
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import EditIcon from '@mui/icons-material/Edit';
 
 import {
-  Chip,
-  Grid,
-  Stack,
-  Alert,
-  FormControl,
-  FormLabel,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  TextField, Paper, Typography
+  Grid
 } from '@mui/material';
 import WriterControl from "./WriterControl";
 import DaqConfig from "./DaqConfig";
@@ -44,11 +33,11 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'http://localhost:5000/status'
+        'http://localhost:5000/writer/status'
       );
 
       const result_config = await axios(
-        'http://localhost:5000/config'
+        'http://localhost:5000/daq/config'
       );
 
       let new_data = result.data;
