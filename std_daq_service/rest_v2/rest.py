@@ -1,4 +1,4 @@
-from flask import request, jsonify, Response
+from flask import request, jsonify, Response, render_template, send_from_directory
 
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import get_parameters_from_write_request
@@ -22,9 +22,13 @@ DAQ_LOGS_ENDPOINT = '/daq/logs/<int:n_logs>'
 DAQ_DEPLOYMENT_STATUS_ENDPOINT = '/daq/deployment'
 
 
-def register_rest_interface(app, writer_manager: WriterRestManager, sim_manager: SimulationRestManager,
-                            daq_manager: DaqRestManager):
+def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
+                            sim_manager: SimulationRestManager):
     detector_name = daq_manager.get_config()['detector_name']
+
+    @app.route('/')
+    def app():
+        return send_from_directory('static', 'index.html')
 
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():

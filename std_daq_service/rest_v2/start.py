@@ -35,13 +35,13 @@ def start_api(beamline_name, daq_config, rest_port):
     writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
     writer_manager = WriterRestManager(writer_driver=writer_driver)
 
+    stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
+    config_driver = AnsibleConfigDriver()
+    daq_manager = DaqRestManager(stats_driver=stats_driver, config_driver=config_driver)
+
     sim_manager = SimulationRestManager(daq_config=daq_config)
 
-    config_driver = AnsibleConfigDriver()
-    stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
-    daq_manager = DaqRestManager(ctx, config_driver=config_driver, stats_driver=stats_driver)
-
-    register_rest_interface(app, writer_manager=writer_manager, sim_manager=sim_manager, daq_manager=daq_manager)
+    register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_manager=sim_manager)
 
     try:
         app.run(host='0.0.0.0', port=rest_port)
