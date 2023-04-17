@@ -29,7 +29,9 @@ class WriterStatusTracker(object):
         self.n_max_active_requests = n_max_active_requests
         self.stop_event = Event()
         
-        self.status = {'state': 'READY', 'acquisition': {'state': "FINISHED", 'info': {}, 'stats': dict(self.EMPTY_STATS)}}
+        self.status = {'state': 'READY', 'acquisition': {'state': "FINISHED",
+                                                         'info': {'n_images': 0},
+                                                         'stats': dict(self.EMPTY_STATS)}}
         self.status_lock = Lock()
 
         self.last_status_send_time = 0

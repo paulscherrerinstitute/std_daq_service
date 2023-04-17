@@ -5,9 +5,9 @@ import {
   Grid,
   Paper,
   Typography,
-    Accordion,
+  Accordion,
   AccordionDetails,
-  AccordionSummary,
+  AccordionSummary, Alert,
 } from '@mui/material';
 import axios from "axios";
 
@@ -15,12 +15,31 @@ function DaqDeployment() {
   const [ state, setState ] = useState(
       {status: '...', message: '...', deployment_id: 'N/A', stats: {start_time: 0, end_time: 0}});
   const deployment_url = "/daq/deployment";
+  const [restError, setRestError] = useState(false);
+  const [restErrorText, setRestErrorText] = useState("Unknown")
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await axios(deployment_url);
-      setState(result.data.deployment);
-    };
+      try {
+        const result = await axios.get(deployment_url);
+
+        if (result.data.status === 'ok') {
+          setState(result.data.deployment);
+          setRestError(false);
+        } else {
+          setRestError(true);
+          setRestErrorText(result.data.message);
+          console.log(result.data);
+        }
+
+      } catch (error) {
+        setRestError(true);
+        setRestErrorText(error.message);
+        console.log(error);
+      }
+    }
+
+
 
     const interval = setInterval(() => {
       fetchData();
@@ -80,6 +99,10 @@ function DaqDeployment() {
     <Paper sx={{ p: 2 }} elevation={3}>
       <Typography variant="h6" gutterBottom>DAQ deployment</Typography>
 
+      {restError ? (
+           <Alert severity="error">Log loading failed. Error message: {restErrorText}</Alert>
+          ) : (
+      <div>
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Status:</Typography></Grid>
         <Grid item> {status_chip} </Grid>
@@ -112,6 +135,8 @@ function DaqDeployment() {
           </Grid>
         </AccordionDetails>
       </Accordion>
+      </div>
+          )}
     </Paper>
   );
 }

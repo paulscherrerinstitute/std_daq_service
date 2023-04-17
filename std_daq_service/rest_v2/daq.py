@@ -22,7 +22,7 @@ class AnsibleConfigDriver(object):
         self.services_file = ansible_repo_folder + SERVICE_FILE
         self.inventory_file = ansible_repo_folder + INVENTORY_FILE
 
-        self.status = {'state': 'Done', 'status': 'Deployment completed.', 'deployment_id': None,
+        self.status = {'state': 'READY', 'status': 'SUCCESS', 'deployment_id': None,
                        'stats': {'start_time': 0, 'end_time': 0}}
         self.status_callback = status_callback
 
