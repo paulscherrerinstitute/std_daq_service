@@ -7,10 +7,10 @@ import TextField from '@mui/material/TextField';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Paper,
-    IconButton,
 } from '@mui/material';
 
 import MenuItem from '@mui/material/MenuItem';
+import axios from "axios";
 
 const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   const [config, setConfig] = useState({});
@@ -34,6 +34,15 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   const handleSaveAndDeploy = () => {
     // Perform save and deploy logic here
     console.log('Saving and deploying daq config:', config);
+
+    axios.post('/daq/config', config).then(response => {
+        if (response.data.status === "error") {
+          console.log(response.data.message);
+        }
+      })
+      .catch(error => {
+        console.log(error.response.data.message);
+      });
 
     onClose();
   };
