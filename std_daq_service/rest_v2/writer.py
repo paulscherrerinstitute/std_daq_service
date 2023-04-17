@@ -15,7 +15,7 @@ class WriterRestManager(object):
         self.writer_driver = writer_driver
 
     def write_sync(self, output_file, n_images):
-        writer_status = self.writer_driver.get_state()
+        writer_status = self.writer_driver.get_status()
         if writer_status['state'] != "READY":
             raise RuntimeError('Cannot start writing until writer state is READY. '
                                'Stop the current acquisition or wait for it to finish.')
@@ -23,7 +23,7 @@ class WriterRestManager(object):
         return self.get_status()
 
     def write_async(self, output_file, n_images):
-        state = self.writer_driver.get_state()
+        state = self.writer_driver.get_status()
         if state['state'] != "READY":
             raise RuntimeError('Cannot start writing until writer state is READY. '
                                'Stop the current acquisition or wait for it to finish.')
