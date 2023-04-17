@@ -10,7 +10,7 @@ _logger = logging.getLogger("StartStopRestManager")
 
 
 class WriterRestManager(object):
-    def __init__(self, ctx, writer_driver: WriterDriver):
+    def __init__(self, writer_driver: WriterDriver):
         self.writer_driver = writer_driver
 
     def write_sync(self, output_file, n_images):

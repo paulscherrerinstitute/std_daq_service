@@ -5,9 +5,8 @@ import logging
 import zmq
 from flask import Flask
 
-from std_daq_service.rest_v2.deployment import AnsibleConfigDriver
 
-from std_daq_service.rest_v2.daq import DaqRestManager
+from std_daq_service.rest_v2.daq import DaqRestManager, AnsibleConfigDriver
 from std_daq_service.rest_v2.simulation import SimulationRestManager
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
@@ -34,15 +33,15 @@ def start_api(beamline_name, daq_config, rest_port):
     ctx = zmq.Context()
 
     writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
+    writer_manager = WriterRestManager(writer_driver=writer_driver)
+
+    sim_manager = SimulationRestManager(daq_config=daq_config)
+
     config_driver = AnsibleConfigDriver()
-
-    writer_manager = WriterRestManager(ctx, writer_driver, config_driver)
-    sim_manager = SimulationRestManager(detector_type)
-
     stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
-    daq_manager = DaqRestManager(ctx, daq_config, stats_driver, config_driver)
+    daq_manager = DaqRestManager(ctx, config_driver=config_driver, stats_driver=stats_driver)
 
-    register_rest_interface(app, writer_manager, sim_manager, daq_manager)
+    register_rest_interface(app, writer_manager=writer_manager, sim_manager=sim_manager, daq_manager=daq_manager)
 
     try:
         app.run(host='0.0.0.0', port=rest_port)
