@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from flask import request, jsonify, Response, render_template, send_from_directory
 
 from std_daq_service.rest_v2.daq import DaqRestManager
@@ -21,6 +23,7 @@ DAQ_STATS_ENDPOINT = '/daq/stats'
 DAQ_LOGS_ENDPOINT = '/daq/logs/<int:n_logs>'
 DAQ_DEPLOYMENT_STATUS_ENDPOINT = '/daq/deployment'
 
+request_logger = getLogger('request_log')
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
                             sim_manager: SimulationRestManager):
@@ -34,6 +37,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     def write_sync_request():
         json_request = request.json
         output_file, n_images = get_parameters_from_write_request(json_request)
+        request_logger.info(f'Sync write {n_images} images to output_file {output_file}')
 
         writer_status = writer_manager.write_sync(output_file, n_images)
 
@@ -45,6 +49,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     def write_async_request():
         json_request = request.json
         output_file, n_images = get_parameters_from_write_request(json_request)
+        request_logger.info(f'Async write {n_images} images to output_file {output_file}')
 
         writer_status = writer_manager.write_async(output_file, n_images)
 
@@ -62,6 +67,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(WRITER_STOP_ENDPOINT, methods=['POST'])
     def stop_writing_request():
+        request_logger.info(f'Stop write')
         writer_status = writer_manager.stop_writing()
 
         return jsonify({"status": "ok",
@@ -78,11 +84,13 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(SIM_START_ENDPOINT, methods=['POST'])
     def start_sim_request():
+        request_logger.info(f'Start simulation')
         sim_manager.start()
         return get_sim_status_request()
 
     @app.route(SIM_STOP_ENDPOINT, methods=['POST'])
     def stop_sim_request():
+        request_logger.info(f'Stop simulation')
         sim_manager.stop()
         return get_sim_status_request()
 
@@ -100,6 +108,8 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['POST'])
     def set_daq_config_request():
         config_change_request = request.json
+        request_logger.info(f'Setting new config {config_change_request}')
+
         daq_config = daq_manager.set_config(config_change_request)
 
         return jsonify({"status": "ok",
