@@ -34,8 +34,10 @@ class SimulationRestManager(object):
 
     def _simulation(self):
         start_udp_port = self.daq_config['start_udp_port']
+        self.status = 'STREAMING'
         generate_udp_stream(self.generator, '0.0.0.0', start_udp_port,
                             stop_event=self.stop_event, image_callback=self._image_callback)
+        self.status = 'READY'
 
     def _image_callback(self, i_image):
         self.images_per_second += 1

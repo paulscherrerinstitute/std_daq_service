@@ -7,7 +7,7 @@ from time import time, sleep
 _logger = logging.getLogger(__name__)
 
 
-def generate_udp_stream(generator, output_ip, start_udp_port, rep_rate=0.1, n_images=None,
+def generate_udp_stream(generator, output_ip, start_udp_port, rep_rate=10, n_images=None,
                         stop_event=None, image_callback=None):
     n_modules = generator.get_n_modules()
     n_packets = generator.get_n_packets()
