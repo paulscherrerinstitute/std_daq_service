@@ -11,7 +11,7 @@ DETECTOR_JF = 'jungfrau'
 DETECTOR_EG = 'eiger'
 
 
-class UdpSimulatorManager(object):
+class SimulationRestManager(object):
     def __init__(self, detector_type):
         if detector_type == DETECTOR_GF:
             self.generator = GFUdpPacketGenerator(image_pixel_height=2016, image_pixel_width=2016, image_filename=None)

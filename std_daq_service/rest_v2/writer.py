@@ -3,15 +3,15 @@ import logging
 import cv2
 import zmq
 
+from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 from utils import update_config
 
 _logger = logging.getLogger("StartStopRestManager")
 
 
-class StartStopRestManager(object):
-    def __init__(self, ctx, writer_driver, config_driver):
+class WriterRestManager(object):
+    def __init__(self, ctx, writer_driver: WriterDriver):
         self.writer_driver = writer_driver
-        self.config_driver = config_driver
 
     def write_sync(self, output_file, n_images):
         writer_status = self.writer_driver.get_state()
@@ -30,22 +30,12 @@ class StartStopRestManager(object):
         return self.get_status()
 
     def stop_writing(self):
+        self.writer_driver.stop()
+
         return self.get_status()
 
     def get_status(self):
         return self.writer_driver.get_status()
-
-    def get_config(self):
-        return self.config_driver.get_config()
-
-    def set_config(self, config_updates):
-        new_config = update_config(self.get_config(), config_updates)
-        self.config_driver.deploy_config(new_config)
-
-        return new_config
-
-    def get_logs(self, n_logs):
-        return self.writer_driver.status.get_logs(n_logs)
 
     def close(self):
         _logger.info("Shutting down manager.")

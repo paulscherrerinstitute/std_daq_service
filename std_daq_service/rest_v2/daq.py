@@ -1,6 +1,9 @@
 import ansible_runner
 import time
 
+from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
+from std_daq_service.rest_v2.utils import update_config
+
 DEFAULT_DEPLOYMENT_FOLDER = '/etc/std_daq/deployment'
 INVENTORY_FILE = '/inventory.yml'
 SERVICE_FILE = '/inventory.yml'
@@ -86,3 +89,29 @@ class AnsibleConfigDriver(object):
                 "image_pixel_height": 2016,
                 "image_pixel_width": 2016,
                 "start_udp_port": 2000}
+
+
+class DaqRestManager(object):
+    def __init__(self, daq_config, stats_driver: ImageMetadataStatsDriver, config_driver: AnsibleConfigDriver):
+        self.daq_config = daq_config
+        self.stats_driver = stats_driver
+        self.config_driver = config_driver
+
+    def get_config(self):
+        return self.config_driver.get_config()
+
+    def set_config(self, config_updates):
+        new_config = update_config(self.get_config(), config_updates)
+        self.config_driver.deploy_config(new_config)
+
+    def get_stats(self):
+        pass
+
+    def get_logs(self, n_logs):
+        pass
+
+    def get_deployment_status(self):
+        pass
+
+    def close(self):
+        pass
