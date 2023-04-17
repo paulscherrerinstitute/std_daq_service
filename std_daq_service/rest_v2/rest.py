@@ -1,7 +1,7 @@
 from flask import request, jsonify, Response, render_template, send_from_directory
 
 from std_daq_service.rest_v2.daq import DaqRestManager
-from std_daq_service.rest_v2.utils import get_parameters_from_write_request
+from std_daq_service.rest_v2.utils import get_parameters_from_write_request, generate_mjpg_image_stream
 from std_daq_service.rest_v2.writer import WriterRestManager
 from std_daq_service.rest_v2.simulation import SimulationRestManager
 
@@ -27,7 +27,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     detector_name = daq_manager.get_config()['detector_name']
 
     @app.route('/')
-    def app():
+    def react_app():
         return send_from_directory('static', 'index.html')
 
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
@@ -88,7 +88,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(DAQ_LIVE_STREAM_ENDPOINT)
     def get_daq_live_stream_request():
-        return Response(live_stream_generator, mimetype='multipart/x-mixed-replace; boundary=frame')
+        return Response(generate_mjpg_image_stream, mimetype='multipart/x-mixed-replace; boundary=frame')
 
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['GET'])
     def get_daq_config_request():
