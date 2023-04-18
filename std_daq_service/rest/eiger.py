@@ -158,22 +158,18 @@ def set_eiger_cmd(cmd):
         response['response'] = "Detector successfully configured."
         return response
     elif cmd == "STOP":
-        if d.status == runStatus.RUNNING:
-            d.stop()
-            limit_timeout = 5 # sec
-            timestep = 0.5
-            counter = 0
-            while (d.status != runStatus.IDLE) and (counter < limit_timeout):
-                time.sleep(timestep)
-                counter += timestep
-            if d.status == runStatus.IDLE:
-                d.nextframenumber = 1
-                return response
-            else:
-                response['response'] = "Warning: STOP successfully sent but detector is not IDLE."
-                return response
+        d.stop()
+        limit_timeout = 5 # sec
+        timestep = 0.5
+        counter = 0
+        while (d.status != runStatus.IDLE) and (counter < limit_timeout):
+            time.sleep(timestep)
+            counter += timestep
+        if d.status == runStatus.IDLE:
+            d.nextframenumber = 1
+            return response
         else:
-            response['response'] = "Nothing to do, the detector is not running."
+            response['response'] = "Warning: STOP successfully sent but detector is not IDLE."
             return response
     response['response'] = f"Unknown problem when communicating with Eiger."
     return response
