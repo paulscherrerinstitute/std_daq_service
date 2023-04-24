@@ -32,8 +32,7 @@ class SimulationRestManager(object):
 
         self._generator_thread = None
         self.status = 'READY'
-        self.bytes_per_second = 0
-        self.images_per_second = 0
+        self.n_generated_images = 0
 
     def _simulation(self):
         start_udp_port = self.daq_config['start_udp_port']
@@ -43,10 +42,11 @@ class SimulationRestManager(object):
         self.status = 'READY'
 
     def _image_callback(self, i_image):
-        self.images_per_second += 1
-        self.bytes_per_second += self._image_size_bytes
+        self.n_generated_images += 1
 
     def start(self):
+        self.stop()
+
         self.stop_event.clear()
         self._generator_thread = threading.Thread(target=self._simulation)
         self._generator_thread.start()
