@@ -2,7 +2,7 @@ import zmq
 import numpy as np
 import cv2
 
-IPC_BASE = "ipc:///tmp"
+IPC_BASE = "ipc:///etc/std_daq/ipcs/"
 
 def get_stream_addresses(detector_name):
 
