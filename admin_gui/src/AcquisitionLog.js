@@ -16,7 +16,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 function AcquisitionLog() {
-  const [acqs, setAcqs] = useState([{stats: '...', info: '...'}]);
+  const [acqs, setAcqs] = useState([]);
   const [restError, setRestError] = useState(false);
   const [restErrorText, setRestErrorText] = useState("Unknown")
 
