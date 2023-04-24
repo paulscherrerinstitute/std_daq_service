@@ -1,8 +1,11 @@
 import tifffile
 import numpy as np
+import logging
 
 from std_buffer.gigafrost.data import calculate_udp_packet_info, GfUdpPacket
 from std_buffer.gigafrost.udp_sim_gf import GF_N_MODULES
+
+_logger = logging.getLogger("GFUdpPacketGenerator")
 
 
 class GFUdpPacketGenerator(object):
@@ -13,6 +16,8 @@ class GFUdpPacketGenerator(object):
 
         self.quadrant_height = image_pixel_height // 2
         self.quadrant_width = image_pixel_width // 2
+
+        _logger.info(f"Initializing Gigafrost udp simulator with width {image_pixel_width} height {image_pixel_height}.")
 
         if image_filename:
             self.image = tifffile.imread(image_filename)
