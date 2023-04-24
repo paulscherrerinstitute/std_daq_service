@@ -60,16 +60,14 @@ class SimulationRestManager(object):
 
         self.status = 'READY'
         self._generator_thread = None
-        self.bytes_per_second = 0
-        self.images_per_second = 0
+        self.n_generated_images = 0
 
         return self.get_status()
 
     def get_status(self):
         return {
             'status': self.status,
-            'stats': {'bytes_per_second': self.bytes_per_second,
-                      'images_per_second': self.images_per_second}
+            'stats': {'n_generated_images': self.n_generated_images}
         }
 
     def close(self):

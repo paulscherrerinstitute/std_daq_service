@@ -15,9 +15,6 @@ function SimulatorControl(props) {
 
   let start_button_disabled = true;
   let stop_button_disabled = true;
-  let mb_per_s = state.stats.bytes_per_second / 1024 / 1024;
-  let bandwidth_text = `${mb_per_s.toFixed(2)} MB/s`;
-  let frequency_text = `${state.stats.images_per_second.toFixed(2)} Hz`;
 
    useEffect(() => {
     const fetchData = async () => {
@@ -112,8 +109,8 @@ function SimulatorControl(props) {
       </Grid>
 
       <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2">Bandwidth:</Typography></Grid>
-        <Grid item> {bandwidth_text} </Grid>
+        <Grid item> <Typography variant="subtitle2">Generated images:</Typography></Grid>
+        <Grid item> {state.stats.n_generated_images} </Grid>
       </Grid>
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle2">Frequency:</Typography></Grid>
