@@ -1,4 +1,5 @@
 import logging
+from time import time, sleep
 
 import cv2
 import numpy as np
@@ -9,24 +10,40 @@ from utils import update_config
 
 _logger = logging.getLogger("StartStopRestManager")
 
+# How much time to sleep between checks on the status, in seconds.
+SYNC_SLEEP_INTERVAL = 0.1
+# How many seconds should the sync request last - at most.
+SYNC_WAIT_TIMEOUT = 60
+
 
 class WriterRestManager(object):
     def __init__(self, writer_driver: WriterDriver):
         self.writer_driver = writer_driver
 
     def write_sync(self, output_file, n_images):
-        writer_status = self.writer_driver.get_status()
-        if writer_status['state'] != "READY":
-            raise RuntimeError('Cannot start writing until writer state is READY. '
-                               'Stop the current acquisition or wait for it to finish.')
+        self.writer_driver.start({
+            'output_file': output_file,
+            'n_images': n_images
+        })
 
-        return self.get_status()
+        start_time = time()
+        while True:
+            status = self.get_status()
+            if status != 'WRITING':
+                return status
+
+            sleep(SYNC_SLEEP_INTERVAL)
+
+            if time() - start_time > SYNC_WAIT_TIMEOUT:
+                raise RuntimeError(f"Your acquisition is still running, just the REST call has ended. "
+                                   f"Sync acquisition limit of {SYNC_WAIT_TIMEOUT} seconds exceeded. "
+                                   f"Use async write call for long acquisitions.")
 
     def write_async(self, output_file, n_images):
-        state = self.writer_driver.get_status()
-        if state['state'] != "READY":
-            raise RuntimeError('Cannot start writing until writer state is READY. '
-                               'Stop the current acquisition or wait for it to finish.')
+        self.writer_driver.start({
+            'output_file': output_file,
+            'n_images': n_images
+        })
 
         return self.get_status()
 
