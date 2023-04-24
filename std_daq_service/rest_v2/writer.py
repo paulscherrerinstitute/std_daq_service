@@ -1,5 +1,5 @@
 import logging
-from time import time, sleep
+from time import time, sleep, time_ns
 
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
@@ -17,6 +17,7 @@ class WriterRestManager(object):
 
     def write_sync(self, output_file, n_images):
         self.writer_driver.start({
+            'run_id': time_ns(),
             'output_file': output_file,
             'n_images': n_images
         })
@@ -36,6 +37,7 @@ class WriterRestManager(object):
 
     def write_async(self, output_file, n_images):
         self.writer_driver.start({
+            'run_id': time_ns(),
             'output_file': output_file,
             'n_images': n_images
         })
