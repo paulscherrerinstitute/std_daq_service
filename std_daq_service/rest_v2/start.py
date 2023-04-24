@@ -19,7 +19,7 @@ from flask_cors import CORS
 _logger = logging.getLogger(__name__)
 
 
-def start_api(beamline_name, daq_config, rest_port):
+def start_api(beamline_name, daq_config, rest_port, ansible_repo_folder):
     daq_manager = None
     sim_manager = None
     writer_manager = None
@@ -42,7 +42,7 @@ def start_api(beamline_name, daq_config, rest_port):
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
         stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
-        config_driver = AnsibleConfigDriver(detector_name=detector_name)
+        config_driver = AnsibleConfigDriver(detector_name=detector_name, ansible_repo_folder=ansible_repo_folder)
         daq_manager = DaqRestManager(stats_driver=stats_driver,
                                      config_driver=config_driver,
                                      writer_driver=writer_driver)
@@ -87,4 +87,5 @@ if __name__ == "__main__":
 
     start_api(beamline_name=args.beamline_name,
               daq_config=config,
-              rest_port=args.rest_port)
+              rest_port=args.rest_port,
+              ansible_repo_folder=args.ansible_folder)

@@ -1,0 +1,9 @@
+{
+  "detector_name": "GF2",
+  "detector_type": "gigafrost",
+  "n_modules": 8,
+  "bit_depth": 16,
+  "image_pixel_height": 2016,
+  "image_pixel_width": 2016,
+  "start_udp_port": 2000
+}

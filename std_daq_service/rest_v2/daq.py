@@ -1,3 +1,6 @@
+import json
+import os
+
 import ansible_runner
 import time
 
@@ -17,10 +20,22 @@ class AnsibleConfigDriver(object):
         'running': 'Running tasks',
     }
 
-    def __init__(self, ansible_repo_folder=DEFAULT_DEPLOYMENT_FOLDER, status_callback=lambda x: None):
+    def __init__(self, detector_name, ansible_repo_folder=DEFAULT_DEPLOYMENT_FOLDER, status_callback=lambda x: None):
         self.repo_folder = ansible_repo_folder
+        if not os.path.exists(self.repo_folder):
+            raise ValueError(f"Ansible repo folder {self.repo_folder} does not exist.")
+
         self.services_file = ansible_repo_folder + SERVICE_FILE
+        if not os.path.isfile(self.services_file):
+            raise ValueError(f'DAQ service file {self.services_file} does not exist.')
+
         self.inventory_file = ansible_repo_folder + INVENTORY_FILE
+        if not os.path.isfile(self.inventory_file):
+            raise ValueError(f'DAQ inventory file {self.inventory_file} does not exist.')
+
+        self.config_file = f'{ansible_repo_folder}/config/{detector_name}.json'
+        if not os.path.isfile(self.config_file):
+            raise ValueError(f'DAQ config file {self.config_file} does not exist.')
 
         self.status = {'state': 'READY', 'status': 'SUCCESS', 'deployment_id': None,
                        'stats': {'start_time': 0, 'end_time': 0}}
@@ -66,16 +81,15 @@ class AnsibleConfigDriver(object):
         return self.status, result
 
     def get_config(self):
-        return {"detector_name": "Eiger9M",
-                "detector_type": "eiger",
-                "n_modules": 72,
-                "bit_depth": 32,
-                "image_pixel_height": 2016,
-                "image_pixel_width": 2016,
-                "start_udp_port": 2000}
+        raise RuntimeError()
+        with open(self.config_file, 'r') as input_file:
+            daq_config = json.load(input_file)
+
+        return daq_config
 
     def set_config(self, daq_config):
-        # TODO: Overwrite the proper config file.
+        with open(self.config_file, 'w') as output_file:
+            json.dump(daq_config, output_file)
 
         ansible_runner.run(
             private_data_dir=self.repo_folder,
@@ -111,7 +125,7 @@ class DaqRestManager(object):
 
     def set_config(self, config_updates):
         new_daq_config = update_config(self.get_config(), config_updates)
-        self.config_driver.deploy(new_daq_config)
+        self.config_driver.set_config(new_daq_config)
 
     def get_stats(self):
         return self.stats_driver.get_stats()
