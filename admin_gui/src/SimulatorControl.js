@@ -6,7 +6,7 @@ import { Chip, Grid, Paper, Typography, Button,
 } from '@mui/material';
 
 function SimulatorControl(props) {
-  const [state, setState] = React.useState({stats: {bytes_per_second: 0, images_per_second:0}});
+  const [state, setState] = React.useState({stats: {n_generated_images: 0}});
   const [open, setOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [restError, setRestError] = useState(false);
@@ -111,10 +111,6 @@ function SimulatorControl(props) {
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle2">Generated images:</Typography></Grid>
         <Grid item> {state.stats.n_generated_images} </Grid>
-      </Grid>
-      <Grid container alignItems="center" spacing={1}>
-        <Grid item> <Typography variant="subtitle2">Frequency:</Typography></Grid>
-        <Grid item> {frequency_text} </Grid>
       </Grid>
 </div>
           )}
