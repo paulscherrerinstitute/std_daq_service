@@ -1,17 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import axios from 'axios';
 
-import {
-  Chip,
-  Grid,
-  Paper,
-  Typography,
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  TextField,
-  Button,
+import { Chip, Grid, Paper, Typography, Button,
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Alert
 } from '@mui/material';
 

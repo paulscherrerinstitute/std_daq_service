@@ -1,18 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import LaunchIcon from '@material-ui/icons/Launch';
-import SettingsIcon from '@material-ui/icons/Settings'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  Chip,
-  Grid,
-  Paper,
-  Typography,
-    Accordion,
-  AccordionDetails,
-  AccordionSummary,
-    TextField,
-    Button
-} from '@mui/material';
+import { Chip, Grid, Paper, Typography, Button } from '@mui/material';
 import axios from "axios";
 
 function DaqStats() {

@@ -1,18 +1,7 @@
 import React, {useState} from 'react';
 import SettingsIcon from '@material-ui/icons/Settings'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditDaqConfigModal from './DaqConfigEdit';
-import {
-  Chip,
-  Grid,
-  Paper,
-  Typography,
-    Accordion,
-  AccordionDetails,
-  AccordionSummary,
-    TextField,
-    Button
-} from '@mui/material';
+import { Grid, Paper, Typography, Button } from '@mui/material';
 
 function DaqConfig(props) {
   const { state } = props;

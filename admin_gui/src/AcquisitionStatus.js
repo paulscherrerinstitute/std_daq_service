@@ -1,16 +1,7 @@
 import React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import {
-  Chip,
-  Grid,
-  Paper,
-  LinearProgress,
-  Typography,
-    Accordion,
-  AccordionDetails,
-  AccordionSummary,
-} from '@mui/material';
+import {Chip, Grid, Paper, LinearProgress, Typography, Accordion, AccordionDetails, AccordionSummary,} from '@mui/material';
 
 function AcquisitionStatus(props) {
   const { state } = props;

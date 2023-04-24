@@ -98,6 +98,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(DAQ_LIVE_STREAM_ENDPOINT)
     def get_daq_live_stream_request():
+        raise NotImplementedError()
         return Response(generate_mjpg_image_stream, mimetype='multipart/x-mixed-replace; boundary=frame')
 
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['GET'])

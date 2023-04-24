@@ -1,14 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  Chip,
-  Grid,
-  Paper,
-  Typography,
-  Accordion,
-  AccordionDetails,
-  AccordionSummary, Alert,
-} from '@mui/material';
+import { Chip, Grid, Paper, Typography, Accordion, AccordionDetails, AccordionSummary, Alert, } from '@mui/material';
 import axios from "axios";
 
 function DaqDeployment() {
