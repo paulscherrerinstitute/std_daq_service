@@ -17,7 +17,7 @@ RECV_TIMEOUT_MS = 200
 SYNC_WINDOW_SIZE = 2
 N_LOGS = 50
 
-WRITER_STATUS_POLL_INTERVAL = 0.5
+WRITER_STATUS_POLL_INTERVAL = 0.1
 WRITER_STATUS_POLL_N_ATTEMPTS = 10
 
 
@@ -203,9 +203,13 @@ class WriterDriver(object):
 
         self.user_command_sender.send_json({'COMMAND': self.START_COMMAND, 'run_info': run_info or {}})
 
+        self.wait_for_state("WRITING")
+
     def stop(self):
         _logger.info(f"Stop acquisition requested.")
         self.user_command_sender.send_json({'COMMAND': self.STOP_COMMAND})
+
+        self.wait_for_state('READY')
 
     def close(self):
         _logger.info(f'Closing writer driver.')
@@ -232,8 +236,6 @@ class WriterDriver(object):
 
                     if command['COMMAND'] == self.START_COMMAND:
                         run_info = command['run_info']
-                        # TODO: Should we be smarter? Use current time as run_id.
-                        run_info['run_id'] = time_ns()
 
                         self._execute_start_command(run_info)
                         i_image = 0
