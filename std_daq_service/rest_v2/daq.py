@@ -33,7 +33,7 @@ class AnsibleConfigDriver(object):
         if not os.path.isfile(self.inventory_file):
             raise ValueError(f'DAQ inventory file {self.inventory_file} does not exist.')
 
-        self.config_file = f'{ansible_repo_folder}/config/{detector_name}.json'
+        self.config_file = f'{ansible_repo_folder}/configs/{detector_name}.json'
         if not os.path.isfile(self.config_file):
             raise ValueError(f'DAQ config file {self.config_file} does not exist.')
 
@@ -81,7 +81,6 @@ class AnsibleConfigDriver(object):
         return self.status, result
 
     def get_config(self):
-        raise RuntimeError()
         with open(self.config_file, 'r') as input_file:
             daq_config = json.load(input_file)
 

@@ -32,8 +32,7 @@ def start_api(beamline_name, daq_config, rest_port, ansible_repo_folder):
 
         command_address, in_status_address, out_status_address, image_metadata_address = \
             get_stream_addresses(detector_name)
-
-        app = Flask(detector_name, static_folder='static')
+        app = Flask(__name__, static_folder='static')
         CORS(app)
         ctx = zmq.Context()
 
@@ -54,6 +53,9 @@ def start_api(beamline_name, daq_config, rest_port, ansible_repo_folder):
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
         app.run(host='0.0.0.0', port=rest_port)
+
+    except Exception as e:
+        _logger.exception("Error while trying to run the REST api")
 
     finally:
         _logger.info("Starting shutdown procedure.")
