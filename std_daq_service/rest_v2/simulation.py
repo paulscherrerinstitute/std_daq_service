@@ -46,6 +46,7 @@ class SimulationRestManager(object):
 
     def start(self):
         self.stop()
+        self.n_generated_images = 0
 
         self.stop_event.clear()
         self._generator_thread = threading.Thread(target=self._simulation)
@@ -60,7 +61,6 @@ class SimulationRestManager(object):
 
         self.status = 'READY'
         self._generator_thread = None
-        self.n_generated_images = 0
 
         return self.get_status()
 
