@@ -1,6 +1,6 @@
 import copy
 from collections import deque
-from threading import Thread, Event, Lock
+from threading import Thread, Event, Lock, Semaphore
 from google.protobuf.json_format import MessageToDict
 from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata
 from std_buffer.std_daq.writer_command_pb2 import WriterCommand, CommandType, RunInfo, WriterStatus
@@ -28,7 +28,8 @@ class WriterStatusTracker(object):
         self.ctx = ctx
         self.n_max_active_requests = n_max_active_requests
         self.stop_event = Event()
-        
+        self.rate_limiter = None
+
         self.status = {'state': 'READY', 'acquisition': {'state': "FINISHED",
                                                          'info': {'n_images': 0},
                                                          'stats': dict(self.EMPTY_STATS)}}
@@ -65,14 +66,14 @@ class WriterStatusTracker(object):
                 if status_message.command_type == CommandType.START_WRITING:
                     self._log_start_status(status_run_id, status_message)
                     continue
-                   
+
                 if status_message.command_type == CommandType.STOP_WRITING:
                     self._log_stop_status(status_message)
                     continue
 
                 if status_run_id != self._current_run_id:
                     _logger.warning(f"Received write status for run_id={status_run_id} while the "
-                        "_current_run_id={self._current_run_id}. Status={status_message}")
+                                    "_current_run_id={self._current_run_id}. Status={status_message}")
                     self.status['state'] = 'WRITING'
                     continue
 
@@ -90,17 +91,17 @@ class WriterStatusTracker(object):
             self.status['acquisition']['state'] = 'ACQUIRING_IMAGES'
             self.status['acquisition']['stats']['n_write_completed'] += 1
 
-        # TODO: release semaphore
+        self.rate_limiter.release()
 
         # Send out write progress updates on STATS_INTERVAL_TIME intervals.
         current_time = time()
         if current_time - self.last_status_send_time > STATS_INTERVAL_TIME:
-            self.last_status_send_time = current_time    
+            self.last_status_send_time = current_time
             self.status_sender.send_json(self.status)
 
     def _log_start_status(self, run_id, status):
         with self.status_lock:
-            self.status = {'state': "WRITING", 
+            self.status = {'state': "WRITING",
                            'acquisition': {'state': 'WAITING_FOR_IMAGES',
                                            'stats': dict(self.EMPTY_STATS),
                                            'info': {'output_file': status.run_info.output_file,
@@ -110,7 +111,7 @@ class WriterStatusTracker(object):
 
         self.last_status_send_time = 0
         self._current_run_id = run_id
-        # TODO: Init semaphor
+        self.rate_limiter = Semaphore(self.n_max_active_requests)
 
         # Send status update as soon as writer starts.
         self.status_sender.send_json(self.status)
@@ -128,11 +129,12 @@ class WriterStatusTracker(object):
         self.status_sender.send_json(self.status)
 
     def log_write_request(self, run_id, image_id):
-        # TODO: acquire semaphore
-
         if run_id != self._current_run_id:
-            _logger.warning(f"Received write_request for image_id={image_id}, run_id={run_id} while the _current_run_id={self._current_run_id}.")
+            _logger.warning(
+                f"Received write_request for image_id={image_id}, run_id={run_id} while the _current_run_id={self._current_run_id}.")
             return
+
+        self.rate_limiter.acquire()
 
         with self.status_lock:
             self.status['acquisition']['stats']['n_write_requested'] += 1
@@ -148,11 +150,10 @@ class WriterStatusTracker(object):
 
 
 class WriterDriver(object):
-
     WRITER_DRIVER_IPC_ADDRESS = 'inproc://WriterDriverCommand'
     POLLER_TIMEOUT_MS = 1000
     # In seconds.
-    STARTUP_WAIT_TIME = 200/1000
+    STARTUP_WAIT_TIME = 200 / 1000
 
     START_COMMAND = 'START'
     STOP_COMMAND = 'STOP'
@@ -230,7 +231,7 @@ class WriterDriver(object):
         while not self.stop_event.is_set():
             try:
                 events = dict(poller.poll(timeout=RECV_TIMEOUT_MS))
-                
+
                 if self.user_command_receiver in events:
                     command = self.user_command_receiver.recv_json(flags=zmq.NOBLOCK)
 
@@ -252,7 +253,7 @@ class WriterDriver(object):
 
                     self._execute_write_command(i_image)
                     i_image += 1
-                    
+
                     # Terminate writing.
                     if i_image == self.writer_command.run_info.n_images:
                         self._execute_stop_command()
@@ -268,7 +269,7 @@ class WriterDriver(object):
 
         _logger.debug(f"Send start command to writer: {self.writer_command}.")
         self.writer_command_sender.send(self.writer_command.SerializeToString())
-        
+
         self.wait_for_state('WRITING')
 
         # Subscribe to the ImageMetadata stream.
@@ -297,7 +298,7 @@ class WriterDriver(object):
         self.writer_command.metadata.CopyFrom(self.image_meta)
         self.writer_command.command_type = CommandType.WRITE_IMAGE
         self.writer_command.i_image = i_image
-    
+
         self.status.log_write_request(self.writer_command.run_info.run_id, self.image_meta.image_id)
         self.writer_command_sender.send(self.writer_command.SerializeToString())
 
