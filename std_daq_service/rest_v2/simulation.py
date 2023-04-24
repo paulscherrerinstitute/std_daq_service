@@ -19,6 +19,9 @@ class SimulationRestManager(object):
         detector_type = self.daq_config['detector_type']
         height = self.daq_config['image_pixel_height']
         width = self.daq_config['image_pixel_width']
+        bit_depth = self.daq_config['bit_depth']
+
+        self._image_size_bytes = height * width * bit_depth / 8
 
         if detector_type == DETECTOR_GF:
             self.generator = GFUdpPacketGenerator(image_pixel_height=height, image_pixel_width=width)
@@ -41,6 +44,7 @@ class SimulationRestManager(object):
 
     def _image_callback(self, i_image):
         self.images_per_second += 1
+        self.bytes_per_second += self._image_size_bytes
 
     def start(self):
         self.stop_event.clear()
