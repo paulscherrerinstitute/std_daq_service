@@ -1,14 +1,9 @@
 import logging
 from time import time, sleep
 
-import cv2
-import numpy as np
-import zmq
-
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
-from utils import update_config
 
-_logger = logging.getLogger("StartStopRestManager")
+_logger = logging.getLogger("WriterRestManager")
 
 # How much time to sleep between checks on the status, in seconds.
 SYNC_SLEEP_INTERVAL = 0.1
@@ -49,13 +44,11 @@ class WriterRestManager(object):
 
     def stop_writing(self):
         self.writer_driver.stop()
-
         return self.get_status()
 
     def get_status(self):
         return self.writer_driver.get_status()
 
     def close(self):
-        _logger.info("Shutting down manager.")
+        _logger.info("Shutting down writer manager.")
         self.writer_driver.close()
-
