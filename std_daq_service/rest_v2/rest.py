@@ -24,6 +24,7 @@ DAQ_LOGS_ENDPOINT = '/daq/logs/<int:n_logs>'
 DAQ_DEPLOYMENT_STATUS_ENDPOINT = '/daq/deployment'
 
 request_logger = getLogger('request_log')
+_logger = getLogger('rest')
 
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
@@ -136,3 +137,9 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
         return jsonify({"status": "ok",
                         "message": f"Deployment status for {detector_name}.",
                         'deployment': daq_manager.get_deployment_status()})
+
+    @app.errorhandler(Exception)
+    def error_handler(e):
+        _logger.exception(e)
+        return jsonify({'status': 'error',
+                        'message': str(e)}), 200
