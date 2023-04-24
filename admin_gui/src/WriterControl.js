@@ -64,7 +64,7 @@ function WriterControl(props) {
   const handleStartClick = () => {
     const run_id = generate_run_id();
 
-    axios.post('http://localhost:5000/writer/write_async', {
+    axios.post('/writer/write_async', {
       n_images: numImages,
       run_id: run_id,
       output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' + generate_filename(run_id, filename_suffix),
@@ -85,7 +85,7 @@ function WriterControl(props) {
   };
 
   const handleStopClick = () => {
-    axios.post('http://localhost:5000/stop')
+    axios.post('/stop')
       .then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
