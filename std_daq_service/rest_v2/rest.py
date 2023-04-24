@@ -25,6 +25,7 @@ DAQ_DEPLOYMENT_STATUS_ENDPOINT = '/daq/deployment'
 
 request_logger = getLogger('request_log')
 
+
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
                             sim_manager: SimulationRestManager):
     detector_name = daq_manager.get_config()['detector_name']
