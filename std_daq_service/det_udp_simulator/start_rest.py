@@ -15,7 +15,8 @@ STATUS_ENDPOINT = '/status'
 START_ENDPOINT = '/start'
 STOP_ENDPOINT = '/stop'
 
-def start_api(config_file, rest_port):
+
+def start_api(config_file, rest_port, image_filename, output_ip):
     sim_manager = None
 
     try:
@@ -30,7 +31,7 @@ def start_api(config_file, rest_port):
         app = Flask(__name__, static_folder='static')
         CORS(app)
 
-        sim_manager = SimulationRestManager(daq_config=daq_config)
+        sim_manager = SimulationRestManager(daq_config=daq_config, output_ip=output_ip, image_filename=image_filename)
 
         @app.route(STATUS_ENDPOINT)
         def get_status_request():
@@ -69,9 +70,12 @@ def start_api(config_file, rest_port):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Standard DAQ Detector simulator')
     parser.add_argument("config_file", type=str, help="Path to JSON config file.")
+    parser.add_argument('output_ip', type=str, help='IP to send the UPD packets to.')
     parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5000)
+    parser.add_argument('-f', '--file', type=str, default=None, help='Image in TIFF format to stream.')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
-    start_api(config_file=args.config_file, rest_port=args.rest_port)
+    start_api(config_file=args.config_file, rest_port=args.rest_port, image_filename=args.file,
+              output_ip=args.output_ip)
