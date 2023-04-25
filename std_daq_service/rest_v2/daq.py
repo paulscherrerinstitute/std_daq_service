@@ -9,8 +9,8 @@ from std_daq_service.rest_v2.utils import update_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
 DEFAULT_DEPLOYMENT_FOLDER = '/etc/std_daq/deployment'
-INVENTORY_FILE = '/inventory.yml'
-SERVICE_FILE = '/inventory.yml'
+INVENTORY_FILE = '/inventory.yaml'
+SERVICE_FILE = '/services.yaml'
 
 
 class AnsibleConfigDriver(object):
