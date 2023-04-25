@@ -19,12 +19,16 @@ from flask_cors import CORS
 _logger = logging.getLogger(__name__)
 
 
-def start_api(beamline_name, daq_config, rest_port, ansible_repo_folder):
+def start_api(beamline_name, config_file, rest_port, ansible_repo_folder):
     daq_manager = None
     sim_manager = None
     writer_manager = None
 
     try:
+        with open(args.config_file, 'r') as input_file:
+            daq_config = json.load(input_file)
+        validate_config(daq_config)
+
         detector_name = daq_config['detector_name']
 
         _logger.info(f'Starting Start Stop REST for detector_name={detector_name} on beamline_name={beamline_name} '
@@ -41,7 +45,7 @@ def start_api(beamline_name, daq_config, rest_port, ansible_repo_folder):
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
         stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
-        config_driver = AnsibleConfigDriver(detector_name=detector_name, ansible_repo_folder=ansible_repo_folder)
+        config_driver = AnsibleConfigDriver(config_file=config_file, ansible_repo_folder=ansible_repo_folder)
         daq_manager = DaqRestManager(stats_driver=stats_driver,
                                      config_driver=config_driver,
                                      writer_driver=writer_driver)
@@ -82,12 +86,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
-    with open(args.config_file, 'r') as input_file:
-        config = json.load(input_file)
-
-    validate_config(config)
-
-    start_api(beamline_name=args.beamline_name,
-              daq_config=config,
-              rest_port=args.rest_port,
-              ansible_repo_folder=args.ansible_folder)
+    start_api(beamline_name=args.beamline_name, config_file=args.config_file,
+              rest_port=args.rest_port, ansible_repo_folder=args.ansible_folder)

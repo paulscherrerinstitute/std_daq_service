@@ -20,7 +20,7 @@ class AnsibleConfigDriver(object):
         'running': 'Running tasks',
     }
 
-    def __init__(self, detector_name, ansible_repo_folder=DEFAULT_DEPLOYMENT_FOLDER, status_callback=lambda x: None):
+    def __init__(self, config_file, ansible_repo_folder=DEFAULT_DEPLOYMENT_FOLDER, status_callback=lambda x: None):
         self.repo_folder = ansible_repo_folder
         if not os.path.exists(self.repo_folder):
             raise ValueError(f"Ansible repo folder {self.repo_folder} does not exist.")
@@ -33,7 +33,7 @@ class AnsibleConfigDriver(object):
         if not os.path.isfile(self.inventory_file):
             raise ValueError(f'DAQ inventory file {self.inventory_file} does not exist.')
 
-        self.config_file = f'{ansible_repo_folder}/configs/{detector_name}.json'
+        self.config_file = config_file
         if not os.path.isfile(self.config_file):
             raise ValueError(f'DAQ config file {self.config_file} does not exist.')
 
