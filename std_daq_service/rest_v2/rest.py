@@ -5,7 +5,7 @@ from flask import request, jsonify, Response, render_template, send_from_directo
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import get_parameters_from_write_request, generate_mjpg_image_stream
 from std_daq_service.rest_v2.writer import WriterRestManager
-from std_daq_service.rest_v2.simulation import SimulationRestManager
+from std_daq_service.rest_v2.sim import SimulationRestManager
 
 # TODO: Separate the drivers based on the REST namespace.
 WRITER_WRITE_SYNC_ENDPOINT = "/writer/write_sync"

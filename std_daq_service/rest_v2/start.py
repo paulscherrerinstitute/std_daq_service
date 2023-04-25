@@ -7,7 +7,7 @@ from flask import Flask
 
 
 from std_daq_service.rest_v2.daq import DaqRestManager, AnsibleConfigDriver, DEFAULT_DEPLOYMENT_FOLDER
-from std_daq_service.rest_v2.simulation import SimulationRestManager
+from std_daq_service.rest_v2.sim import SimulationRestManager
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
