@@ -7,7 +7,6 @@ from flask import Flask
 
 
 from std_daq_service.rest_v2.daq import DaqRestManager, AnsibleConfigDriver, DEFAULT_DEPLOYMENT_FOLDER
-from std_daq_service.rest_v2.sim import SimulationRestManager
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
@@ -19,7 +18,7 @@ from flask_cors import CORS
 _logger = logging.getLogger(__name__)
 
 
-def start_api(beamline_name, config_file, rest_port, ansible_repo_folder):
+def start_api(beamline_name, config_file, rest_port, ansible_repo_folder, sim_url_base):
     daq_manager = None
     sim_manager = None
     writer_manager = None
@@ -50,9 +49,7 @@ def start_api(beamline_name, config_file, rest_port, ansible_repo_folder):
                                      config_driver=config_driver,
                                      writer_driver=writer_driver)
 
-        sim_manager = SimulationRestManager(daq_config=daq_config)
-
-        register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_manager=sim_manager)
+        register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base)
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
@@ -82,9 +79,10 @@ if __name__ == "__main__":
     parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5000)
     parser.add_argument('--ansible_folder', type=str, default=DEFAULT_DEPLOYMENT_FOLDER,
                         help="Ansible deployment folder location. Usually /etc/std_daq/deployment")
+    parser.add_argument("--sim_url_base", type=str, default=None, help="URL to control the simulation")
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
     start_api(beamline_name=args.beamline_name, config_file=args.config_file,
-              rest_port=args.rest_port, ansible_repo_folder=args.ansible_folder)
+              rest_port=args.rest_port, ansible_repo_folder=args.ansible_folder, sim_url_base=args.sim_url_base)

@@ -1,11 +1,11 @@
 from logging import getLogger
 
+import requests
 from flask import request, jsonify, Response, render_template, send_from_directory
 
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import get_parameters_from_write_request, generate_mjpg_image_stream
 from std_daq_service.rest_v2.writer import WriterRestManager
-from std_daq_service.rest_v2.sim import SimulationRestManager
 
 # TODO: Separate the drivers based on the REST namespace.
 WRITER_WRITE_SYNC_ENDPOINT = "/writer/write_sync"
@@ -27,8 +27,7 @@ request_logger = getLogger('request_log')
 _logger = getLogger('rest')
 
 
-def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
-                            sim_manager: SimulationRestManager):
+def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager, sim_url_base: str):
     detector_name = daq_manager.get_config()['detector_name']
 
     @app.route('/')
@@ -78,7 +77,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(SIM_STATUS_ENDPOINT)
     def get_sim_status_request():
-        status = sim_manager.get_status()
+        status = requests.get(f'{sim_url_base}{SIM_STATUS_ENDPOINT}').json()
 
         return jsonify({"status": "ok",
                         "message": f"Simulator for {detector_name}.",
@@ -87,13 +86,13 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(SIM_START_ENDPOINT, methods=['POST'])
     def start_sim_request():
         request_logger.info(f'Start simulation')
-        sim_manager.start()
+        requests.post(f'{sim_url_base}{SIM_START_ENDPOINT}', data={}).json()
         return get_sim_status_request()
 
     @app.route(SIM_STOP_ENDPOINT, methods=['POST'])
     def stop_sim_request():
         request_logger.info(f'Stop simulation')
-        sim_manager.stop()
+        requests.post(f'{sim_url_base}{SIM_STOP_ENDPOINT}', data={}).json()
         return get_sim_status_request()
 
     @app.route(DAQ_LIVE_STREAM_ENDPOINT)
