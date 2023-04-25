@@ -3,6 +3,7 @@ from logging import getLogger
 import requests
 from flask import request, jsonify, Response, render_template, send_from_directory
 
+from std_daq_service.det_udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import get_parameters_from_write_request, generate_mjpg_image_stream
 from std_daq_service.rest_v2.writer import WriterRestManager
@@ -13,9 +14,9 @@ WRITER_WRITE_ASYNC_ENDPOINT = "/writer/write_async"
 WRITER_STATUS_ENDPOINT = "/writer/status"
 WRITER_STOP_ENDPOINT = "/writer/stop"
 
-SIM_STATUS_ENDPOINT = '/simulation/status'
-SIM_START_ENDPOINT = '/simulation/start'
-SIM_STOP_ENDPOINT = '/simulation/stop'
+SIM_STATUS_ENDPOINT = '/simulation' + STATUS_ENDPOINT
+SIM_START_ENDPOINT = '/simulation' + START_ENDPOINT
+SIM_STOP_ENDPOINT = '/simulation' + STOP_ENDPOINT
 
 DAQ_LIVE_STREAM_ENDPOINT = '/daq/live'
 DAQ_CONFIG_ENDPOINT = '/daq/config'
