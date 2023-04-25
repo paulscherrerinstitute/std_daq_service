@@ -4,6 +4,7 @@ from threading import Event
 
 from std_daq_service.det_udp_simulator.gigafrost import GFUdpPacketGenerator
 from std_daq_service.det_udp_simulator.udp_stream import generate_udp_stream
+from std_daq_service.det_udp_simulator.util import get_detector_generator
 
 _logger = logging.getLogger("StartStopRestManager")
 
@@ -13,7 +14,7 @@ DETECTOR_EG = 'eiger'
 
 
 class SimulationRestManager(object):
-    def __init__(self, daq_config):
+    def __init__(self, daq_config, image_filename=None):
         self.daq_config = daq_config
 
         detector_type = self.daq_config['detector_type']
@@ -23,11 +24,7 @@ class SimulationRestManager(object):
 
         self._image_size_bytes = height * width * bit_depth / 8
 
-        if detector_type == DETECTOR_GF:
-            self.generator = GFUdpPacketGenerator(image_pixel_height=height, image_pixel_width=width)
-        else:
-            raise ValueError(f"Unknown detector type: {detector_type}.")
-
+        self.generator = get_detector_generator(detector_type, height, width, image_filename)
         self.stop_event = Event()
 
         self._generator_thread = None
