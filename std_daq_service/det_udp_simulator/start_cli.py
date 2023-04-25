@@ -31,7 +31,7 @@ def main():
     image_width = config['image_pixel_width']
     detector_type = config['detector_type']
 
-    if detector_type == 'GF':
+    if detector_type == 'gigafrost':
         generator = GFUdpPacketGenerator(image_pixel_height=image_height,
                                          image_pixel_width=image_width,
                                          image_filename=image_filename)
