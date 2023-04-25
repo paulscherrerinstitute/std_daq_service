@@ -15,7 +15,7 @@ STATUS_ENDPOINT = '/status'
 START_ENDPOINT = '/start'
 STOP_ENDPOINT = '/stop'
 
-def start_api(config_file, rest_port, ansible_repo_folder):
+def start_api(config_file, rest_port):
     sim_manager = None
 
     try:
