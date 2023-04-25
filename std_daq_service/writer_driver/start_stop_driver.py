@@ -310,7 +310,7 @@ class WriterDriver(object):
             if status['state'] == target_state:
                 return
         else:
-            raise RuntimeError(f"Writer cannot reach target_state={target_state}. Last status:\n{status}")
+            raise RuntimeError(f"Cannot reach {target_state} state. The writer needs to be restarted.")
 
     def get_logs(self, n_logs):
         return self.status.get_logs(n_logs)
