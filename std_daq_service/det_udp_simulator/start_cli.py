@@ -5,6 +5,7 @@ import logging
 
 from std_daq_service.det_udp_simulator.gigafrost import GFUdpPacketGenerator
 from std_daq_service.det_udp_simulator.udp_stream import generate_udp_stream
+from std_daq_service.det_udp_simulator.util import get_detector_generator
 
 _logger = logging.getLogger(__name__)
 
@@ -26,24 +27,17 @@ def main():
     with open(args.detector_config_file, 'r') as input_file:
         config = json.load(input_file)
 
-    start_udp_port = config['start_udp_port']
+    detector_type = config['detector_type']
     image_height = config['image_pixel_height']
     image_width = config['image_pixel_width']
-    detector_type = config['detector_type']
+    generator = get_detector_generator(detector_type, image_height, image_width, image_filename=image_filename)
 
-    if detector_type == 'gigafrost':
-        generator = GFUdpPacketGenerator(image_pixel_height=image_height,
-                                         image_pixel_width=image_width,
-                                         image_filename=image_filename)
-    else:
-        raise ValueError(f"Detector type {detector_type} simulator not implemented.")
-
-    _logger.info(f'Starting simulated {detector_type} with rep_rate {rep_rate} on {output_ip} '
-                 f'with start_udp_port {start_udp_port} and image_shape {(image_height, image_width)} '
+    _logger.info(f'Starting simulated {config["detector_type"]} with rep_rate {rep_rate} on {output_ip} '
+                 f'with start_udp_port {config["start_udp_port"]} with image_shape {(image_height, image_width)} '
                  f'for {"unlimited" if n_images is None else n_images} images.')
 
     try:
-        generate_udp_stream(generator, output_ip, start_udp_port, rep_rate, n_images)
+        generate_udp_stream(generator, output_ip, config['start_udp_port'], rep_rate, n_images)
     except KeyboardInterrupt:
         pass
 
