@@ -13,7 +13,7 @@ CORS(app)
 
 WIDTH = 800
 HEIGHT = 600
-RECV_TIMEOUT = 150 # milliseconds
+RECV_TIMEOUT = 500 # milliseconds
 
 
 @app.route('/')
@@ -43,12 +43,12 @@ def generate_frames():
             a = (255 - 0) / (65535 - 0)
             b = 255 - a * 65535
             frame = (a * frame + b).astype(np.uint8)
-            frame = cv2.resize(frame, (HEIGHT, WIDTH))
+            frame = cv2.resize(frame, (WIDTH, HEIGHT))
 
             image_id = meta["frame"]
         except Again:
             frame = np.random.randint(0, 256, (HEIGHT, WIDTH), dtype=np.uint8)
-            image_id = "N/A"
+            image_id = "No data"
 
         # apply a color scheme to the grayscale image
         color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
