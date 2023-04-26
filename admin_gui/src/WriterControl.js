@@ -85,7 +85,7 @@ function WriterControl(props) {
   };
 
   const handleStopClick = () => {
-    axios.post('/stop')
+    axios.post('/writer/stop')
       .then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
