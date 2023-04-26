@@ -32,6 +32,7 @@ def generate_udp_stream(generator, output_ip, start_udp_port, rep_rate=10, n_ima
         _logger.debug(f'Send frames for {i_image}.')
 
         image_callback(i_image)
+        i_image += 1
 
         iteration_end = time()
         time_left_to_sleep = max(0.0, time_to_sleep - (iteration_end - iteration_start))
