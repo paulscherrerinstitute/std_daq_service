@@ -48,7 +48,7 @@ def generate_frames():
             frame = ((frame - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
 
             frame = cv2.resize(frame, (WIDTH, HEIGHT))
-            frame = cv2.flip(frame, -1)
+            frame = cv2.flip(frame, 0)
 
             image_id = meta["frame"]
         except Again:
