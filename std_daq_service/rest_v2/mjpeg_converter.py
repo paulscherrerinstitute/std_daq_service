@@ -6,12 +6,14 @@ from flask import Flask, Response
 import cv2
 import numpy as np
 from flask_cors import CORS
+from zmq import Again
 
 app = Flask(__name__)
 CORS(app)
 
 WIDTH = 800
 HEIGHT = 600
+RECV_TIMEOUT = 150 # milliseconds
 
 
 @app.route('/')
@@ -27,17 +29,21 @@ def live_stream():
 def generate_frames():
 
     context = zmq.Context()
-    socket = context.socket(zmq.SUB)
-    socket.connect("tcp://192.168.10.228:20000")
-    socket.setsockopt_string(zmq.SUBSCRIBE, "")
+    receiver = context.socket(zmq.SUB)
+    receiver.connect("tcp://192.168.10.228:20000")
+    receiver.setsockopt_string(zmq.SUBSCRIBE, "")
+    receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
     while True:
-        raw_meta, raw_data = socket.recv_multipart()
+        try:
+            raw_meta, raw_data = receiver.recv_multipart()
+            meta = json.loads(raw_meta.decode('utf-8'))
+            frame = np.frombuffer(raw_data, dtype=meta['type']).reshape(meta['shape'])
 
-        meta = json.loads(raw_meta.decode('utf-8'))
-        frame = np.frombuffer(raw_data, dtype=meta['type']).reshape(meta['shape'])
-
-        image_id = meta["frame"]
+            image_id = meta["frame"]
+        except Again:
+            frame = np.random.randint(0, 256, (HEIGHT, WIDTH), dtype=np.uint8)
+            image_id = "N/A"
 
         # apply a color scheme to the grayscale image
         color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
@@ -53,6 +59,8 @@ def generate_frames():
 
         # yield the frame for the MJPG stream
         yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
+
+    receiver.close()
 
 
 if __name__ == '__main__':
