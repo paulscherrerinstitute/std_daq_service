@@ -34,8 +34,6 @@ def generate_frames():
     receiver.setsockopt_string(zmq.SUBSCRIBE, "")
     receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
-    frame = None
-    image_id = None
     full_circle = True
 
     while True:
@@ -61,8 +59,6 @@ def generate_frames():
         image = cv2.resize(frame, (WIDTH, HEIGHT))
         # apply a color scheme to the grayscale image
         image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
-
-
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         # Valid image.
