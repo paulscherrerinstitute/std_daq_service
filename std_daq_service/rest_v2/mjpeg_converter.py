@@ -34,6 +34,9 @@ def generate_frames():
     receiver.setsockopt_string(zmq.SUBSCRIBE, "")
     receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
+    frame = np.random.randint(0, 256, (HEIGHT, WIDTH), dtype=np.uint8)
+    image_id = 0
+
     while True:
         try:
             raw_meta, raw_data = receiver.recv_multipart()
@@ -45,14 +48,14 @@ def generate_frames():
             frame = ((frame - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
 
             frame = cv2.resize(frame, (WIDTH, HEIGHT))
+            frame = cv2.flip(frame, -1)
 
             image_id = meta["frame"]
         except Again:
-            frame = np.random.randint(0, 256, (HEIGHT, WIDTH), dtype=np.uint8)
             image_id = None
 
         # apply a color scheme to the grayscale image
-        color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
+        color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         if image_id is not None:
