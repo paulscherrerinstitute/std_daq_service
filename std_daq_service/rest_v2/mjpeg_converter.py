@@ -43,6 +43,7 @@ def generate_frames():
             a = (255 - 0) / (65535 - 0)
             b = 255 - a * 65535
             frame = (a * frame + b).astype(np.uint8)
+            frame = cv2.resize(frame, (HEIGHT, WIDTH))
 
             image_id = meta["frame"]
         except Again:
