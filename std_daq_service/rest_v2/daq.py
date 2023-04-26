@@ -50,7 +50,7 @@ class AnsibleConfigDriver(object):
             self.status['deployment_id'] = data['runner_ident']
 
         # Set the status for displaying.
-        if data['status'] == 'failed':
+        if data['status'] == 'ERROR':
             # TODO: Extract the exception from somewhere.
             self.status['status'] = 'OMG ERROR WHAT TO DOOOOO'
         else:
