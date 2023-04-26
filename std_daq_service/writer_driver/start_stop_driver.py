@@ -102,7 +102,7 @@ class WriterStatusTracker(object):
     def _log_start_status(self, run_id, status):
         with self.status_lock:
             self.status = {'state': "WRITING",
-                           'acquisition': {'state': 'WAITING_FOR_IMAGES',
+                           'acquisition': {'state': 'WAITING_IMAGES',
                                            'stats': dict(self.EMPTY_STATS),
                                            'info': {'output_file': status.run_info.output_file,
                                                     'n_images': status.run_info.n_images,
