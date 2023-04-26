@@ -48,15 +48,21 @@ def generate_frames():
             image_id = meta["frame"]
         except Again:
             frame = np.random.randint(0, 256, (HEIGHT, WIDTH), dtype=np.uint8)
-            image_id = "No data"
+            image_id = None
 
         # apply a color scheme to the grayscale image
         color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        text = 'Frame {}'.format(image_id)
+        if image_id:
+            text = 'Frame {}'.format(image_id)
+            text_color = (0, 255, 0)
+        else:
+            text = 'NO DATA'
+            text_color = (255, 0, 0)
+
         text_size = cv2.getTextSize(text, font, 1, 2)[0]
-        cv2.putText(color_frame, text, (10, HEIGHT - text_size[1] - 10), font, 1, (0, 255, 0), 2)
+        cv2.putText(color_frame, text, (10, HEIGHT - text_size[1] - 10), font, 1, text_color, 2)
 
         # encode the color image as JPEG
         _, buffer = cv2.imencode('.jpg', color_frame)
