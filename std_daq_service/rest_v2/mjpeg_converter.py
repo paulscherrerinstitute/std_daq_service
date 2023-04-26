@@ -54,12 +54,12 @@ def generate_frames():
         color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        if image_id:
+        if image_id is not None:
             text = 'Frame {}'.format(image_id)
             text_color = (0, 255, 0)
         else:
-            text = 'NO DATA'
-            text_color = (255, 0, 0)
+            text = 'No data'
+            text_color = (0, 0, 255)
 
         text_size = cv2.getTextSize(text, font, 1, 2)[0]
         cv2.putText(color_frame, text, (10, HEIGHT - text_size[1] - 10), font, 1, text_color, 2)
