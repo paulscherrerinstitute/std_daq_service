@@ -34,26 +34,24 @@ def generate_frames():
     receiver.setsockopt_string(zmq.SUBSCRIBE, "")
     receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
-    frame = np.random.randint(0, 256, (HEIGHT, WIDTH), dtype=np.uint8)
-    image_id = 0
-
+    frame = np.zeros(shape=(HEIGHT, WIDTH), dtype=np.uint8)
     while True:
         try:
             raw_meta, raw_data = receiver.recv_multipart()
             meta = json.loads(raw_meta.decode('utf-8'))
+            image_id = meta["frame"]
             frame = np.frombuffer(raw_data, dtype=meta['type']).reshape(meta['shape'])
 
+            # Scale image to 8 bits with full range.
             min_val = frame.min()
             max_val = frame.max()
             frame = ((frame - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
 
-            frame = cv2.resize(frame, (WIDTH, HEIGHT))
-            frame = cv2.flip(frame, 0)
-
-            image_id = meta["frame"]
         except Again:
             image_id = None
 
+        frame = cv2.resize(frame, (WIDTH, HEIGHT))
+        frame = cv2.flip(frame, 0)
         # apply a color scheme to the grayscale image
         color_frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
@@ -62,7 +60,7 @@ def generate_frames():
             text = 'Frame {}'.format(image_id)
             text_color = (0, 255, 0)
         else:
-            text = 'No data'
+            text = 'No data...'
             text_color = (0, 0, 255)
 
         text_size = cv2.getTextSize(text, font, 1, 2)[0]
