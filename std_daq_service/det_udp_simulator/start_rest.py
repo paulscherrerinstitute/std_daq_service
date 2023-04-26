@@ -54,7 +54,7 @@ def start_api(config_file, rest_port, image_filename, output_ip):
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        app.run(host='0.0.0.0', port=rest_port)
+        app.run(host='0.0.0.0', port=rest_port, threaded=True)
 
     except Exception as e:
         _logger.exception("Error while trying to run the REST api")
