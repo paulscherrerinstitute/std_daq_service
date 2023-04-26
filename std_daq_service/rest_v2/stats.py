@@ -7,9 +7,15 @@ from zmq import Again
 from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata
 
 import zmq
+import copy
 
 # For how long to accumulate statistics in seconds.
 STATS_INTERVAL = 1
+# Receive timeout in milliseconds
+RECV_TIMEOUT = 1000
+
+EMPTY_STATS = {"bytes_per_second": 0, "images_per_second": 0}
+
 
 
 class ImageMetadataStatsDriver(object):
@@ -18,7 +24,7 @@ class ImageMetadataStatsDriver(object):
         self.ctx = ctx
 
         self._stop_event = Event()
-        self.stats = {"bytes_per_second": 0, "images_per_second": 0}
+        self.stats = copy.deepcopy(EMPTY_STATS)
         self._stats_thread = Thread(target=self._collect_stats)
         self._stats_thread.start()
 
@@ -26,17 +32,19 @@ class ImageMetadataStatsDriver(object):
         receiver = self.ctx.socket(zmq.SUB)
         receiver.connect(self.image_stream_url)
         receiver.setsockopt(zmq.SUBSCRIBE, b'')
+        receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
         image_meta = ImageMetadata()
         n_bytes_interval = 0
         n_images_interval = 0
 
         start_time = time()
-        while self._stop_event.is_set():
+        while not self._stop_event.is_set():
             try:
                 meta_raw = receiver.recv()
                 image_meta.ParseFromString(meta_raw)
             except Again:
+                self.stats = copy.deepcopy(EMPTY_STATS)
                 continue
 
             diff = time() - start_time
