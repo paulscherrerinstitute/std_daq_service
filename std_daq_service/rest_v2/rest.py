@@ -78,11 +78,11 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(SIM_STATUS_ENDPOINT)
     def get_sim_status_request():
+
+        print(f'{sim_url_base}{STATUS_ENDPOINT}')
         status = requests.get(f'{sim_url_base}{STATUS_ENDPOINT}').json()
 
-        return jsonify({"status": "ok",
-                        "message": f"Simulator for {detector_name}.",
-                        'simulator': status})
+        return status
 
     @app.route(SIM_START_ENDPOINT, methods=['POST'])
     def start_sim_request():
