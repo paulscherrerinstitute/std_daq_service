@@ -39,10 +39,7 @@ def generate_frames():
             raw_meta, raw_data = receiver.recv_multipart()
             meta = json.loads(raw_meta.decode('utf-8'))
             frame = np.frombuffer(raw_data, dtype=meta['type']).reshape(meta['shape'])
-
-            a = (255 - 0) / (65535 - 0)
-            b = 255 - a * 65535
-            frame = (a * frame + b).astype(np.uint8)
+            frame = (frame / 256).astype('uint8')
             frame = cv2.resize(frame, (WIDTH, HEIGHT))
 
             image_id = meta["frame"]
