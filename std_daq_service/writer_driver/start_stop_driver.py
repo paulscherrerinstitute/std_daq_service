@@ -159,11 +159,11 @@ class WriterDriver(object):
     STOP_COMMAND = 'STOP'
 
     def __init__(self, ctx, command_address, in_status_address, out_status_address, image_metadata_address):
-        _logger.info(f'Starting writer driver with:\n'\
-                f'\t command_address:{command_address}\n' \
-                f'\t in_status_address:{in_status_address}\n' \
-                f'\t out_status_address:{out_status_address}\n' \
-                f'\t image_metadata_address:{image_metadata_address}')
+        _logger.info(f'Starting writer driver with:\n' \
+                     f'\t command_address:{command_address}\n' \
+                     f'\t in_status_address:{in_status_address}\n' \
+                     f'\t out_status_address:{out_status_address}\n' \
+                     f'\t image_metadata_address:{image_metadata_address}')
 
         self.ctx = ctx
         self.stop_event = Event()
