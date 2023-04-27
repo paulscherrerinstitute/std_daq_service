@@ -53,7 +53,7 @@ def start_api(beamline_name, config_file, rest_port, ansible_repo_folder, sim_ur
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        app.run(host='0.0.0.0', port=rest_port)
+        app.run(host='0.0.0.0', port=rest_port, threaded=True)
 
     except Exception as e:
         _logger.exception("Error while trying to run the REST api")
@@ -79,7 +79,8 @@ if __name__ == "__main__":
     parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5000)
     parser.add_argument('--ansible_folder', type=str, default=DEFAULT_DEPLOYMENT_FOLDER,
                         help="Ansible deployment folder location. Usually /etc/std_daq/deployment")
-    parser.add_argument("--sim_url_base", type=str, default=None, help="URL to control the simulation")
+    parser.add_argument("--sim_url_base", type=str, default='http://localhost:5001',
+                        help="URL to control the simulation")
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
