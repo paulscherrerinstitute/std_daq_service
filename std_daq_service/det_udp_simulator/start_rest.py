@@ -71,7 +71,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Standard DAQ Detector simulator')
     parser.add_argument("config_file", type=str, help="Path to JSON config file.")
     parser.add_argument('output_ip', type=str, help='IP to send the UPD packets to.')
-    parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5000)
+    parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5001)
     parser.add_argument('-f', '--file', type=str, default=None, help='Image in TIFF format to stream.')
 
     args = parser.parse_args()
