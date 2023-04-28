@@ -20,7 +20,7 @@ HEIGHT = 600
 # milliseconds
 RECV_TIMEOUT = 500
 
-_logging = logging.getLogger('MJPEG Stream')
+_logger = logging.getLogger('MJPEG Stream')
 LIVE_STREAM_URL = 'tcp://localhost:20000'
 
 @app.route('/')
@@ -102,6 +102,6 @@ if __name__ == '__main__':
     LIVE_STREAM_URL = args.live_stream_address
 
     logging.basicConfig(level=logging.INFO)
-    _logging.info(f"Starting MJPEG streamer on {rest_port} for live stream {LIVE_STREAM_URL}.")
+    _logger.info(f"Starting MJPEG streamer on {rest_port} for live stream {LIVE_STREAM_URL}.")
 
     app.run(host='0.0.0.0', port=rest_port, threaded=True)
