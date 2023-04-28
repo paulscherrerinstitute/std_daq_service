@@ -1,3 +1,5 @@
+import argparse
+import logging
 from time import sleep
 
 import zmq
@@ -8,13 +10,18 @@ import numpy as np
 from flask_cors import CORS
 from zmq import Again
 
+from std_daq_service.rest_v2.utils import validate_config
+
 app = Flask(__name__)
 CORS(app)
 
 WIDTH = 800
 HEIGHT = 600
-RECV_TIMEOUT = 500 # milliseconds
+# milliseconds
+RECV_TIMEOUT = 500
 
+_logging = logging.getLogger('MJPEG Stream')
+LIVE_STREAM_URL = 'tcp://localhost:20000'
 
 @app.route('/')
 def index():
@@ -30,7 +37,7 @@ def generate_frames():
 
     context = zmq.Context()
     receiver = context.socket(zmq.SUB)
-    receiver.connect("tcp://192.168.10.228:20000")
+    receiver.connect(LIVE_STREAM_URL)
     receiver.setsockopt_string(zmq.SUBSCRIBE, "")
     receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
@@ -86,4 +93,15 @@ def generate_frames():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, threaded=True)
+    parser = argparse.ArgumentParser(description='MJPEG converter')
+    parser.add_argument("live_stream_address", type=str, help="Path to JSON config file.")
+    parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5001)
+
+    args = parser.parse_args()
+    rest_port = args.rest_port
+    LIVE_STREAM_URL = args.live_stream_address
+
+    logging.basicConfig(level=logging.INFO)
+    _logging.info(f"Starting MJPEG streamer on {rest_port} for live stream {LIVE_STREAM_URL}.")
+
+    app.run(host='0.0.0.0', port=rest_port, threaded=True)
