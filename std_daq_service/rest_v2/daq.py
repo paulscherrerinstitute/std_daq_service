@@ -58,35 +58,34 @@ class AnsibleConfigDriver(object):
         self.status['state'] = self.MAPPING_STATUS_TO_STD_DAQ_STATE.get(ansible_status, 'UNKNOWN')
         self.status['status'] = self.MAPPING_STATUS_TO_STD_DAQ_STATUS.get(ansible_status, 'UNKNOWN')
 
-        # Record start time and id.
+        message = None
         if ansible_status == 'starting':
+            message = 'Starting...'
             self.status['deployment_id'] = data['runner_ident']
             self.status['stats']['start_time'] = time.time()
             _logger.info(f"Starting deployment_id={self.status['deployment_id']}")
 
         elif ansible_status == 'failed':
+            message = 'Failed. Check logs on Elastic.'
             self.status['stats']['stop_time'] = time.time()
             _logger.error(f'Deployment failed: {data}')
 
         elif ansible_status == 'successful':
+            message = 'Succeeded.'
             _logger.info(f"Deployment successful: {data}")
             self.status['stats']['stop_time'] = time.time()
 
+        elif ansible_status == 'running':
+            message = 'Running...'
+            _logger.info(f"Running deployment_id={self.status['deployment_id']}")
+
+        self.status['message'] = message
         _logger.info(f"Status changed: {self.status}")
 
         self.status_callback(self.status)
 
     def _event_handler(self, data):
-        message = None
-        if data['event'] == 'verbose':
-            message = data['stdout']
-        elif data['event'] == 'runner_on_start':
-            # Task name and host in status.
-            message = f"Running {data['event_data'].get('task')} on {data['event_data'].get('host')}"
-
-        if message:
-            self.status['message'] = message
-            self.status_callback(self.status)
+        pass
 
     def get_servers_facts(self):
         result = ansible_runner.run(
