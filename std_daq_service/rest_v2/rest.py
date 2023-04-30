@@ -118,7 +118,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
         daq_config = daq_manager.set_config(config_change_request)
 
         return jsonify({"status": "ok",
-                        "message": f"DAQ configured for bit_depth={daq_config['bit_depth']}.",
+                        "message": f"Setting new daq config.",
                         'config': daq_config})
 
     @app.route(DAQ_STATS_ENDPOINT)

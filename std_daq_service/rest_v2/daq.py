@@ -125,6 +125,7 @@ class DaqRestManager(object):
     def set_config(self, config_updates):
         new_daq_config = update_config(self.get_config(), config_updates)
         self.config_driver.set_config(new_daq_config)
+        return new_daq_config
 
     def get_stats(self):
         return self.stats_driver.get_stats()
