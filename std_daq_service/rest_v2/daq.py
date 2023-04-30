@@ -17,6 +17,19 @@ _logger = logging.getLogger("DaqRestManager")
 
 
 class AnsibleConfigDriver(object):
+    MAPPING_STATUS_TO_STD_DAQ_STATE = {
+        'starting': 'DEPLOYING',
+        'running': 'DEPLOYING',
+        'failed': 'READY',
+        'successful': "READY"
+    }
+    MAPPING_STATUS_TO_STD_DAQ_STATUS = {
+        'starting': 'RUNNING',
+        'running': 'RUNNING',
+        'failed': 'ERROR',
+        'successful': "SUCCESS"
+    }
+
     status_mapping = {
         'starting': 'Execution started',
         'successful': 'Done',
@@ -41,23 +54,32 @@ class AnsibleConfigDriver(object):
             raise ValueError(f'DAQ config file {self.config_file} does not exist.')
 
         self.status = {'state': 'READY', 'status': 'SUCCESS', 'deployment_id': None,
-                       'stats': {'start_time': 0, 'end_time': 0}}
+                       'stats': {'start_time': None, 'end_time': None}}
         self.status_callback = status_callback
 
     def _status_handler(self, data, runner_config):
-        self.status['state'] = data['status']
+        ansible_status = data['status']
+
+        self.status['state'] = self.MAPPING_STATUS_TO_STD_DAQ_STATE.get(ansible_status, 'UNKNOWN')
+        self.status['status'] = self.MAPPING_STATUS_TO_STD_DAQ_STATUS.get(ansible_status, 'UNKNOWN')
+        self.status['message'] = ansible_status
 
         # Record start time and id.
-        if data['status'] == 'starting':
-            self.status['deployment_start'] = time.time()
+        if ansible_status == 'starting':
             self.status['deployment_id'] = data['runner_ident']
+            self.status['stats']['start_time'] = time.time()
+            _logger.info(f"Starting deployment_id={self.status['deployment_id']}")
 
-        # Set the status for displaying.
-        if data['status'] == 'ERROR':
-            # TODO: Extract the exception from somewhere.
-            self.status['status'] = 'OMG ERROR WHAT TO DOOOOO'
-        else:
-            self.status['status'] = self.status_mapping.get(self.status['state'], "")
+        elif ansible_status == 'failed':
+            self.status['stats']['end_time'] = time.time()
+            # TODO: Extract real error message
+            error_message = "SOMETHING IS WRONG HERE"
+            self.status['message'] = error_message
+            _logger.error(f'Deployment failed: {data}')
+
+        elif ansible_status == 'successful':
+            _logger.info(f"Deployment successful: {data}")
+            self.status['stats']['end_time'] = time.time()
 
         _logger.info(f"Status changed: {self.status}")
 
