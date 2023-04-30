@@ -30,12 +30,6 @@ class AnsibleConfigDriver(object):
         'successful': "SUCCESS"
     }
 
-    status_mapping = {
-        'starting': 'Execution started',
-        'successful': 'Done',
-        'running': 'Running tasks',
-    }
-
     def __init__(self, config_file, ansible_repo_folder=DEFAULT_DEPLOYMENT_FOLDER, status_callback=lambda x: None):
         self.repo_folder = ansible_repo_folder
         if not os.path.exists(self.repo_folder):
@@ -54,7 +48,8 @@ class AnsibleConfigDriver(object):
             raise ValueError(f'DAQ config file {self.config_file} does not exist.')
 
         self.status = {'state': 'READY', 'status': 'SUCCESS', 'deployment_id': None,
-                       'stats': {'start_time': None, 'end_time': None}}
+                       'stats': {'start_time': None, 'end_time': None},
+                       'message': None}
         self.status_callback = status_callback
 
     def _status_handler(self, data, runner_config):
@@ -62,7 +57,6 @@ class AnsibleConfigDriver(object):
 
         self.status['state'] = self.MAPPING_STATUS_TO_STD_DAQ_STATE.get(ansible_status, 'UNKNOWN')
         self.status['status'] = self.MAPPING_STATUS_TO_STD_DAQ_STATUS.get(ansible_status, 'UNKNOWN')
-        self.status['message'] = ansible_status
 
         # Record start time and id.
         if ansible_status == 'starting':
@@ -72,9 +66,6 @@ class AnsibleConfigDriver(object):
 
         elif ansible_status == 'failed':
             self.status['stats']['stop_time'] = time.time()
-            # TODO: Extract real error message
-            error_message = "failed: SOMETHING IS WRONG HERE"
-            self.status['message'] = error_message
             _logger.error(f'Deployment failed: {data}')
 
         elif ansible_status == 'successful':
@@ -86,14 +77,16 @@ class AnsibleConfigDriver(object):
         self.status_callback(self.status)
 
     def _event_handler(self, data):
-        # Non relevant event.
-        if data['event'] != 'runner_on_start':
-            return
+        message = None
+        if data['event'] == 'verbose':
+            message = data['stdout']
+        elif data['event'] == 'runner_on_start':
+            # Task name and host in status.
+            message = f"Running {data['event_data'].get('task')} on {data['event_data'].get('host')}"
 
-        # Task name and host in status.
-        self.status['status'] = f"{data['event_data'].get('task')} on {data['event_data'].get('host')}"
-
-        self.status_callback(self.status)
+        if message:
+            self.status['message'] = message
+            self.status_callback(self.status)
 
     def get_servers_facts(self):
         result = ansible_runner.run(
