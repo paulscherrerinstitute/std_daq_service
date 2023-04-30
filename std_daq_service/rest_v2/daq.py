@@ -47,7 +47,7 @@ class AnsibleConfigDriver(object):
         if not os.path.isfile(self.config_file):
             raise ValueError(f'DAQ config file {self.config_file} does not exist.')
 
-        self.status = {'state': 'READY', 'status': '...', 'deployment_id': None,
+        self.status = {'state': 'READY', 'status': 'SUCCESS', 'deployment_id': None,
                        'stats': {'start_time': None, 'end_time': None},
                        'message': 'N/A'}
         self.status_callback = status_callback
