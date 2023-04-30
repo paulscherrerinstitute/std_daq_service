@@ -85,7 +85,7 @@ class AnsibleConfigDriver(object):
         self.status_callback(self.status)
 
     def _event_handler(self, data):
-        pass
+        _logger.info(data)
 
     def get_servers_facts(self):
         result = ansible_runner.run(
