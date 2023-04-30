@@ -71,7 +71,7 @@ class AnsibleConfigDriver(object):
             _logger.error(f'Deployment failed: {data}')
 
         elif ansible_status == 'successful':
-            message = 'Succeeded.'
+            message = 'Operation completed.'
             _logger.info(f"Deployment successful: {data}")
             self.status['stats']['stop_time'] = time.time()
 
