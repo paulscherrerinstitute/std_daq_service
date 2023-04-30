@@ -71,15 +71,15 @@ class AnsibleConfigDriver(object):
             _logger.info(f"Starting deployment_id={self.status['deployment_id']}")
 
         elif ansible_status == 'failed':
-            self.status['stats']['end_time'] = time.time()
+            self.status['stats']['stop_time'] = time.time()
             # TODO: Extract real error message
-            error_message = "SOMETHING IS WRONG HERE"
+            error_message = "failed: SOMETHING IS WRONG HERE"
             self.status['message'] = error_message
             _logger.error(f'Deployment failed: {data}')
 
         elif ansible_status == 'successful':
             _logger.info(f"Deployment successful: {data}")
-            self.status['stats']['end_time'] = time.time()
+            self.status['stats']['stop_time'] = time.time()
 
         _logger.info(f"Status changed: {self.status}")
 
