@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import ansible_runner
@@ -11,6 +12,8 @@ from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 DEFAULT_DEPLOYMENT_FOLDER = '/etc/std_daq/deployment'
 INVENTORY_FILE = '/inventory.yaml'
 SERVICE_FILE = '/services.yaml'
+
+_logger = logging.getLogger("DaqRestManager")
 
 
 class AnsibleConfigDriver(object):
@@ -56,6 +59,8 @@ class AnsibleConfigDriver(object):
         else:
             self.status['status'] = self.status_mapping.get(self.status['state'], "")
 
+        _logger.info(f"Status changed: {self.status}")
+
         self.status_callback(self.status)
 
     def _event_handler(self, data):
@@ -90,6 +95,8 @@ class AnsibleConfigDriver(object):
         with open(self.config_file, 'w') as output_file:
             json.dump(daq_config, output_file)
 
+        _logger.info(f"Setting config: {daq_config}")
+
         ansible_runner.run(
             private_data_dir=self.repo_folder,
             inventory=self.inventory_file, playbook=self.services_file, tags='config',
@@ -99,6 +106,8 @@ class AnsibleConfigDriver(object):
         return self.status
 
     def deploy(self):
+        _logger.info("Starting deploy.")
+
         result = ansible_runner.run(
             private_data_dir=self.repo_folder,
             inventory=self.inventory_file, playbook=self.services_file, tags='all',
