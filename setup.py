@@ -13,7 +13,8 @@ setup(
         'protobuf',
         'flask',
         'flask-cors',
-        'numpy'
+        'numpy',
+        'redis'
     ],
     entry_points='''
         [console_scripts]
