@@ -29,7 +29,6 @@ _logger = getLogger('rest')
 
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager, sim_url_base: str):
-    detector_name = daq_manager.get_config()['detector_name']
 
     @app.route('/')
     def react_app():
@@ -125,20 +124,20 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     def get_daq_stats_request():
         stats = daq_manager.get_stats()
         return jsonify({"status": "ok",
-                        "message": f"DAQ statistics for {detector_name}.",
+                        "message": f"DAQ statistics",
                         'stats': stats})
 
     @app.route(DAQ_LOGS_ENDPOINT)
     def get_daq_logs_request(n_logs):
         logs = daq_manager.get_logs(n_logs)
         return jsonify({"status": "ok",
-                        "message": f"DAQ logs for {detector_name}.",
+                        "message": f"DAQ logs",
                         'logs': logs})
 
     @app.route(DAQ_DEPLOYMENT_STATUS_ENDPOINT)
     def get_deployment_status_request():
         return jsonify({"status": "ok",
-                        "message": f"Deployment status for {detector_name}.",
+                        "message": f"Deployment status",
                         'deployment': daq_manager.get_deployment_status()})
 
     @app.errorhandler(Exception)
