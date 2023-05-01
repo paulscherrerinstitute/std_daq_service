@@ -55,8 +55,11 @@ def validate_n_images(n_images_str):
 
 
 def update_config(old_config, config_updates):
-    new_config = OrderedDict({param: config_updates.get(param, old_config[param])
-                              for param in DAQ_CONFIG_FIELDS})
+    if old_config is not None:
+        new_config = OrderedDict({param: config_updates.get(param, old_config[param])
+                                  for param in DAQ_CONFIG_FIELDS})
+    else:
+        new_config = config_updates
 
     validate_config(new_config)
 

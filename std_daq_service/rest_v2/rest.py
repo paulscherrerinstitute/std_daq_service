@@ -84,7 +84,6 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
             _logger.error(f"Cannot communicate with simulator API on {sim_url_base}")
             return jsonify({'status': 'error', 'message': f'Cannot communicate with API on {sim_url_base}.'})
 
-
     @app.route(SIM_START_ENDPOINT, methods=['POST'])
     def start_sim_request():
         request_logger.info(f'Start simulation')
@@ -104,10 +103,11 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['GET'])
     def get_daq_config_request():
-        daq_config = daq_manager.get_config()
+        config_id, daq_config = daq_manager.get_config()
         return jsonify({"status": "ok",
-                        "message": f"DAQ configured for bit_depth={daq_config['bit_depth']}.",
-                        'config': daq_config})
+                        "message": f"DAQ configured for bit_depth={daq_config.get('bit_depth')}.",
+                        'config': daq_config,
+                        'config_id': config_id})
 
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['POST'])
     def set_daq_config_request():

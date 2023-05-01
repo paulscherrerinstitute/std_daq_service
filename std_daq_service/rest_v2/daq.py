@@ -23,13 +23,15 @@ class DaqRestManager(object):
     def get_config(self):
         messages = self.redis.xrevrange(self.config_key)
         if len(messages) > 0:
+            config_id = messages[0][0].decode('utf8')
             daq_config = json.loads(messages[0][1][b'daq_config'])
-            return daq_config
+            return config_id, daq_config
         else:
-            return {}
+            return "", {}
 
     def set_config(self, config_updates):
-        new_daq_config = update_config(self.get_config(), config_updates)
+        config_id, daq_config = self.get_config()
+        new_daq_config = update_config(daq_config, config_updates)
         self.redis.xadd(self.config_key, {b'daq_config': json.dumps(new_daq_config)})
         return new_daq_config
 
