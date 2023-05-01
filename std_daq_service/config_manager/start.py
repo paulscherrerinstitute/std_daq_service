@@ -36,7 +36,7 @@ def start_manager(server_name, config_file, redis_url):
                 if config_id != last_seen_id:
                     _logger.info(f"New config found: {config_id}")
                     redis_client.xadd(config_status_key, {"server_name": server_name, 'config_id': config_id,
-                                                          'Message': 'Deploying'})
+                                                          'message': 'Deploying'})
 
                     daq_config = json.loads(messages[0][1][b'daq_config'])
                     with open(config_file, 'w') as f:
@@ -44,7 +44,7 @@ def start_manager(server_name, config_file, redis_url):
 
                     _logger.info(f'New config deployed: {daq_config}')
                     redis_client.xadd(config_status_key, {"server_name": server_name, 'config_id': config_id,
-                                                          'Message': 'Deployed'})
+                                                          'message': 'Done'})
                     _logger.info("Deployment completed.")
                     last_seen_id = config_id
 
