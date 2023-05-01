@@ -62,6 +62,7 @@ class DaqRestManager(object):
             start_timestamp = redis_to_unix_timestamp(daq_config_id)
             statuses = self.redis.xrange(self.config_status_key, min=daq_config_id)
 
+            # Collect latest status from each server.
             for status in statuses:
                 daq_config = status[1]
                 status_config_id = daq_config[b'config_id'].decode()
@@ -75,8 +76,22 @@ class DaqRestManager(object):
                 else:
                     break
 
+            if all(message == 'Done' for message in deployed_servers.values()):
+                status = 'SUCCESS'
+                message = 'Deployment successful'
+            elif any(message == 'Error' for message in deployed_servers.values()):
+                status = 'ERROR'
+                message = "Deployment failed"
+            elif any(message == 'Deploying' for message in deployed_servers.values()):
+                status = 'DEPLOYING'
+                message = '...'
+            else:
+                status = 'UNKNOWN'
+                message = 'Unexpected state. Check logs on Elastic.'
+                _logger.warning(f"Unexpected deployment status: {deployed_servers}")
+
         return {'config_id': daq_config_id,
-                'status': "READY",
+                'status': status,
                 'message': message,
                 'servers': deployed_servers,
                 'stats': {'start_time': start_timestamp, 'stop_time': stop_timestamp}}
