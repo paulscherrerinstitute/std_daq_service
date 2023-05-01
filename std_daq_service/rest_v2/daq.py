@@ -44,19 +44,27 @@ class DaqRestManager(object):
     def get_deployment_status(self):
         messages = self.redis.xrevrange(self.config_key)
 
+        daq_config_id = None
+        deployed_servers = {}
+
         if len(messages) > 0:
-            daq_config_id = messages[0][0]
+            daq_config_id = messages[0][0].decode()
             statuses = self.redis.xrange(self.config_status_key, min=daq_config_id)
 
-            deployed_servers = []
             for status in statuses:
-                status_config_id = status[0]
-                if daq_config_id == status_config_id:
-                    status_config_server = status[1][b'server_name'].decode('utf8')
-                    deployed_servers.append(status_config_server)
+                daq_config = status[1]
+                status_config_id = daq_config[b'config_id'].decode()
 
-            return {'config_id': daq_config_id,
-                    'servers': deployed_servers}
+                if daq_config_id == status_config_id:
+                    server_name = daq_config[b'server_name'].decode()
+                    server_message = daq_config[b'message'].decode()
+                    # Return only the last message received from a specific server.
+                    deployed_servers[server_name] = server_message
+                else:
+                    break
+
+        return {'config_id': daq_config_id,
+                'servers': deployed_servers}
 
     def close(self):
         self.stats_driver.close()
