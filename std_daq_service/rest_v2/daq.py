@@ -75,7 +75,9 @@ class DaqRestManager(object):
                     deployed_servers[server_name] = server_message
                 else:
                     break
-
+            if len(deployed_servers) == 0:
+                status = 'RUNNING'
+                message = 'Waiting for servers...'
             if all(message == 'Done' for message in deployed_servers.values()):
                 status = 'SUCCESS'
                 message = 'Deployment successful'
@@ -83,8 +85,8 @@ class DaqRestManager(object):
                 status = 'ERROR'
                 message = "Deployment failed"
             elif any(message == 'Deploying' for message in deployed_servers.values()):
-                status = 'DEPLOYING'
-                message = '...'
+                status = 'RUNNING'
+                message = 'Deploying on servers...'
             else:
                 status = 'UNKNOWN'
                 message = 'Unexpected state. Check logs on Elastic.'
