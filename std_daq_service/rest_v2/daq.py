@@ -12,15 +12,13 @@ _logger = logging.getLogger("DaqRestManager")
 
 
 class DaqRestManager(object):
-    def __init__(self, config_name, stats_driver: ImageMetadataStatsDriver, writer_driver: WriterDriver, redis_url):
+    def __init__(self, config_file, stats_driver: ImageMetadataStatsDriver, writer_driver: WriterDriver, redis: Redis):
         self.stats_driver = stats_driver
         self.writer_driver = writer_driver
-        redis_host, redis_port = redis_url.split(':')
-        _logger.info(f"Connecting to Redis {redis_host}:{redis_port}")
 
-        self.redis = Redis(host=redis_host, port=redis_port)
-        self.config_key = f'{config_name}:config'
-        self.config_status_key = f'{config_name}:config_status'
+        self.redis = redis
+        self.config_key = f'{config_file}:config'
+        self.config_status_key = f'{config_file}:config_status'
 
     def get_config(self):
         messages = self.redis.xrevrange(self.config_key)
