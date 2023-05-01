@@ -78,7 +78,7 @@ class DaqRestManager(object):
             if len(deployed_servers) == 0:
                 status = 'RUNNING'
                 message = 'Waiting for servers...'
-            if all(message == 'Done' for message in deployed_servers.values()):
+            elif all(message == 'Done' for message in deployed_servers.values()):
                 status = 'SUCCESS'
                 message = 'Deployment successful'
             elif any(message == 'Error' for message in deployed_servers.values()):
