@@ -5,7 +5,7 @@ import axios from "axios";
 
 function DaqDeployment() {
   const [ state, setState ] = useState(
-      {status: '...', message: '...', config_id: 'N/A', stats: {start_time: 0, stop_time: 0}});
+      {status: '...', message: '...', servers: {}, config_id: 'N/A', stats: {start_time: 0, stop_time: 0}});
   const deployment_url = "/daq/deployment";
   const [restError, setRestError] = useState(false);
   const [restErrorText, setRestErrorText] = useState("Unknown")
@@ -30,8 +30,6 @@ function DaqDeployment() {
         console.log(error);
       }
     }
-
-
 
     const interval = setInterval(() => {
       fetchData();
@@ -84,7 +82,7 @@ function DaqDeployment() {
     return diff;
   };
   let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
-
+  let n_servers = Object.keys(state.servers).length;
 
 
   return (
@@ -103,6 +101,10 @@ function DaqDeployment() {
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Message:</Typography></Grid>
         <Grid item> {state.message} </Grid>
+      </Grid>
+      <Grid container alignItems="center" spacing={1}>
+        <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Deployment time:</Typography></Grid>
+        <Grid item> {formatTimestamp(state.stats.start_time)} </Grid>
       </Grid>
 
       <Accordion>
@@ -127,6 +129,25 @@ function DaqDeployment() {
           </Grid>
         </AccordionDetails>
       </Accordion>
+
+
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="status-content" id="status-header">
+            <Grid container alignItems="center" spacing={1}>
+              <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Details:</Typography></Grid>
+              <Grid item> <Typography variant="subtitle2" >{n_servers} {((n_servers === 1) ? 'server' : 'servers')}
+              </Typography></Grid>
+            </Grid>
+          </AccordionSummary>
+          <AccordionDetails>
+            {Object.entries(state.servers).map(([server_name, message]) => (
+              <Grid container alignItems="center" spacing={1}>
+                <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{server_name}:</Typography></Grid>
+                <Grid item> {message} </Grid>
+              </Grid>
+            ))}
+          </AccordionDetails>
+        </Accordion>
       </div>
           )}
     </Paper>
