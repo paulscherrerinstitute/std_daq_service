@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 
 from redis.client import Redis
 
@@ -9,6 +10,10 @@ from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
 
 _logger = logging.getLogger("DaqRestManager")
+
+
+def redis_to_unix_timestamp(redis_id):
+    return float(redis_id.replace('-', '.')) / 1000
 
 
 class DaqRestManager(object):
@@ -46,14 +51,21 @@ class DaqRestManager(object):
 
         daq_config_id = None
         deployed_servers = {}
+        start_timestamp = 0
+        stop_timestamp = 0
+
+        status = 'UNKNOWN'
+        message = "No deployment records."
 
         if len(messages) > 0:
             daq_config_id = messages[0][0].decode()
+            start_timestamp = redis_to_unix_timestamp(daq_config_id)
             statuses = self.redis.xrange(self.config_status_key, min=daq_config_id)
 
             for status in statuses:
                 daq_config = status[1]
                 status_config_id = daq_config[b'config_id'].decode()
+                stop_timestamp = max(stop_timestamp, redis_to_unix_timestamp(status_config_id))
 
                 if daq_config_id == status_config_id:
                     server_name = daq_config[b'server_name'].decode()
@@ -64,7 +76,10 @@ class DaqRestManager(object):
                     break
 
         return {'config_id': daq_config_id,
-                'servers': deployed_servers}
+                'status': "READY",
+                'message': message,
+                'servers': deployed_servers,
+                'stats': {'start_time': start_timestamp, 'stop_time': stop_timestamp}}
 
     def close(self):
         self.stats_driver.close()

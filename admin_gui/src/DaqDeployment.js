@@ -5,7 +5,7 @@ import axios from "axios";
 
 function DaqDeployment() {
   const [ state, setState ] = useState(
-      {status: '...', message: '...', deployment_id: 'N/A', stats: {start_time: 0, end_time: 0}});
+      {status: '...', message: '...', config_id: 'N/A', stats: {start_time: 0, stop_time: 0}});
   const deployment_url = "/daq/deployment";
   const [restError, setRestError] = useState(false);
   const [restErrorText, setRestErrorText] = useState("Unknown")
@@ -123,7 +123,7 @@ function DaqDeployment() {
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Deployment ID:</Typography></Grid>
-            <Grid item> {state.deployment_id} </Grid>
+            <Grid item> {state.config_id} </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
