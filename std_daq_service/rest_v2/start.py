@@ -24,14 +24,14 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
     writer_manager = None
 
     try:
+        _logger.info(f'Starting Start Stop REST for {config_file} on beamline_name={beamline_name} '
+                     f'(rest_port={rest_port}).')
+
         with open(config_file, 'r') as input_file:
             daq_config = json.load(input_file)
         validate_config(daq_config)
 
         detector_name = daq_config['detector_name']
-
-        _logger.info(f'Starting Start Stop REST for detector_name={detector_name} on beamline_name={beamline_name} '
-                     f'(rest_port={rest_port}).')
 
         command_address, in_status_address, out_status_address, image_metadata_address = \
             get_stream_addresses(detector_name)
