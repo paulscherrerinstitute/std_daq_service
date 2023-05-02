@@ -31,7 +31,7 @@ class StdDaqRedisStorage(object):
     @staticmethod
     def _interpret_deployment_status(deployed_servers):
         if len(deployed_servers) == 0:
-            status = 'RUNNING'
+            status = 'UNKNOWN'
             message = 'Waiting for servers...'
         elif all(message == 'Done' for message in deployed_servers.values()):
             status = 'SUCCESS'
