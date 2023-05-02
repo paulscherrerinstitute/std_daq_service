@@ -72,6 +72,9 @@ def validate_config(new_config):
         if field_name not in new_config:
             error_message += f' {field_name}'
 
+        if field_name not in ('detector_type', 'detector_name'):
+            new_config[field_name] = int(new_config[field_name])
+
     if error_message:
         raise RuntimeError(f"Missing mandatory fields:{error_message}")
 
