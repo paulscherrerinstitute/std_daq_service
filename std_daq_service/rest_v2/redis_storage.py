@@ -87,7 +87,7 @@ class StdDaqRedisStorage(object):
         return {'config_id': config_id,
                 'status': status,
                 'message': message,
-                'servers': deployed_servers,
+                'servers': deployed_servers or {},
                 'stats': {'start_time': start_timestamp, 'stop_time': stop_timestamp}}
 
     def set_deployment_status(self, config_id, server_name, message):
