@@ -15,7 +15,7 @@ function DaqConfig(props) {
     setIsModalOpen(false);
   };
 
-  let no_config = typeof state === 'undefined'
+  let no_config = !state
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
