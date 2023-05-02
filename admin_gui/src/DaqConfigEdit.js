@@ -27,10 +27,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setConfig(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    setConfig({ ...config, [name]: value });
   };
 
   const handleRefresh = () => {
