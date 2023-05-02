@@ -62,7 +62,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
         <Paper sx={{ p: 2 }} elevation={3}>
           <Typography variant="h6" gutterBottom>Detector</Typography>
           <TextField
-            label="Type" name="detector_type" value={config.detector_type || 'eiger'} onChange={handleChange}
+            label="Type" name="detector_type" value={config.detector_type || ''} onChange={handleChange}
             fullWidth margin="normal" select >
             <MenuItem value="eiger">Eiger</MenuItem>
             <MenuItem value="gigafrost">Gigafrost</MenuItem>
@@ -82,7 +82,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
                        fullWidth margin="normal" />
             <TextField label="Width" name="image_pixel_width" value={config.image_pixel_width || 0} onChange={handleChange}
               fullWidth margin="normal" />
-            <TextField label="Bit depth" name="bit_depth" value={config.bit_depth || 16} onChange={handleChange}
+            <TextField label="Bit depth" name="bit_depth" value={config.bit_depth || 0} onChange={handleChange}
             fullWidth margin="normal" select >
             <MenuItem value="4">4</MenuItem>
             <MenuItem value="8">8</MenuItem>
