@@ -4,7 +4,7 @@ import time
 
 from redis.client import Redis
 
-from std_daq_service.rest_v2.redis import StdDaqRedisStorage
+from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import update_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
