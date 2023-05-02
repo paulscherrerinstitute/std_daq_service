@@ -14,7 +14,11 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   const [config, setConfig] = useState({});
 
   useEffect(() => {
-    setConfig(init_config);
+    if (!init_config) {
+      setConfig({});
+    } else {
+      setConfig(init_config);
+    }
   }, [isOpen]);
 
   const handleChange = (e) => {
