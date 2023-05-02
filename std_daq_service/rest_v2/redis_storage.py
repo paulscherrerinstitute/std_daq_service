@@ -30,7 +30,10 @@ class StdDaqRedisStorage(object):
 
     @staticmethod
     def _interpret_deployment_status(deployed_servers):
-        if len(deployed_servers) == 0:
+        if deployed_servers is None:
+            status = 'UNKNOWN'
+            message = 'No config available'
+        elif len(deployed_servers) == 0:
             status = 'UNKNOWN'
             message = 'Waiting for servers...'
         elif all(message == 'Done' for message in deployed_servers.values()):
@@ -59,13 +62,13 @@ class StdDaqRedisStorage(object):
     def get_deployment_status(self):
         config_id, _ = self.get_config()
 
-        deployed_servers = {}
+        deployed_servers = None
         start_timestamp = 0
         stop_timestamp = 0
 
         if config_id is not None:
             start_timestamp = self._redis_to_unix_timestamp(config_id)
-
+            deployed_servers = {}
             # Collect latest status from each server.
             for deployment_event in self.redis.xrange(self._get_deployment_key(config_id)):
                 deployment_event_id = deployment_event[0].decode('utf8')
