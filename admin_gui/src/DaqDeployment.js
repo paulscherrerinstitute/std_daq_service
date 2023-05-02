@@ -82,7 +82,7 @@ function DaqDeployment() {
     return diff;
   };
   let n_seconds = get_n_seconds(state.stats.start_time, state.stats.stop_time);
-  let n_servers = Object.keys(state.servers).length;
+  let n_servers = state.servers ? Object.keys(state.servers).length : 0;
 
 
   return (
