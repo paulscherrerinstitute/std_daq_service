@@ -3,7 +3,6 @@ import logging
 
 _logger = logging.getLogger("StdDaqRedisStorage")
 
-
 FIELD_DAQ_CONFIG_JSON = b'json'
 
 
@@ -49,6 +48,7 @@ class StdDaqRedisStorage(object):
             _logger.warning(f"Unexpected deployment status: {deployed_servers}")
 
         return status, message
+
     @staticmethod
     def _redis_to_unix_timestamp(redis_timestamp):
         return float(redis_timestamp.replace('-', '.')) / 1000
@@ -91,9 +91,10 @@ class StdDaqRedisStorage(object):
         _logger.info(f"Set deployment status on config_id {config_id} from "
                      f"server_name {server_name} with message {message}.")
 
-        deployment_status_id = self.redis.xadd(self._get_deployment_key(config_id), {
-            'server_name': server_name,
-            'message': message
-        }).encode('utf8')
+        deployment_status_id = self.redis.xadd(
+            self._get_deployment_key(config_id), {
+                'server_name': server_name,
+                'message': message
+            }).encode('utf8')
 
         return deployment_status_id
