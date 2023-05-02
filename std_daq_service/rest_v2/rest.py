@@ -104,10 +104,13 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['GET'])
     def get_daq_config_request():
         config_id, daq_config = daq_manager.get_config()
-        return jsonify({"status": "ok",
-                        "message": f"DAQ configured for bit_depth={daq_config.get('bit_depth')}.",
-                        'config': daq_config,
-                        'config_id': config_id})
+
+        if config_id is None:
+            message = "No config set yet."
+        else:
+            message = f"DAQ configured for bit_depth={daq_config.get('bit_depth')}."
+
+        return jsonify({"status": "ok", "message": message, 'config': daq_config, 'config_id': config_id})
 
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['POST'])
     def set_daq_config_request():
