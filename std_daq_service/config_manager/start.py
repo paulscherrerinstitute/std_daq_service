@@ -6,11 +6,13 @@ from time import sleep
 import redis
 import json
 
+from std_daq_service.rest_v2.redis import StdDaqRedisStorage
+
 _logger = logging.getLogger("ConfigManager")
 
 # Config polling interval in seconds.
 POLL_INTERVAL = 0.5
-
+LAST_DEPLOYED_CONFIG_FILENAME = 'LAST_DEPLOYED_CONFIG_ID'
 
 def start_manager(server_name, config_file, redis_url):
     config_folder = os.path.dirname(config_file)
@@ -19,34 +21,40 @@ def start_manager(server_name, config_file, redis_url):
         _logger.error(error_message)
         raise RuntimeError(error_message)
 
-    redis_host, redis_port = redis_url.split(':')
-    config_key = f"{config_file}:config"
-    config_status_key = f"{config_file}:config_status"
-
-    _logger.info(f"Connecting to {redis_host}:{redis_port} to save {config_file}.")
-
     last_seen_id = None
+    last_deployed_config_filename = config_folder + LAST_DEPLOYED_CONFIG_FILENAME
+    if os.path.exists(config_folder + LAST_DEPLOYED_CONFIG_FILENAME):
+        with open(last_deployed_config_filename, 'r') as input_file:
+            last_seen_id = input_file.read()
+            _logger.info(f"Deployment record found. Last deployed config_if {last_seen_id}")
+
+    redis_host, redis_port = redis_url.split(':')
+    _logger.info(f"Connecting to {redis_host}:{redis_port} to save {config_file}.")
     redis_client = redis.Redis(host=redis_host, port=redis_port)
+
+    storage = StdDaqRedisStorage(redis=redis_client, redis_namespace=config_file)
 
     while True:
         try:
-            messages = redis_client.xrevrange(config_key, count=1)
-            if len(messages) > 0:
-                config_id = messages[0][0]
-                if config_id != last_seen_id:
-                    _logger.info(f"New config found: {config_id}")
-                    redis_client.xadd(config_status_key, {"server_name": server_name, 'config_id': config_id,
-                                                          'message': 'Deploying'})
+            config_id, daq_config = storage.get_config()
 
-                    daq_config = json.loads(messages[0][1][b'daq_config'])
-                    with open(config_file, 'w') as f:
-                        json.dump(daq_config, f)
+            if config_id is not None and config_id != last_seen_id:
 
-                    _logger.info(f'New config deployed: {daq_config}')
-                    redis_client.xadd(config_status_key, {"server_name": server_name, 'config_id': config_id,
-                                                          'message': 'Done'})
-                    _logger.info("Deployment completed.")
-                    last_seen_id = config_id
+
+                _logger.info(f"Deploying new config: {daq_config}")
+                storage.set_deployment_status(config_id=config_id,
+                                              server_name=server_name,
+                                              message="Deploying")
+
+                with open(config_file, 'w') as f:
+                    json.dump(daq_config, f)
+
+                storage.set_deployment_status(config_id=config_id,
+                                              server_name=server_name,
+                                              message='Done')
+
+                _logger.info("Deployment completed.")
+                last_seen_id = config_id
 
             sleep(POLL_INTERVAL)
         except KeyboardInterrupt:
