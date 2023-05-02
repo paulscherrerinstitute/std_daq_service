@@ -13,12 +13,16 @@ import axios from "axios";
 const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   const [config, setConfig] = useState({});
 
-  useEffect(() => {
-    if (!init_config) {
+  const set_config_with_default = (new_config) => {
+   if (!init_config) {
       setConfig({});
     } else {
       setConfig(init_config);
     }
+  }
+
+  useEffect(() => {
+    set_config_with_default(init_config);
   }, [isOpen]);
 
   const handleChange = (e) => {
@@ -30,7 +34,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   };
 
   const handleRefresh = () => {
-    setConfig(init_config);
+    set_config_with_default(init_config);
   }
 
   const handleSaveAndDeploy = () => {
