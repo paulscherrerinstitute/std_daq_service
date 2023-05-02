@@ -81,7 +81,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
             <Paper sx={{ p: 2 }} elevation={3}>
               <Typography variant="h6" gutterBottom>Detector</Typography>
               <TextField
-                label="Type" name="detector_type" value={config.detector_type || ''} onChange={handleChange}
+                label="Type" name="detector_type" value={config.detector_type || '...'} onChange={handleChange}
                 fullWidth margin="normal" select >
                 <MenuItem value="eiger">Eiger</MenuItem>
                 <MenuItem value="gigafrost">Gigafrost</MenuItem>
