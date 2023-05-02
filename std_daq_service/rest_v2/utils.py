@@ -67,7 +67,13 @@ def update_config(old_config, config_updates):
 
 
 def validate_config(new_config):
-    pass
+    error_message = ""
+    for field_name in DAQ_CONFIG_FIELDS:
+        if field_name not in new_config:
+            error_message += f' {field_name}'
+
+    if error_message:
+        raise RuntimeError(f"Missing mandatory fields:{error_message}")
 
 
 def generate_mjpg_image_stream(ctx, image_stream_url):
