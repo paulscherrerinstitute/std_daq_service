@@ -63,8 +63,7 @@ def start_manager(server_name, config_file, redis_url):
             _logger.exception("Error in watcher loop.")
             raise
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='Configuration manager')
     parser.add_argument("server_name", type=str, help='Name of the server for deployment status reporting.')
     parser.add_argument("config_file", type=str, help="Path to the config file managed by this instance.")
@@ -76,3 +75,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     start_manager(server_name=args.server_name, config_file=args.config_file, redis_url=args.redis_url)
+
+if __name__ == "__main__":
+    main()

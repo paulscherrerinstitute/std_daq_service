@@ -74,7 +74,7 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
     _logger.info("Start Stop REST properly shut down.")
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='Standard DAQ Start Stop REST interface')
     parser.add_argument("beamline_name", type=str, help="Beamline on which this instance is running.")
     parser.add_argument("config_file", type=str, help="Path to JSON config file.")
@@ -91,3 +91,7 @@ if __name__ == "__main__":
               rest_port=args.rest_port,
               sim_url_base=args.sim_url_base,
               redis_url=args.redis_url)
+
+
+if __name__ == "__main__":
+    main()

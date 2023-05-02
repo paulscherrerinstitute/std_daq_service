@@ -66,8 +66,7 @@ def start_api(config_file, rest_port, image_filename, output_ip):
 
     _logger.info("Udp simulator properly shut down.")
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description='Standard DAQ Detector simulator')
     parser.add_argument("config_file", type=str, help="Path to JSON config file.")
     parser.add_argument('output_ip', type=str, help='IP to send the UPD packets to.')
@@ -79,3 +78,6 @@ if __name__ == "__main__":
 
     start_api(config_file=args.config_file, rest_port=args.rest_port, image_filename=args.file,
               output_ip=args.output_ip)
+
+if __name__ == "__main__":
+    main()
