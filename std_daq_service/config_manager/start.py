@@ -6,13 +6,14 @@ from time import sleep
 import redis
 import json
 
-from std_daq_service.rest_v2.redis import StdDaqRedisStorage
+from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 
 _logger = logging.getLogger("ConfigManager")
 
 # Config polling interval in seconds.
 POLL_INTERVAL = 0.5
 LAST_DEPLOYED_CONFIG_FILENAME = 'LAST_DEPLOYED_CONFIG_ID'
+
 
 def start_manager(server_name, config_file, redis_url):
     config_folder = os.path.dirname(config_file)
@@ -23,7 +24,7 @@ def start_manager(server_name, config_file, redis_url):
 
     last_seen_id = None
     last_deployed_config_filename = config_folder + LAST_DEPLOYED_CONFIG_FILENAME
-    if os.path.exists(config_folder + LAST_DEPLOYED_CONFIG_FILENAME):
+    if os.path.exists(last_deployed_config_filename):
         with open(last_deployed_config_filename, 'r') as input_file:
             last_seen_id = input_file.read()
             _logger.info(f"Deployment record found. Last deployed config_if {last_seen_id}")
@@ -40,21 +41,20 @@ def start_manager(server_name, config_file, redis_url):
 
             if config_id is not None and config_id != last_seen_id:
 
-
                 _logger.info(f"Deploying new config: {daq_config}")
-                storage.set_deployment_status(config_id=config_id,
-                                              server_name=server_name,
-                                              message="Deploying")
+                storage.set_deployment_status(config_id=config_id, server_name=server_name, message="Deploying")
 
                 with open(config_file, 'w') as f:
                     json.dump(daq_config, f)
 
-                storage.set_deployment_status(config_id=config_id,
-                                              server_name=server_name,
-                                              message='Done')
+                storage.set_deployment_status(config_id=config_id, server_name=server_name, message='Done')
 
                 _logger.info("Deployment completed.")
+
                 last_seen_id = config_id
+                with open(last_deployed_config_filename, 'w') as output_file:
+                    output_file.write(config_id)
+                    _logger.info(f"Last deployed config_id {config_id} saved to file.")
 
             sleep(POLL_INTERVAL)
         except KeyboardInterrupt:
