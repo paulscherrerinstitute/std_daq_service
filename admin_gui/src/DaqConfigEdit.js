@@ -14,10 +14,10 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
   const [config, setConfig] = useState({});
 
   const set_config_with_default = (new_config) => {
-   if (!init_config) {
+   if (!new_config) {
       setConfig({});
     } else {
-      setConfig(init_config);
+      setConfig(new_config);
     }
   }
 
