@@ -42,6 +42,8 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
 
     axios.post('/daq/config', config).then(response => {
         if (response.data.status === "error") {
+          setErrorMessage(error.response.data.message);
+          setOpenErrorDialog(true);
           console.log(response.data.message);
         }
       })
