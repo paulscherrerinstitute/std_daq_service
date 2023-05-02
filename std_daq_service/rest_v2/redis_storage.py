@@ -25,7 +25,7 @@ class StdDaqRedisStorage(object):
 
     def set_config(self, daq_config):
         _logger.info(f"Set config {daq_config} to key {self.KEY_CONFIG}")
-        config_id = self.redis.xadd(self.KEY_CONFIG, {FIELD_DAQ_CONFIG_JSON: json.dumps(daq_config)}).decode('uint8')
+        config_id = self.redis.xadd(self.KEY_CONFIG, {FIELD_DAQ_CONFIG_JSON: json.dumps(daq_config)}).decode('utf8')
         _logger.info(f"Config got config_id {config_id}")
 
     @staticmethod
