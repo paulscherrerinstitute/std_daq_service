@@ -17,7 +17,6 @@ RECV_TIMEOUT = 1000
 EMPTY_STATS = {"bytes_per_second": 0, "images_per_second": 0}
 
 
-
 class ImageMetadataStatsDriver(object):
     def __init__(self, ctx, image_stream_url):
         self.image_stream_url = image_stream_url

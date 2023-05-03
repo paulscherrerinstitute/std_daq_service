@@ -75,7 +75,7 @@ def validate_config(new_config):
             try:
                 new_config[field_name] = int(new_config[field_name])
             except ValueError:
-                error_message += f' non-int value {field_name},'
+                error_message += f' non-int value {field_name};'
 
     if error_message:
         raise RuntimeError(f"Config errors:{error_message}")
