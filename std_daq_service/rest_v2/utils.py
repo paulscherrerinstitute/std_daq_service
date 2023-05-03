@@ -7,7 +7,8 @@ import numpy as np
 import zmq
 
 DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type', 'bit_depth',
-                     'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port']
+                     'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
+                     'module_positions']
 
 
 def get_parameters_from_write_request(json_request):
