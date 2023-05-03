@@ -97,6 +97,7 @@ def generate_frames():
 
     yield stream.generate_frames()
 
+
 def main():
     parser = argparse.ArgumentParser(description='MJPEG converter')
     parser.add_argument("live_stream_address", type=str, help="Path to JSON config file.")
@@ -110,6 +111,7 @@ def main():
     _logger.info(f"Starting MJPEG streamer on {rest_port} for live stream {LIVE_STREAM_URL}.")
 
     app.run(host='0.0.0.0', port=rest_port, threaded=True)
+
 
 if __name__ == '__main__':
     main()

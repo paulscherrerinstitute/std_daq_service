@@ -3,9 +3,9 @@ import argparse
 import json
 import logging
 
-from std_daq_service.det_udp_simulator.gigafrost import GFUdpPacketGenerator
-from std_daq_service.det_udp_simulator.udp_stream import generate_udp_stream
-from std_daq_service.det_udp_simulator.util import get_detector_generator
+from std_daq_service.udp_simulator.gigafrost import GFUdpPacketGenerator
+from std_daq_service.udp_simulator.udp_stream import generate_udp_stream
+from std_daq_service.udp_simulator.util import get_detector_generator
 
 _logger = logging.getLogger(__name__)
 

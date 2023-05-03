@@ -2,8 +2,8 @@ import logging
 import threading
 from threading import Event
 
-from std_daq_service.det_udp_simulator.udp_stream import generate_udp_stream
-from std_daq_service.det_udp_simulator.util import get_detector_generator
+from std_daq_service.udp_simulator.udp_stream import generate_udp_stream
+from std_daq_service.udp_simulator.util import get_detector_generator
 
 _logger = logging.getLogger("StartStopRestManager")
 

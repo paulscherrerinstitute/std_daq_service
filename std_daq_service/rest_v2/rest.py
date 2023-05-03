@@ -3,7 +3,7 @@ from logging import getLogger
 import requests
 from flask import request, jsonify, Response, render_template, send_from_directory
 
-from std_daq_service.det_udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
+from std_daq_service.udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import get_parameters_from_write_request, generate_mjpg_image_stream
 from std_daq_service.rest_v2.writer import WriterRestManager
