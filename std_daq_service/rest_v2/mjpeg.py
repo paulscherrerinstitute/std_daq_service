@@ -97,8 +97,7 @@ def generate_frames():
 
     yield stream.generate_frames()
 
-
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='MJPEG converter')
     parser.add_argument("live_stream_address", type=str, help="Path to JSON config file.")
     parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5001)
@@ -111,3 +110,6 @@ if __name__ == '__main__':
     _logger.info(f"Starting MJPEG streamer on {rest_port} for live stream {LIVE_STREAM_URL}.")
 
     app.run(host='0.0.0.0', port=rest_port, threaded=True)
+
+if __name__ == '__main__':
+    main()
