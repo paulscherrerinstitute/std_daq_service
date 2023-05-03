@@ -7,6 +7,7 @@ from flask import Flask
 from redis.client import Redis
 
 from std_daq_service.rest_v2.daq import DaqRestManager
+from std_daq_service.rest_v2.redis import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
@@ -39,6 +40,13 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
         redis_host, redis_port = redis_url.split(':')
         _logger.info(f"Connecting to Redis {redis_host}:{redis_port}")
         redis = Redis(host=redis_host, port=redis_port)
+        storage = StdDaqRedisStorage(redis, config_file)
+
+        # If the current config file is not in Redis - cold deploy, first time run.
+        # This will cause a deploy of the config.
+        config_id, daq_config = storage.get_config()
+        if config_id is None:
+            storage.set_config(daq_config)
 
         app = Flask(__name__, static_folder='static')
         CORS(app)
@@ -49,7 +57,7 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
 
         stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
         daq_manager = DaqRestManager(config_file=config_file, stats_driver=stats_driver, writer_driver=writer_driver,
-                                     redis=redis)
+                                     storage=storage)
 
         register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base)
 

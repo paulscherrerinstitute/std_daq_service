@@ -14,7 +14,7 @@ _logger = logging.getLogger("DaqRestManager")
 
 
 class DaqRestManager(object):
-    def __init__(self, config_file, stats_driver: ImageMetadataStatsDriver, writer_driver: WriterDriver, redis: Redis):
+    def __init__(self, config_file, stats_driver: ImageMetadataStatsDriver, writer_driver: WriterDriver, storage):
         self.stats_driver = stats_driver
         self.writer_driver = writer_driver
 
