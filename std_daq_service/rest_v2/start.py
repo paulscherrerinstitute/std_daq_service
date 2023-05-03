@@ -7,7 +7,7 @@ from flask import Flask
 from redis.client import Redis
 
 from std_daq_service.rest_v2.daq import DaqRestManager
-from std_daq_service.rest_v2.redis import StdDaqRedisStorage
+from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
