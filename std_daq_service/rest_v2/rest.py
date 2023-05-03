@@ -28,7 +28,8 @@ request_logger = getLogger('request_log')
 _logger = getLogger('rest')
 
 
-def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager, sim_url_base: str):
+def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
+                            sim_url_base: str, streamer):
 
     @app.route('/')
     def react_app():
@@ -98,8 +99,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(DAQ_LIVE_STREAM_ENDPOINT)
     def get_daq_live_stream_request():
-        raise NotImplementedError()
-        return Response(generate_mjpg_image_stream, mimetype='multipart/x-mixed-replace; boundary=frame')
+        return Response(streamer.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
     @app.route(DAQ_CONFIG_ENDPOINT, methods=['GET'])
     def get_daq_config_request():

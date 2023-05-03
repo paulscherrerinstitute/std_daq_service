@@ -7,6 +7,7 @@ from flask import Flask
 from redis.client import Redis
 
 from std_daq_service.rest_v2.daq import DaqRestManager
+from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
 from std_daq_service.rest_v2.utils import validate_config
@@ -23,6 +24,7 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
     daq_manager = None
     sim_manager = None
     writer_manager = None
+    ctx = None
 
     try:
         _logger.info(f'Starting Start Stop REST for {config_file} on beamline_name={beamline_name} '
@@ -59,7 +61,9 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
         daq_manager = DaqRestManager(config_file=config_file, stats_driver=stats_driver, writer_driver=writer_driver,
                                      storage=storage)
 
-        register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base)
+        mjpeg_streamer = MJpegLiveStream(ctx, 'tcp://127.0.0.1:5000')
+        register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base,
+                                streamer=mjpeg_streamer)
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
@@ -68,8 +72,10 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
     except Exception as e:
         _logger.exception("Error while trying to run the REST api")
 
-    finally:
+    except KeyboardInterrupt:
         _logger.info("Starting shutdown procedure.")
+
+    finally:
         if daq_manager:
             daq_manager.close()
 
@@ -78,6 +84,9 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
 
         if writer_manager:
             writer_manager.close()
+
+        if ctx:
+            ctx.destroy()
 
     _logger.info("Start Stop REST properly shut down.")
 
