@@ -76,5 +76,6 @@ def main():
 
     start_manager(server_name=args.server_name, config_file=args.config_file, redis_url=args.redis_url)
 
+
 if __name__ == "__main__":
     main()
