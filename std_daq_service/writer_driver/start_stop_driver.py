@@ -164,6 +164,7 @@ class WriterDriver(object):
                      f'\t in_status_address:{in_status_address}\n' \
                      f'\t out_status_address:{out_status_address}\n' \
                      f'\t image_metadata_address:{image_metadata_address}')
+        self.out_status_address = out_status_address
 
         self.ctx = ctx
         self.stop_event = Event()

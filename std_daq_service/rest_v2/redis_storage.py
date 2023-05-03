@@ -3,7 +3,7 @@ import logging
 
 _logger = logging.getLogger("StdDaqRedisStorage")
 
-FIELD_DAQ_CONFIG_JSON = b'json'
+FIELD_DAQ_JSON = b'json'
 
 
 class StdDaqRedisStorage(object):
@@ -12,20 +12,21 @@ class StdDaqRedisStorage(object):
         self.redis = redis
 
         self.KEY_CONFIG = f'{redis_namespace}:config'
+        self.KEY_ACQUISITION_LOG = f'{redis_namespace}:acquisition'
 
     def get_config(self):
         response = self.redis.xrevrange(self.KEY_CONFIG, count=1)
         # Fails before a beamline is configured for the first time.
         if len(response) > 0:
             config_id = response[0][0].decode('utf8')
-            daq_config = json.loads(response[0][1][FIELD_DAQ_CONFIG_JSON])
+            daq_config = json.loads(response[0][1][FIELD_DAQ_JSON])
             return config_id, daq_config
         else:
             return None, None
 
     def set_config(self, daq_config):
         _logger.info(f"Set config {daq_config} to key {self.KEY_CONFIG}")
-        config_id = self.redis.xadd(self.KEY_CONFIG, {FIELD_DAQ_CONFIG_JSON: json.dumps(daq_config)}).decode('utf8')
+        config_id = self.redis.xadd(self.KEY_CONFIG, {FIELD_DAQ_JSON: json.dumps(daq_config)}).decode('utf8')
         _logger.info(f"Config got config_id {config_id}")
 
     @staticmethod
@@ -101,3 +102,7 @@ class StdDaqRedisStorage(object):
             }).decode('utf8')
 
         return deployment_status_id
+
+    def add_acquisition(self, acq_status):
+        _logger.info(f"Adding finished acquisition {acq_status} to log.")
+        self.redis.xadd(self.KEY_ACQUISITION_LOG, {FIELD_DAQ_JSON: json.dumps(acq_status)})
