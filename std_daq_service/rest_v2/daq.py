@@ -11,14 +11,14 @@ from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
 _logger = logging.getLogger("DaqRestManager")
 # milliseconds
-RECV_TIMEOUT = 500
+RECV_TIMEOUT = 100
 
 
 class DaqRestManager(object):
     def __init__(self, config_file, stats_driver: ImageMetadataStatsDriver, writer_driver: WriterDriver, storage):
         self.stats_driver = stats_driver
         self.writer_driver = writer_driver
-        self.writer_acq_logger = WriterAcquisitionLogger(zmq.Context(), writer_driver.out_status_address)
+        self.writer_acq_logger = WriterAcquisitionLogger(zmq.Context(), writer_driver.out_status_address, storage)
 
         self.storage = storage
 
@@ -37,7 +37,7 @@ class DaqRestManager(object):
         return self.stats_driver.get_stats()
 
     def get_logs(self, n_logs):
-        return self.writer_driver.get_logs(n_logs)
+        return self.storage.get_acquisition_logs(n_logs)
 
     def get_deployment_status(self):
         return self.storage.get_deployment_status()
@@ -68,8 +68,9 @@ class WriterAcquisitionLogger(object):
         while not self.stop_event.is_set():
             try:
                 status = receiver.recv_json()
-                if status['acquisition']['state'] == 'FINISHED':
-                    self.storage.add_acquisition(status)
+                acq_status = status['acquisition']
+                if acq_status['state'] == 'FINISHED':
+                    self.storage.add_acquisition_log(acq_status)
             except Again:
                 pass
 

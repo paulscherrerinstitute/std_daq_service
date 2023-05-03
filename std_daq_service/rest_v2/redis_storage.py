@@ -103,6 +103,12 @@ class StdDaqRedisStorage(object):
 
         return deployment_status_id
 
-    def add_acquisition(self, acq_status):
+    def add_acquisition_log(self, acq_status):
         _logger.info(f"Adding finished acquisition {acq_status} to log.")
         self.redis.xadd(self.KEY_ACQUISITION_LOG, {FIELD_DAQ_JSON: json.dumps(acq_status)})
+
+    def get_acquisition_logs(self, n_acquisitions):
+        records = self.redis.xrevrange(self.KEY_ACQUISITION_LOG, count=n_acquisitions)
+        logs = [json.loads(x[0][1][FIELD_DAQ_JSON]) for x in records]
+        return logs
+

@@ -37,7 +37,6 @@ class WriterStatusTracker(object):
 
         self.last_status_send_time = 0
         self._current_run_id = None
-        self.logs = deque(maxlen=N_LOGS)
 
         self.status_receiver = self.ctx.socket(zmq.PULL)
         self.status_receiver.RCVTIMEO = WRITER_STATUS_TIMEOUT_MS
@@ -121,7 +120,6 @@ class WriterStatusTracker(object):
             self.status['state'] = 'READY'
             self.status['acquisition']['state'] = 'FINISHED'
             self.status['acquisition']['stats']['stop_time'] = time()
-            self.logs.append(copy.deepcopy(self.status['acquisition']))
 
         self._current_run_id = None
 
@@ -138,9 +136,6 @@ class WriterStatusTracker(object):
 
         with self.status_lock:
             self.status['acquisition']['stats']['n_write_requested'] += 1
-
-    def get_logs(self, n_logs):
-        return list(self.logs)[-n_logs:]
 
     def close(self):
         _logger.info("Closing writer status.")
@@ -188,8 +183,6 @@ class WriterDriver(object):
 
         self.image_meta = ImageMetadata()
         self.writer_command = WriterCommand()
-
-        self.logs = deque(maxlen=50)
 
         self.communication_t = Thread(target=self._communication_thread)
         self.communication_t.start()
@@ -312,6 +305,3 @@ class WriterDriver(object):
                 return
         else:
             raise RuntimeError(f"Cannot reach {target_state} state. The writer needs to be restarted.")
-
-    def get_logs(self, n_logs):
-        return self.status.get_logs(n_logs)
