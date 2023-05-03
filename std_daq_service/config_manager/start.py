@@ -14,6 +14,7 @@ _logger = logging.getLogger("ConfigManager")
 POLL_INTERVAL = 0.5
 LAST_DEPLOYED_CONFIG_FILENAME = 'LAST_DEPLOYED_CONFIG_ID'
 
+
 def start_manager(server_name, config_file, redis_url):
     config_folder = os.path.dirname(config_file)
     if not os.access(config_folder, os.W_OK):
