@@ -6,9 +6,11 @@ import cv2
 import numpy as np
 import zmq
 
-DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type', 'bit_depth',
-                     'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
+DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
+                     'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
                      'module_positions']
+
+DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port']
 
 
 def get_parameters_from_write_request(json_request):
@@ -72,7 +74,7 @@ def validate_config(new_config):
     for field_name in DAQ_CONFIG_FIELDS:
         if field_name not in new_config:
             error_message += f' missing {field_name},'
-        elif field_name not in ('detector_type', 'detector_name'):
+        elif field_name in DAQ_CONFIG_INT_FIELDS:
             try:
                 new_config[field_name] = int(new_config[field_name])
             except ValueError:
