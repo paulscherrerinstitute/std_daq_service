@@ -43,6 +43,7 @@ def generate_frames():
 
     full_circle = True
 
+    _logger.info("Live stream started.")
     while True:
         try:
             raw_meta, raw_data = receiver.recv_multipart()
@@ -88,8 +89,6 @@ def generate_frames():
 
         # yield the frame for the MJPG stream
         yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n'
-
-    receiver.close()
 
 
 if __name__ == '__main__':
