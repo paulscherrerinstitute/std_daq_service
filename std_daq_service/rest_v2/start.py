@@ -44,7 +44,7 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
 
         # If the current config file is not in Redis - cold deploy, first time run.
         # This will cause a deploy of the config.
-        config_id, daq_config = storage.get_config()
+        config_id, _ = storage.get_config()
         if config_id is None:
             storage.set_config(daq_config)
 
