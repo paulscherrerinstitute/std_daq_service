@@ -70,13 +70,15 @@ def validate_config(new_config):
     error_message = ""
     for field_name in DAQ_CONFIG_FIELDS:
         if field_name not in new_config:
-            error_message += f' {field_name}'
-
-        if field_name not in ('detector_type', 'detector_name'):
-            new_config[field_name] = int(new_config[field_name])
+            error_message += f' missing {field_name},'
+        elif field_name not in ('detector_type', 'detector_name'):
+            try:
+                new_config[field_name] = int(new_config[field_name])
+            except ValueError:
+                error_message += f' non-int value {field_name},'
 
     if error_message:
-        raise RuntimeError(f"Missing mandatory fields:{error_message}")
+        raise RuntimeError(f"Config errors:{error_message}")
 
 
 def generate_mjpg_image_stream(ctx, image_stream_url):
