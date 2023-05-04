@@ -47,6 +47,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url):
         # This will cause a deploy of the config.
         config_id, _ = storage.get_config()
         if config_id is None:
+            _logger.info("No config present in storage. Re-deploying config.")
             storage.set_config(daq_config)
 
         app = Flask(__name__, static_folder='static')
