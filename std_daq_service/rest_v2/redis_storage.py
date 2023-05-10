@@ -11,6 +11,9 @@ class StdDaqRedisStorage(object):
         _logger.info(f"Using namespace {redis_namespace}.")
         self.redis = redis
 
+        if not self.redis.ping():
+            raise RuntimeError("Cannot connect to object store. Is Redis running?")
+
         self.KEY_CONFIG = f'{redis_namespace}:config'
         self.KEY_ACQUISITION_LOG = f'{redis_namespace}:acquisition'
 

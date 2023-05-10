@@ -20,15 +20,14 @@ from flask_cors import CORS
 _logger = logging.getLogger(__name__)
 
 
-def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
+def start_api(config_file, rest_port, sim_url_base, redis_url):
     daq_manager = None
     sim_manager = None
     writer_manager = None
     ctx = None
 
     try:
-        _logger.info(f'Starting Start Stop REST for {config_file} on beamline_name={beamline_name} '
-                     f'(rest_port={rest_port}).')
+        _logger.info(f'Starting Start Stop REST for {config_file} (rest_port={rest_port}).')
 
         with open(config_file, 'r') as input_file:
             daq_config = json.load(input_file)
@@ -93,7 +92,6 @@ def start_api(beamline_name, config_file, rest_port, sim_url_base, redis_url):
 
 def main():
     parser = argparse.ArgumentParser(description='Standard DAQ Start Stop REST interface')
-    parser.add_argument("beamline_name", type=str, help="Beamline on which this instance is running.")
     parser.add_argument("config_file", type=str, help="Path to JSON config file.")
     parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5000)
     parser.add_argument('--redis_url', default="0.0.0.0:6379", help="Redis management instance")
@@ -103,8 +101,7 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
-    start_api(beamline_name=args.beamline_name,
-              config_file=args.config_file,
+    start_api(config_file=args.config_file,
               rest_port=args.rest_port,
               sim_url_base=args.sim_url_base,
               redis_url=args.redis_url)
