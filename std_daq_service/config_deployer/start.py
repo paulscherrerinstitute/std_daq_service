@@ -65,8 +65,8 @@ def start_manager(server_name, config_file, redis_url):
 
 def main():
     parser = argparse.ArgumentParser(description='Configuration manager')
-    parser.add_argument("server_name", type=str, help='Name of the server for deployment status reporting.')
     parser.add_argument("config_file", type=str, help="Path to the config file managed by this instance.")
+    parser.add_argument("server_name", type=str, help='Name of the server for deployment status reporting.')
     parser.add_argument("--config_folder", default='/etc/std_daq/configs', type=str,
                         help="Folder on disk where to download the config")
     parser.add_argument('--redis_url', default="0.0.0.0:6379")
