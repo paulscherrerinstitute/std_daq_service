@@ -22,7 +22,8 @@ def print_cpu_table(interface_regex, delta_time):
         queues_irqs = sorted(queues_irqs)
         irq_string = ''
         for delta_irq, queue_name in queues_irqs:
-            irq_string += f'{queue_name}({delta_irq}) '
+            if delta_irq > 0:
+                irq_string += f'{queue_name}({delta_irq}) '
 
         print("{:<8} {}".format(core_id, irq_string))
 
