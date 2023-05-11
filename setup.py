@@ -26,6 +26,7 @@ setup(
         
         std_daq_rest=std_daq_service.rest_v2.start:main
         std_daq_config_deployer=std_daq_service.config_deployer.start:main
+        std_daq_tune_network=std_daq_service.config_deployer.tune_network:main
         std_daq_udp_simulator=std_daq_service.udp_simulator.start_rest:main
         std_daq_mjpeg_stream=std_daq_service.rest_v2.mjpeg:main
     ''',
