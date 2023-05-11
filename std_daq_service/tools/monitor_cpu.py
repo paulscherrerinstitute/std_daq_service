@@ -8,7 +8,7 @@ def print_cpu_table(interface_regex, delta_time):
     meta, irqs, irqs2 = collect_irq_samples(interface_regex, delta_time)
 
     cpu_stats = {}
-    print("{:<8} {}".format('CORE_ID', 'QUEUE_NAME (n_interrupts)'))
+    print("{:<8} {:<8} {}".format('CORE_ID', 'N_INT', 'QUEUE_NAME(n_interrupts)'))
     for i_queue in range(len(meta)):
         queue_name = meta[i_queue]['queue_name']
 
@@ -19,13 +19,15 @@ def print_cpu_table(interface_regex, delta_time):
             cpu_stats[core_id].append((delta_irq, queue_name))
 
     for core_id, queues_irqs  in cpu_stats.items():
-        queues_irqs = sorted(queues_irqs)
+        queues_irqs = sorted(queues_irqs, reverse=True)
         irq_string = ''
+        n_interrupts = 0
         for delta_irq, queue_name in queues_irqs:
             if delta_irq > 0:
                 irq_string += f'{queue_name}({delta_irq}) '
+                n_interrupts += delta_irq
 
-        print("{:<8} {}".format(core_id, irq_string))
+        print("{:<8} {:<8} {}".format(core_id, n_interrupts, irq_string))
 
 
 def main():
