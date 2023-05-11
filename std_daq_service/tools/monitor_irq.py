@@ -2,6 +2,7 @@ import argparse
 from time import sleep
 import re
 
+N_CPUS = 32
 
 def collect_interface(queue_regex):
     with open('/proc/interrupts') as input_file:
@@ -10,14 +11,18 @@ def collect_interface(queue_regex):
     interface_lines = [x for x in lines if re.search(queue_regex, x[-1])]
 
     interface_meta = [{'line_n': i, 'irq': x[0][:-1], 'queue_name': x[-1]} for i, x in enumerate(interface_lines)]
-    interface_interrupts = [x[1:33] for x in interface_lines]
+    interface_interrupts = [x[1:N_CPUS+1] for x in interface_lines]
     return interface_meta, interface_interrupts
 
 
-def print_irq_table(interface_regex, delta_time):
+def collect_irq_samples(interface_regex, delta_time):
     meta, irqs = collect_interface(interface_regex)
     sleep(delta_time)
     meta, irqs2 = collect_interface(interface_regex)
+    return meta, irqs, irqs2
+
+def print_irq_table(interface_regex, delta_time):
+    meta, irqs, irqs2 = collect_irq_samples(interface_regex, delta_time)
 
     result = []
     for irq_t1, irq_t2 in zip(irqs, irqs2):
