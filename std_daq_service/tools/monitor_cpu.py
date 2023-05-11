@@ -13,7 +13,7 @@ def print_cpu_table(interface_regex, delta_time):
         queue_name = meta[i_queue]['queue_name']
 
         for core_id in range(len(irqs2[i_queue])):
-            delta_irq = int(irqs2[i_queue][core_id]) - (irqs[i_queue][core_id])
+            delta_irq = int(irqs2[i_queue][core_id]) - int((irqs[i_queue][core_id]))
             if core_id not in cpu_stats:
                 cpu_stats[core_id] = []
             cpu_stats[core_id].append((delta_irq, queue_name))
