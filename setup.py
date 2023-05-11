@@ -31,5 +31,6 @@ setup(
         std_cli_tune_network=std_daq_service.tools.tune_network:main
         std_cli_mjpeg_stream=std_daq_service.rest_v2.mjpeg:main
         std_cli_monitor_irq=std_daq_service.tools.monitor_irq:main
+        std_cli_monitor_cpu=std_daq_service.tools.monitor_cpu:main
     ''',
 )
