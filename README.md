@@ -4,7 +4,7 @@ This is a monorepo for standard daq services.
 
 Documentation of interfaces:
 - [SLS Rest interface](std_daq_service/rest/README.md)
-- [Broker command line interface](std_daq_service/cli/README.md)
+- [Broker command line interface](std_daq_service/tools/README.md)
 
 Documentation of services:
 - [Writer agent](std_daq_service/writer_driver/README.md)
