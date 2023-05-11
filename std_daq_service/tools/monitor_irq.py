@@ -3,11 +3,11 @@ from time import sleep
 import re
 
 
-def collect_interface(interface):
+def collect_interface(queue_regex):
     with open('/proc/interrupts') as input_file:
         lines = [x.split() for x in input_file.readlines()[1:]]
 
-    interface_lines = [x for x in lines if re.search(interface, x[-1])]
+    interface_lines = [x for x in lines if re.search(queue_regex, x[-1])]
 
     interface_meta = [{'line_n': i, 'irq': x[0][:-1], 'queue_name': x[-1]} for i, x in enumerate(interface_lines)]
     interface_interrupts = [x[1:33] for x in interface_lines]
