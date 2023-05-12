@@ -21,9 +21,11 @@ RECV_TIMEOUT = 500
 _logger = logging.getLogger('MJpegLiveStream')
 LIVE_STREAM_URL = 'tcp://localhost:20000'
 
+
 @app.route('/')
 def index():
     return "Welcome to the MJPG Stream Demo!"
+
 
 @app.route('/live')
 def live_stream():
@@ -105,6 +107,8 @@ def main():
 
     args = parser.parse_args()
     rest_port = args.rest_port
+
+    global LIVE_STREAM_URL
     LIVE_STREAM_URL = args.live_stream_address
 
     logging.basicConfig(level=logging.INFO)
