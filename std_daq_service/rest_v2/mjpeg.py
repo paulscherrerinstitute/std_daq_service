@@ -16,7 +16,7 @@ CORS(app)
 WIDTH = 800
 HEIGHT = 600
 # milliseconds
-RECV_TIMEOUT = 1200
+RECV_TIMEOUT = 500
 
 _logger = logging.getLogger('MJpegLiveStream')
 LIVE_STREAM_URL = 'tcp://localhost:20000'
@@ -46,6 +46,7 @@ class MJpegLiveStream(object):
         full_circle = True
 
         _logger.info("Live stream started.")
+        n_timeouts = 0
         while True:
             try:
                 raw_meta, raw_data = receiver.recv_multipart()
@@ -62,7 +63,13 @@ class MJpegLiveStream(object):
                 frame = ((new_frame - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
                 image_id = meta["frame"]
 
+                n_timeouts = 0
+
             except Again:
+                if n_timeouts < 3:
+                    n_timeouts += 1
+                    continue
+
                 frame = np.zeros(shape=(HEIGHT, WIDTH), dtype=np.uint8)
                 image_id = None
 
