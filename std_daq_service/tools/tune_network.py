@@ -51,7 +51,7 @@ def tune(machine_config, interface, start_udp_port):
         irq_file = f"/proc/irq/{irq}/smp_affinity_list"
 
         with open(irq_file, 'w') as output_file:
-            output_file.write(cpu_id)
+            output_file.write(str(cpu_id))
 
         udp_port = int(start_udp_port) + module_id
         cmd = ["ethtool", "-U", interface, "flow-type", "udp4", "dst-port", str(udp_port), "action", str(module_id)]
