@@ -9,7 +9,6 @@ def main():
     parser.add_argument('core_id', type=int, help='Zero based index of core to move the interrupt to.')
     args = parser.parse_args()
 
-    network_interface = args.network_interface
     irq = args.irq
     core_id = args.irq
 
