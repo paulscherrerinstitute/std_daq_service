@@ -20,9 +20,8 @@ from flask_cors import CORS
 _logger = logging.getLogger(__name__)
 
 
-def start_api(config_file, rest_port, sim_url_base, redis_url):
+def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
     daq_manager = None
-    sim_manager = None
     writer_manager = None
     ctx = None
 
@@ -61,7 +60,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url):
         daq_manager = DaqRestManager(config_file=config_file, stats_driver=stats_driver, writer_driver=writer_driver,
                                      storage=storage)
 
-        mjpeg_streamer = MJpegLiveStream(ctx, 'tcp://127.0.0.1:5000')
+        mjpeg_streamer = MJpegLiveStream(ctx, live_stream_url=live_stream_url)
         register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base,
                                 streamer=mjpeg_streamer)
 
@@ -79,9 +78,6 @@ def start_api(config_file, rest_port, sim_url_base, redis_url):
         if daq_manager:
             daq_manager.close()
 
-        if sim_manager:
-            sim_manager.close()
-
         if writer_manager:
             writer_manager.close()
 
@@ -95,9 +91,10 @@ def main():
     parser = argparse.ArgumentParser(description='Standard DAQ Start Stop REST interface')
     parser.add_argument("config_file", type=str, help="Path to JSON config file.")
     parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5000)
-    parser.add_argument('--redis_url', default="0.0.0.0:6379", help="Redis management instance")
     parser.add_argument("--sim_url_base", type=str, default='http://localhost:5001',
                         help="URL to control the simulation")
+    parser.add_argument('--redis_url', default="0.0.0.0:6379", help="Redis management instance")
+    parser.add_argument('--live_stream_url', default="tcp://127.0.0.1:20000", help="Live stream url for MJPEG streamer")
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -105,7 +102,8 @@ def main():
     start_api(config_file=args.config_file,
               rest_port=args.rest_port,
               sim_url_base=args.sim_url_base,
-              redis_url=args.redis_url)
+              redis_url=args.redis_url,
+              live_stream_url=args.live_stream_url)
 
 
 if __name__ == "__main__":
