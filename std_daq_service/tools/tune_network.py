@@ -37,6 +37,13 @@ def get_module_id_to_irq_map(interface):
     return {i: x[0][:-1] for i, x in enumerate(lines)}
 
 
+def set_irq_to_core(irq, core_id):
+    irq_file = f"/proc/irq/{irq}/smp_affinity_list"
+
+    with open(irq_file, 'w') as output_file:
+        output_file.write(str(core_id))
+
+
 def tune(machine_config, interface, start_udp_port):
     _logger.info(f'Tuning interface {interface} with start_udp_port {start_udp_port}.')
 
@@ -46,12 +53,9 @@ def tune(machine_config, interface, start_udp_port):
     cmd = f"ethtool -u {interface} | grep Filter: | awk '{{print $2}}' | xargs -L1 ethtool -U {interface} delete"
     subprocess.run(cmd, shell=True)
 
-    for module_id, cpu_id in map_module_to_cpu.items():
+    for module_id, core_id in map_module_to_cpu.items():
         irq = map_module_id_to_irq[module_id]
-        irq_file = f"/proc/irq/{irq}/smp_affinity_list"
-
-        with open(irq_file, 'w') as output_file:
-            output_file.write(str(cpu_id))
+        set_irq_to_core(irq, core_id)
 
         udp_port = int(start_udp_port) + module_id
         cmd = ["ethtool", "-U", interface, "flow-type", "udp4", "dst-port", str(udp_port), "action", str(module_id)]
