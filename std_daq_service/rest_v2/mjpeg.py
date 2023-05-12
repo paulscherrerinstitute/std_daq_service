@@ -16,7 +16,7 @@ CORS(app)
 WIDTH = 800
 HEIGHT = 600
 # milliseconds
-RECV_TIMEOUT = 500
+RECV_TIMEOUT = 1200
 
 _logger = logging.getLogger('MJpegLiveStream')
 LIVE_STREAM_URL = 'tcp://localhost:20000'
