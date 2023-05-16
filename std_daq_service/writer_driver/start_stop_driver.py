@@ -53,6 +53,7 @@ class WriterStatusTracker(object):
     def set_unknown_status(self):
         with self.status_lock:
             self.status = {'state': 'UNKNOWN', 'acquisition': {'state': "FINISHED",
+                                                               'message': "",
                                                                'info': {'n_images': 0},
                                                                'stats': dict(self.EMPTY_STATS)}}
 
@@ -110,6 +111,7 @@ class WriterStatusTracker(object):
         with self.status_lock:
             self.status = {'state': "WRITING",
                            'acquisition': {'state': 'WAITING_IMAGES',
+                                           'message': '',
                                            'stats': dict(self.EMPTY_STATS),
                                            'info': {'output_file': status.run_info.output_file,
                                                     'n_images': status.run_info.n_images,
@@ -128,6 +130,7 @@ class WriterStatusTracker(object):
             self.status['state'] = 'READY'
             self.status['acquisition']['state'] = 'FINISHED'
             self.status['acquisition']['stats']['stop_time'] = time()
+            self.status['acquisition']['message'] = status.error_message
 
         self._current_run_id = None
 
@@ -208,17 +211,21 @@ class WriterDriver(object):
 
         self.user_command_sender.send_json({'COMMAND': self.START_COMMAND, 'run_info': run_info or {}})
 
-        if not self.wait_for_state("WRITING"):
+        try:
+            self.wait_for_state("WRITING")
+        except RuntimeError:
             self.status.set_unknown_status()
-            raise RuntimeError("Cannot reach WRITING state. The writer needs to be restarted.")
+            raise
 
     def stop(self):
         _logger.info(f"Stop acquisition requested.")
         self.user_command_sender.send_json({'COMMAND': self.STOP_COMMAND})
 
-        if not self.wait_for_state('READY'):
+        try:
+            self.wait_for_state("READY")
+        except RuntimeError:
             self.status.set_unknown_status()
-            raise RuntimeError("Cannot reach READY state. The writer needs to be restarted.")
+            raise
 
     def close(self):
         _logger.info(f'Closing writer driver.')
@@ -278,8 +285,7 @@ class WriterDriver(object):
         _logger.debug(f"Send start command to writer: {self.writer_command}.")
         self.writer_command_sender.send(self.writer_command.SerializeToString())
 
-        if not self.wait_for_state('WRITING'):
-            raise RuntimeError("Cannot reach WRITING state.")
+        self.wait_for_state('WRITING')
 
         # Subscribe to the ImageMetadata stream.
         self.image_metadata_receiver.setsockopt(zmq.SUBSCRIBE, b'')
@@ -300,8 +306,7 @@ class WriterDriver(object):
         _logger.debug(f"Send stop command to writer: {self.writer_command}.")
         self.writer_command_sender.send(self.writer_command.SerializeToString())
 
-        if not self.wait_for_state('READY'):
-            raise RuntimeError("Cannot reach READY state.")
+        self.wait_for_state('READY')
 
     def _execute_write_command(self, i_image):
 
@@ -317,6 +322,8 @@ class WriterDriver(object):
             sleep(poll_interval)
             status = self.get_status()
             if status['state'] == target_state:
-                return True
+                return
+            if status['acquisition']['message'].startswith("ERROR:"):
+                raise ValueError(status['acquisition']['message'])
         else:
-            return False
+            raise RuntimeError(f"Cannot reach {target_state}. Writer needs to be restarted.")
