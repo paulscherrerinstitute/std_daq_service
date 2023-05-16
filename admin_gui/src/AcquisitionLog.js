@@ -71,15 +71,15 @@ function AcquisitionLog() {
       return "error";
     }
 
-    if (message === "Completed") {
+    if (message === "Completed.") {
       return "success";
     }
 
-    if (message === "Interrupted") {
+    if (message === "Interrupted.") {
       return "warning";
     }
 
-    if (message.startsWith('Error')) {
+    if (message.startsWith('ERROR:')) {
       return "error";
     }
   }
