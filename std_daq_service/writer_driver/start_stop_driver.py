@@ -8,6 +8,8 @@ from time import time, sleep, time_ns
 import logging
 import zmq
 
+from std_daq_service.rest_v2.utils import set_ipc_rights
+
 _logger = logging.getLogger(__name__)
 
 STATS_INTERVAL_TIME = 0.5
@@ -41,6 +43,7 @@ class WriterStatusTracker(object):
         self.status_receiver = self.ctx.socket(zmq.PULL)
         self.status_receiver.RCVTIMEO = WRITER_STATUS_TIMEOUT_MS
         self.status_receiver.bind(in_status_address)
+        set_ipc_rights(in_status_address)
 
         self.status_sender = self.ctx.socket(zmq.PUB)
         self.status_sender.bind(out_status_address)
@@ -176,6 +179,7 @@ class WriterDriver(object):
         # Send commands to writer instances.
         self.writer_command_sender = self.ctx.socket(zmq.PUB)
         self.writer_command_sender.bind(command_address)
+        set_ipc_rights(command_address)
 
         # Receive the image metadata stream from the detector.
         self.image_metadata_receiver = self.ctx.socket(zmq.SUB)

@@ -1,5 +1,7 @@
+import logging
 import os
 import re
+import stat
 from collections import OrderedDict
 
 import cv2
@@ -11,6 +13,9 @@ DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
                      'module_positions']
 
 DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port']
+
+
+_logger = logging.getLogger("utils")
 
 
 def get_parameters_from_write_request(json_request):
@@ -111,3 +116,12 @@ def generate_mjpg_image_stream(ctx, image_stream_url):
 
         # yield the frame for the MJPG stream
         yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n'
+
+
+def set_ipc_rights(ipc_path):
+    if ipc_path.startswith("ipc://"):
+        filename = ipc_path[6:]
+        current_p = os.stat(filename).st_mode
+        additional_p = stat.S_IWGRP | stat.S_IWOTH
+        _logger.info(f"Relax permission on {filename}.")
+        os.chmod(filename, current_p | additional_p)
