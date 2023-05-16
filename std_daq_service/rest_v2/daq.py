@@ -69,7 +69,7 @@ class WriterAcquisitionLogger(object):
             try:
                 status = receiver.recv_json()
                 acq_status = status['acquisition']
-                if acq_status['state'] == 'FINISHED':
+                if acq_status['state'] == 'FINISHED' and acq_status['start_time'] is not None:
                     self.storage.add_acquisition_log(acq_status)
             except Again:
                 pass
