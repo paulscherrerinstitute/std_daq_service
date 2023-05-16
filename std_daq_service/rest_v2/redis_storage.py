@@ -112,6 +112,6 @@ class StdDaqRedisStorage(object):
 
     def get_acquisition_logs(self, n_acquisitions):
         records = self.redis.xrevrange(self.KEY_ACQUISITION_LOG, count=n_acquisitions)
-        logs = [json.loads(x[0][1][FIELD_DAQ_JSON]) for x in records]
+        logs = [json.loads(x[1][FIELD_DAQ_JSON]) for x in records]
         return logs
 
