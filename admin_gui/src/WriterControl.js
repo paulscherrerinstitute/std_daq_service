@@ -41,6 +41,7 @@ function WriterControl(props) {
       break;
     default:
       status_chip = <Chip variant="outlined" label="..." color="error" />;
+      stop_button_disabled = false;
       break;
   };
 
