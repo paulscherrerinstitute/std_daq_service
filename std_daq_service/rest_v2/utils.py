@@ -10,20 +10,21 @@ import zmq
 
 DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
                      'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
-                     'module_positions']
+                     'writer_user_id', 'module_positions']
 
-DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port']
+DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
+                         'writer_user_id']
 
 
 _logger = logging.getLogger("utils")
 
 
-def get_parameters_from_write_request(json_request):
+def get_parameters_from_write_request(json_request, user_id):
     if 'output_file' not in json_request:
         raise RuntimeError(f'Mandatory field missing: output_file')
 
     output_file = json_request.get('output_file')
-    validate_output_file(output_file)
+    validate_output_file(output_file, user_id)
 
     n_images_str = json_request.get('n_images')
     n_images = validate_n_images(n_images_str)
@@ -31,7 +32,7 @@ def get_parameters_from_write_request(json_request):
     return output_file, n_images
 
 
-def validate_output_file(output_file):
+def validate_output_file(output_file, user_id):
     if output_file is None:
         raise RuntimeError(f'Mandatory field missing: output_file')
 
@@ -42,9 +43,18 @@ def validate_output_file(output_file):
     if not re.compile(path_validator).match(output_file):
         raise RuntimeError(f'Invalid output_file={output_file}. Must be a valid posix path.')
 
-    path_folder = os.path.dirname(output_file)
-    if not os.path.exists(path_folder):
-        raise RuntimeError(f'Output file folder {path_folder} does not exist. Please create it first.')
+    try:
+        # Set user_id for checking the directory permissions.
+        if user_id > 0:
+            os.seteuid(user_id)
+
+        path_folder = os.path.dirname(output_file)
+        if not os.path.exists(path_folder):
+            raise RuntimeError(f'Output file folder {path_folder} does not exist. Please create it first.')
+    finally:
+        # In case you set the user_id, revert back to original.
+        if user_id > 0:
+            os.seteuid(os.getuid())
 
 
 def validate_n_images(n_images_str):

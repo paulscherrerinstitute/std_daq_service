@@ -62,7 +62,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
 
         mjpeg_streamer = MJpegLiveStream(ctx, live_stream_url=live_stream_url)
         register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base,
-                                streamer=mjpeg_streamer)
+                                streamer=mjpeg_streamer, user_id=int(storage.get_config()['writer_user_id']))
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)

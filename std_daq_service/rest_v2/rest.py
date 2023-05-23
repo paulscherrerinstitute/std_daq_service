@@ -29,7 +29,7 @@ _logger = getLogger('rest')
 
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
-                            sim_url_base: str, streamer):
+                            sim_url_base: str, streamer, user_id: int):
 
     @app.route('/')
     def react_app():
@@ -38,7 +38,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
         json_request = request.json
-        output_file, n_images = get_parameters_from_write_request(json_request)
+        output_file, n_images = get_parameters_from_write_request(json_request, user_id)
         request_logger.info(f'Sync write {n_images} images to output_file {output_file}')
 
         writer_status = writer_manager.write_sync(output_file, n_images)
@@ -50,7 +50,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(WRITER_WRITE_ASYNC_ENDPOINT, methods=['POST'])
     def write_async_request():
         json_request = request.json
-        output_file, n_images = get_parameters_from_write_request(json_request)
+        output_file, n_images = get_parameters_from_write_request(json_request, user_id)
         request_logger.info(f'Async write {n_images} images to output_file {output_file}')
 
         writer_status = writer_manager.write_async(output_file, n_images)
