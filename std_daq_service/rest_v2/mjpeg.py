@@ -104,7 +104,7 @@ def generate_frames():
     context = zmq.Context()
     stream = MJpegLiveStream(context, LIVE_STREAM_URL)
 
-    yield stream.generate_frames()
+    return stream.generate_frames()
 
 
 def main():
