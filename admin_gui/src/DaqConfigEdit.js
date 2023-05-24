@@ -75,7 +75,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
         <Modal open={isOpen} onClose={onClose}>
           <Box
             sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper',
-              boxShadow: 24, p: 4, maxWidth: '90%', maxHeight: '90%', overflow: 'auto' }} >
+              boxShadow: 24, p: 4, maxWidth: '90%', maxHeight: '90%', overflow: 'auto', width: '480px' }} >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h5" component="h2"> Edit DAQ Config </Typography>
                 <Button variant="outlined" color="info" onClick={handleRefresh} startIcon={<RefreshIcon />}> Refresh </Button>
@@ -120,10 +120,10 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
                   onChange={handleChange} fullWidth margin="normal" />
                 <TextField label="Start UDP port" name="start_udp_port" value={config.start_udp_port || 0}
                   onChange={handleChange} fullWidth margin="normal" />
+                <TextField label="Writer user_id" name="writer_user_id" value={config.writer_user_id || 0}
+                  onChange={handleChange} fullWidth margin="normal" />
               </Box>
             </Paper>
-
-
             {/* Add more form fields as needed */}
             <Box mt={4}>
               <Button variant="contained" color="primary" onClick={handleSaveAndDeploy} > Save and Deploy </Button>
