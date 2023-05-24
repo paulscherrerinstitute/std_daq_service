@@ -1,4 +1,5 @@
 import argparse
+import json
 
 from std_daq_client import StdDaqClient
 
@@ -9,7 +10,7 @@ def main():
     args = parser.parse_args()
 
     client = StdDaqClient(url_base=args.url_base)
-    print(client.get_stats())
+    print(json.dumps(client.get_stats(), indent=2))
 
 
 if __name__ == "__main__":
