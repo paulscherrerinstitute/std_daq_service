@@ -1,6 +1,11 @@
+import os
+
 from setuptools import setup
 
 CLIENT_VERSION = "1.0.0"
+
+with open(os.path.join(os.path.dirname(__file__), '/std_daq_client/', 'README.md')) as readme:
+    long_description = readme.read()
 
 setup(
     version=CLIENT_VERSION,
@@ -17,4 +22,11 @@ setup(
         std_cli_get_stats=std_daq_client.cli.get_stats:main
         std_cli_get_status=std_daq_client.cli.get_status:main
     ''',
+
+    author="Paul Scherrer Institute",
+    author_email='andrej.babic@psi.ch',
+    url='https://github.com/paulscherrerinstitute/std_daq_service',
+    description='Python client for standard-daq',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
 )
