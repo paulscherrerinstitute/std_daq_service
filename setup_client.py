@@ -25,7 +25,6 @@ setup(
     ''',
 
     author="Paul Scherrer Institute",
-    author_email='andrej.babic@psi.ch',
     url='https://github.com/paulscherrerinstitute/std_daq_service',
     description='Python client for standard-daq',
     long_description=long_description,
