@@ -63,7 +63,8 @@ class StdDaqClient(object):
           "image_pixel_width": 3106,         # Assembled image width in pixels.
           "n_modules: 2,                     # Number of modules to assemble.
           "start_udp_port": 50000,           # Start UDP port where the detector is streaming modules.
-          "module_positions": {              # Dictionary with mapping between module number -> image possition.
+          "writer_user_id": 12345,           # User_id under which the writer will create and write the file.
+          "module_positions": {              # Dictionary with mapping between module number -> image position.
             "0": [0, 3263, 513, 3008 ],      #     Format: [start_x, start_y, end_x, end_y]
             "1": [516, 3263, 1029, 3008 ],
         }
@@ -94,20 +95,19 @@ class StdDaqClient(object):
             "info": {                             #    Acquisition request
               "n_images": 100,                    #        Number of images
               "output_file": "/tmp/test.h5",      #        Output file
-              "run_id": 1684930336122153839       #
+              "run_id": 1684930336122153839       #        Run_id (start timestamp)
             },
-            "message": "Completed.",
-            "state": "FINISHED",
-            "stats": {
-              "n_write_completed": 100,
-              "n_write_requested": 100,
-              "start_time": 1684930336.1252322,
-              "stop_time": 1684930345.2723851
+            "message": "Completed.",              # User displayable message from the writer.
+            "state": "FINISHED",                  # State of the acquisition.
+            "stats": {                            # Stats of the acquisition.
+              "n_write_completed": 100,           #     Number of completed writes
+              "n_write_requested": 100,           #     Number of requested writers from the driver
+              "start_time": 1684930336.1252322,   #     Acquisition start timestamp
+              "stop_time": 1684930345.2723851     #     Acquisition stop timestamp
             }
           },
           "state": "READY"                        # State of the writer: READY (to write), WRITING
         }
-
 
         :return: Dictionary with current status.
         """
