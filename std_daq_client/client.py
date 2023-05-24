@@ -25,7 +25,12 @@ class StdDaqAdminException(Exception):
 
 
 class StdDaqClient(object):
-    def __init__(self, url_base):
+    def __init__(self, url_base='http://localhost:5000'):
+        """
+        REST client for the standard-daq admin interface.
+
+        :param url_base: URL on which the admin interface is running. Usually port 5000.
+        """
         self.url_base = url_base
 
     @staticmethod
@@ -46,6 +51,25 @@ class StdDaqClient(object):
         return self._get_json_from_response(requests.get(self.url_base + url_postfix))
 
     def get_config(self):
+        """
+        Retrieves the current DAQ configuration.
+
+        Return dictionary format:
+        {
+          "bit_depth": 16,                   # Bit depth of the image. Supported values are dependent on the detector.
+          "detector_name": "EG9M",           # Name of the detector. Must be unique, used as internal DAQ identifier.
+          "detector_type": "eiger",          # Type of detector. Currently supported: eiger, jungfrau, gigafrost.
+          "image_pixel_height": 3264,        # Assembled image height in pixels.
+          "image_pixel_width": 3106,         # Assembled image width in pixels.
+          "n_modules: 2,                     # Number of modules to assemble.
+          "start_udp_port": 50000,           # Start UDP port where the detector is streaming modules.
+          "module_positions": {              # Dictionary with mapping between module number -> image possition.
+            "0": [0, 3263, 513, 3008 ],      #     Format: [start_x, start_y, end_x, end_y]
+            "1": [516, 3263, 1029, 3008 ],
+        }
+
+        :return: Dictionary with current configuration.
+        """
         return self._get_url(DAQ_CONFIG_ENDPOINT)['config']
 
     def set_config(self, daq_config):
@@ -61,7 +85,33 @@ class StdDaqClient(object):
         return self._post_url(WRITER_STOP_ENDPOINT, {})
 
     def get_status(self):
-        return self._get_url(WRITER_STATUS_ENDPOINT)
+        """
+        Return the current DAQ status.
+
+        Return dictionary format:
+        {
+          "acquisition": {                        # Stats about the currently running or last finished acquisition.
+            "info": {                             #    Acquisition request
+              "n_images": 100,                    #        Number of images
+              "output_file": "/tmp/test.h5",      #        Output file
+              "run_id": 1684930336122153839       #
+            },
+            "message": "Completed.",
+            "state": "FINISHED",
+            "stats": {
+              "n_write_completed": 100,
+              "n_write_requested": 100,
+              "start_time": 1684930336.1252322,
+              "stop_time": 1684930345.2723851
+            }
+          },
+          "state": "READY"                        # State of the writer: READY (to write), WRITING
+        }
+
+
+        :return: Dictionary with current status.
+        """
+        return self._get_url(WRITER_STATUS_ENDPOINT)['writer']
 
     def get_stats(self):
         return self._get_url(DAQ_STATS_ENDPOINT)['stats']
