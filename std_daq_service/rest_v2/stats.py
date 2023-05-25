@@ -95,7 +95,7 @@ class StatsDriver(object):
                     new_images_writer = n_written - last_n_write_completed
                     last_n_write_completed = n_written
 
-                    new_bytes_writer = image_n_bytes
+                    new_bytes_writer = image_n_bytes * new_images_writer
             except Again:
                 self.stats = copy.deepcopy(EMPTY_STATS)
                 continue
