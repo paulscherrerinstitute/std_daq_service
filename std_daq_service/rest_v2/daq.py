@@ -4,7 +4,7 @@ from threading import Event, Thread
 import zmq
 from zmq import Again
 
-from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
+from std_daq_service.rest_v2.stats import StatsDriver
 from std_daq_service.rest_v2.utils import update_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
@@ -15,7 +15,7 @@ RECV_TIMEOUT = 100
 
 
 class DaqRestManager(object):
-    def __init__(self, config_file, stats_driver: ImageMetadataStatsDriver, writer_driver: WriterDriver, storage):
+    def __init__(self, config_file, stats_driver: StatsDriver, writer_driver: WriterDriver, storage):
         self.stats_driver = stats_driver
         self.writer_driver = writer_driver
         self.writer_acq_logger = WriterAcquisitionLogger(zmq.Context(), writer_driver.out_status_address, storage)
