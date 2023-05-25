@@ -1,18 +1,20 @@
+import logging
 from copy import deepcopy
 from threading import Thread, Event
-from time import time
+from time import time, sleep
 
 from zmq import Again
 
-from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata
+from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 import zmq
 import copy
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
-from std_daq_service.rest_v2.utils import dtype_to_bytes
 
 # For how long to accumulate statistics in seconds.
+from std_daq_service.rest_v2.utils import get_image_n_bytes
+
 STATS_INTERVAL = 1
 # Receive timeout in milliseconds
 RECV_TIMEOUT = 1000
@@ -21,6 +23,9 @@ EMPTY_STATS = {
     'detector': {"bytes_per_second": 0, "images_per_second": 0},
     'writer': {'bytes_per_second': 0, "writes_per_second": 0}
 }
+
+
+_logger = logging.getLogger("StatsDriver")
 
 
 class StatsDriver(object):
@@ -72,8 +77,7 @@ class StatsDriver(object):
                 if detector_receiver in socks:
                     meta_raw = detector_receiver.recv(flags=zmq.NOBLOCK)
                     image_meta.ParseFromString(meta_raw)
-                    image_n_bytes = image_meta.width * image_meta.height * \
-                                    (dtype_to_bytes[ImageMetadata.Dtype.Name(image_meta.dtype)])
+                    image_n_bytes = get_image_n_bytes(image_meta)
 
                     new_bytes_detector = image_n_bytes
                     new_images_detector = 1
@@ -94,6 +98,10 @@ class StatsDriver(object):
                     new_bytes_writer = image_n_bytes
             except Again:
                 self.stats = copy.deepcopy(EMPTY_STATS)
+                continue
+            except Exception:
+                _logger.exception("Error in stats loop.")
+                sleep(1)
                 continue
 
             diff = time() - start_time

@@ -3,6 +3,7 @@ import os
 import re
 import stat
 from collections import OrderedDict
+from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 import cv2
 import numpy as np
@@ -19,12 +20,16 @@ DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width',
 _logger = logging.getLogger("utils")
 
 
-dtype_to_bytes = {
-    'uint8': 1, 'int8': 1,
-    'uint16': 2, 'int16': 2,
-    'uint32': 4, 'int32': 4, 'float32': 24,
-    'uint64': 8, 'int64': 8, 'float64': 8
-}
+def get_image_n_bytes(image_meta: ImageMetadata):
+    dtype_to_bytes = {
+        'uint8': 1, 'int8': 1,
+        'uint16': 2, 'int16': 2,
+        'uint32': 4, 'int32': 4, 'float32': 24,
+        'uint64': 8, 'int64': 8, 'float64': 8
+    }
+
+    image_n_bytes = image_meta.width * image_meta.height * (dtype_to_bytes[ImageMetadataDtype.Name(image_meta.dtype)])
+    return image_n_bytes
 
 
 def get_parameters_from_write_request(json_request, user_id):
