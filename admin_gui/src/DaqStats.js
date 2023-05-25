@@ -6,18 +6,30 @@ import axios from "axios";
 function DaqStats() {
   const [ state, setState ] = useState({bytes_per_second: 0, images_per_second: 0});
 
-  const n_mbytes = state.bytes_per_second / 1024 / 1024;
-  const bandwidth_text = `${n_mbytes.toFixed(2)} MB/s`;
+  const n_mbytes_detector = state.detector.bytes_per_second / 1024 / 1024;
+  const bandwidth_text_detector = `${n_mbytes_detector.toFixed(2)} MB/s`;
+  const n_images_detector = state.detector.images_per_second;
+  const frequency_text_detector = `${n_images_detector.toFixed(2)} Hz`;
 
-  const n_images = state.images_per_second;
-  const frequency_text = `${n_images.toFixed(2)} Hz`;
+  const n_mbytes_writer = state.writer.bytes_per_second / 1024 / 1024;
+  const bandwidth_text_writer = `${n_mbytes_detector.toFixed(2)} MB/s`;
+  const n_images_writer = state.writer.images_per_second;
+  const frequency_text_writer = `${n_images_detector.toFixed(2)} Hz`;
+
   const stats_url = "/daq/stats";
 
-  let status_chip;
-  if (n_mbytes > 0) {
-     status_chip = <Chip variant="contained" label="Streaming" color="success" />;
+  let status_chip_detector;
+  if (n_mbytes_detector > 0) {
+     status_chip_detector = <Chip variant="contained" label="Streaming" color="success" />;
   } else {
-      status_chip = <Chip variant="contained" label="Idle" color="info" />;
+      status_chip_detector = <Chip variant="contained" label="Idle" color="info" />;
+  }
+
+  let status_chip_writer;
+  if (n_mbytes_writer > 0) {
+      status_chip_writer = <Chip variant="contained" label="Writing" color="success" />;
+  } else {
+      status_chip_writer = <Chip variant="contained" label="Idle" color="info" />;
   }
 
   useEffect(() => {
@@ -39,16 +51,30 @@ function DaqStats() {
 
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Detector:</Typography></Grid>
-        <Grid item> {status_chip} </Grid>
+        <Grid item> {status_chip_detector} </Grid>
       </Grid>
 
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle2">Bandwidth:</Typography></Grid>
-        <Grid item> {bandwidth_text} </Grid>
+        <Grid item> {bandwidth_text_detector} </Grid>
       </Grid>
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle2">Frequency:</Typography></Grid>
-        <Grid item> {frequency_text} </Grid>
+        <Grid item> {frequency_text_detector} </Grid>
+      </Grid>
+
+      <Grid container alignItems="center" spacing={1}>
+          <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Writer:</Typography></Grid>
+          <Grid item> {status_chip_writer} </Grid>
+      </Grid>
+
+      <Grid container alignItems="center" spacing={1}>
+          <Grid item> <Typography variant="subtitle2">Bandwidth:</Typography></Grid>
+          <Grid item> {bandwidth_text_writer} </Grid>
+      </Grid>
+      <Grid container alignItems="center" spacing={1}>
+          <Grid item> <Typography variant="subtitle2">Frequency:</Typography></Grid>
+          <Grid item> {frequency_text_writer} </Grid>
       </Grid>
 
       <a href={stats_url} target="_blank">
