@@ -19,6 +19,14 @@ DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width',
 _logger = logging.getLogger("utils")
 
 
+dtype_to_bytes = {
+    'uint8': 1, 'int8': 1,
+    'uint16': 2, 'int16': 2,
+    'uint32': 4, 'int32': 4, 'float32': 24,
+    'uint64': 8, 'int64': 8, 'float64': 8
+}
+
+
 def get_parameters_from_write_request(json_request, user_id):
     if 'output_file' not in json_request:
         raise RuntimeError(f'Mandatory field missing: output_file')

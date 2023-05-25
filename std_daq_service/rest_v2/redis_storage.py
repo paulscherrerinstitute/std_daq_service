@@ -16,6 +16,7 @@ class StdDaqRedisStorage(object):
 
         self.KEY_CONFIG = f'{redis_namespace}:config'
         self.KEY_ACQUISITION_LOG = f'{redis_namespace}:acquisition'
+        self.KEY_WRITER_STATUS = f'{redis_namespace}:writer_status'
 
     def get_config(self):
         response = self.redis.xrevrange(self.KEY_CONFIG, count=1)
@@ -114,4 +115,7 @@ class StdDaqRedisStorage(object):
         records = self.redis.xrevrange(self.KEY_ACQUISITION_LOG, count=n_acquisitions)
         logs = [json.loads(x[1][FIELD_DAQ_JSON]) for x in records]
         return logs
+
+    def add_writer_status(self, writer_status):
+        self.redis.xadd(self.KEY_WRITER_STATUS, {FIELD_DAQ_JSON: json.dumps(writer_status)})
 

@@ -9,7 +9,7 @@ from redis.client import Redis
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
-from std_daq_service.rest_v2.stats import ImageMetadataStatsDriver
+from std_daq_service.rest_v2.stats import StatsDriver
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 from std_daq_service.rest_v2.writer import WriterRestManager
@@ -56,7 +56,8 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
-        stats_driver = ImageMetadataStatsDriver(ctx, image_metadata_address)
+        stats_driver = StatsDriver(ctx, storage=storage, image_stream_url=image_metadata_address,
+                                   writer_status_url=out_status_address)
         daq_manager = DaqRestManager(config_file=config_file, stats_driver=stats_driver, writer_driver=writer_driver,
                                      storage=storage)
 
