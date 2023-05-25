@@ -15,9 +15,9 @@ function DaqStats() {
   const frequency_text_detector = `${n_images_detector.toFixed(2)} Hz`;
 
   const n_mbytes_writer = state.writer.bytes_per_second / 1024 / 1024;
-  const bandwidth_text_writer = `${n_mbytes_detector.toFixed(2)} MB/s`;
+  const bandwidth_text_writer = `${n_mbytes_writer.toFixed(2)} MB/s`;
   const n_images_writer = state.writer.images_per_second;
-  const frequency_text_writer = `${n_images_detector.toFixed(2)} Hz`;
+  const frequency_text_writer = `${n_images_writer.toFixed(2)} Hz`;
 
   const stats_url = "/daq/stats";
 
