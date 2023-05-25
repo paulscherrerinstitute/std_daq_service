@@ -4,7 +4,10 @@ import { Chip, Grid, Paper, Typography, Button } from '@mui/material';
 import axios from "axios";
 
 function DaqStats() {
-  const [ state, setState ] = useState({bytes_per_second: 0, images_per_second: 0});
+  const [ state, setState ] = useState({
+    detector: {bytes_per_second: 0, images_per_second: 0},
+    writer: {bytes_per_second: 0, images_per_second: 0}
+  });
 
   const n_mbytes_detector = state.detector.bytes_per_second / 1024 / 1024;
   const bandwidth_text_detector = `${n_mbytes_detector.toFixed(2)} MB/s`;
