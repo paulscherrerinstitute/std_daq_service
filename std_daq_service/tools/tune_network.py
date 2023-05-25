@@ -64,30 +64,34 @@ def tune(machine_config, interface, start_udp_port):
 
 def main():
     parser = argparse.ArgumentParser(description='Tune network on receiver machine')
-    parser.add_argument("deployment_config", type=str, help="Path to the site.yaml deployment config.")
-    parser.add_argument('daq_config', type=str, help='Path to daq config file.')
     parser.add_argument('network_interface', type=str, help='Name of the network interface to tune.')
+    parser.add_argument("--deployment_config", type=str, help="Path to the site.yaml deployment config.")
+    parser.add_argument('--daq_config', type=str, help='Path to daq config file.')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
     network_interface = args.network_interface
 
-    with open(args.deployment_config, 'r') as input_file:
-        deployment_config = yaml.safe_load(input_file)
+    if args.deployment_config:
+        with open(args.deployment_config, 'r') as input_file:
+            deployment_config = yaml.safe_load(input_file)
 
-    with open(args.daq_config, 'r') as input_file:
-        daq_config = yaml.safe_load(input_file)
+        with open(args.daq_config, 'r') as input_file:
+            daq_config = yaml.safe_load(input_file)
 
-    for machine_config in deployment_config:
-        config_hostname = machine_config['hosts']
-        _logger.info(f'Inspecting config hostname {config_hostname}.')
+        for machine_config in deployment_config:
+            config_hostname = machine_config['hosts']
+            _logger.info(f'Inspecting config hostname {config_hostname}.')
 
-        if is_hostname_from_this_machine(machine_config['hosts']):
-            tune(machine_config, network_interface, daq_config['start_udp_port'])
-            break
+            if is_hostname_from_this_machine(machine_config['hosts']):
+                tune(machine_config, network_interface, daq_config['start_udp_port'])
+                break
+        else:
+            _logger.error("No hostname matches the current machine.")
     else:
-        _logger.error("No hostname matches the current machine.")
+        pass
+
 
 
 if __name__ == "__main__":
