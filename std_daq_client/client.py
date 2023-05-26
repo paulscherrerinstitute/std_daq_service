@@ -61,9 +61,9 @@ class StdDaqClient(object):
           "detector_type": "eiger",          # Type of detector. Currently supported: eiger, jungfrau, gigafrost, bsread
           "image_pixel_height": 3264,        # Assembled image height in pixels.
           "image_pixel_width": 3106,         # Assembled image width in pixels.
-          "n_modules: 2,                     # Number of modules to assemble.
+          "n_modules": 2,                    # Number of modules to assemble.
           "start_udp_port": 50000,           # Start UDP port where the detector is streaming modules.
-          "writer_user_id": 12345,           # User_id under which the writer will create and write the file.
+          "writer_user_id": 12345,           # User_id under which the writer will create and write files.
           "module_positions": {              # Dictionary with mapping between module number -> image position.
             "0": [0, 3263, 513, 3008 ],      #     Format: [start_x, start_y, end_x, end_y]
             "1": [516, 3263, 1029, 3008 ],
@@ -146,7 +146,7 @@ class StdDaqClient(object):
         is 'UNKNOWN'. When this happens call the 'stop_writer' function to re-establish the connection between the
         driver and the writer.
         """
-        return self._post_url(WRITER_STOP_ENDPOINT, {})
+        return self._post_url(WRITER_STOP_ENDPOINT, {})['writer']
 
     def get_status(self):
         """
