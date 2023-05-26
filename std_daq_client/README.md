@@ -169,6 +169,9 @@ This is not something you usually change without hardware changes on the beamlin
 ### DAQ statistics
 Current data flow statistics of the DAQ.
 
+This object is returned by:
+- get_stats
+
 ```json
 {
   "detector": {                 // Detector statistics
@@ -186,6 +189,9 @@ The statistics is refreshed and aggregated with 1 Hz.
 
 ### DAQ logs
 Log of all acquisitions that produced a file. It is a list of acquisition objects in reverse chronological order.
+
+This object is returned by:
+- get_logs
 
 ```json
 [
