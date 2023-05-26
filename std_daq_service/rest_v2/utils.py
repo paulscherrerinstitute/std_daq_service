@@ -3,6 +3,8 @@ import os
 import re
 import stat
 from collections import OrderedDict
+from time import time
+
 from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 import cv2
@@ -42,7 +44,9 @@ def get_parameters_from_write_request(json_request, user_id):
     n_images_str = json_request.get('n_images')
     n_images = validate_n_images(n_images_str)
 
-    return output_file, n_images
+    user_id = json_request.get('run_id', time())
+
+    return output_file, n_images, user_id
 
 
 def validate_output_file(output_file, user_id):

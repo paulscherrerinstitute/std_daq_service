@@ -15,9 +15,9 @@ class WriterRestManager(object):
     def __init__(self, writer_driver: WriterDriver):
         self.writer_driver = writer_driver
 
-    def write_sync(self, output_file, n_images):
+    def write_sync(self, output_file, n_images, run_id):
         self.writer_driver.start({
-            'run_id': time_ns(),
+            'run_id': run_id,
             'output_file': output_file,
             'n_images': n_images
         })
@@ -35,9 +35,9 @@ class WriterRestManager(object):
                                    f"Sync acquisition limit of {SYNC_WAIT_TIMEOUT} seconds exceeded. "
                                    f"Use async write call for long acquisitions.")
 
-    def write_async(self, output_file, n_images):
+    def write_async(self, output_file, n_images, user_id):
         self.writer_driver.start({
-            'run_id': time_ns(),
+            'run_id': user_id,
             'output_file': output_file,
             'n_images': n_images
         })

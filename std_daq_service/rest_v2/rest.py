@@ -38,10 +38,10 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
         json_request = request.json
-        output_file, n_images = get_parameters_from_write_request(json_request, user_id)
-        request_logger.info(f'Sync write {n_images} images to output_file {output_file}')
+        output_file, n_images, run_id = get_parameters_from_write_request(json_request, user_id)
+        request_logger.info(f'Sync write {n_images} images with run_id {run_id} and file {output_file}')
 
-        writer_status = writer_manager.write_sync(output_file, n_images)
+        writer_status = writer_manager.write_sync(output_file, n_images, run_id)
 
         return jsonify({"status": "ok",
                         "message": "Writing finished.",
@@ -50,10 +50,10 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(WRITER_WRITE_ASYNC_ENDPOINT, methods=['POST'])
     def write_async_request():
         json_request = request.json
-        output_file, n_images = get_parameters_from_write_request(json_request, user_id)
-        request_logger.info(f'Async write {n_images} images to output_file {output_file}')
+        output_file, n_images, run_id = get_parameters_from_write_request(json_request, user_id)
+        request_logger.info(f'Async write {n_images} images with run_id {run_id} and file {output_file}')
 
-        writer_status = writer_manager.write_async(output_file, n_images)
+        writer_status = writer_manager.write_async(output_file, n_images, run_id)
 
         return jsonify({"status": "ok",
                         "message": "Writing started.",
