@@ -34,6 +34,17 @@ def write_async():
     print(json.dumps(response, indent=2))
 
 
+def write_stop():
+    parser = argparse.ArgumentParser(description='Get std_daq stats')
+    parser.add_argument("--url_base", type=str, default='http://localhost:5000', help="Base URL of the REST Endpoint")
+    url_base = parser.parse_args().url_base
+
+    client = StdDaqClient(url_base)
+    response = client.stop_writer()
+
+    print(json.dumps(response, indent=2))
+
+
 if __name__ == "__main__":
     # The default is sync, for no real reason.
     write_sync()

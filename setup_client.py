@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-CLIENT_VERSION = "1.1.1"
+CLIENT_VERSION = "1.2.0"
 
 with open(os.path.join(os.path.dirname(__file__), 'std_daq_client/', 'README.md')) as readme:
     long_description = readme.read()
@@ -24,6 +24,7 @@ setup(
         std_cli_get_status=std_daq_client.cli.get_status:main
         std_cli_write_async=std_daq_client.cli.write:write_sync
         std_cli_write_sync=std_daq_client.cli.write:write_async
+        std_cli_write_stop=std_daq_client.cli.write:write_stop
     ''',
 
     author="Paul Scherrer Institute",
