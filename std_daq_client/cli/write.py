@@ -5,7 +5,7 @@ from std_daq_client import StdDaqClient
 
 
 def _process_arguments():
-    parser = argparse.ArgumentParser(description='Get std_daq stats')
+    parser = argparse.ArgumentParser(description='std_daq start writer')
     parser.add_argument("--url_base", type=str, default='http://localhost:5000', help="Base URL of the REST Endpoint")
     parser.add_argument("output_file", type=str, help="Absolute path filename to write the data to.")
     parser.add_argument("n_images", type=int, help="Number of images to write.")
@@ -35,7 +35,7 @@ def write_async():
 
 
 def write_stop():
-    parser = argparse.ArgumentParser(description='Get std_daq stats')
+    parser = argparse.ArgumentParser(description='std_daq stop writer')
     parser.add_argument("--url_base", type=str, default='http://localhost:5000', help="Base URL of the REST Endpoint")
     url_base = parser.parse_args().url_base
 
