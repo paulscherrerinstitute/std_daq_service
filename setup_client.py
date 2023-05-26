@@ -22,6 +22,8 @@ setup(
         std_cli_get_logs=std_daq_client.cli.get_logs:main
         std_cli_get_stats=std_daq_client.cli.get_stats:main
         std_cli_get_status=std_daq_client.cli.get_status:main
+        std_cli_write_async=std_daq_client.cli.write:main_sync
+        std_cli_write_sync=std_daq_client.cli.write:main_async
     ''',
 
     author="Paul Scherrer Institute",
