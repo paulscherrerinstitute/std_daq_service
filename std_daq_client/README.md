@@ -44,10 +44,38 @@ All CLI tools accept the **--url\_base** parameter used to point the client to t
 your DAQ integrator to find out this address.
 
 ### Redis interface
-Status streams are available also on Redis in the form of Redis PUB/SUB. The client does not communicate with Redis 
-for you, but it can parse the Redis response into standard objects. We recommended the usage of these parsers as the 
-format in which data is streamed on Redis can change - it is considered an implementation detail and not part of the 
-public interface.
+System state is available also on Redis in the form of Redis Streams. The stream name prefix is the system-wide unique 
+identifier for sources - detector_name. Contact your DAQ integrator to find out the host and port on which Redis is 
+running - generally this should be the same network interface as the REST api, on the default Redis port. You can 
+see the currently deployed detector_name with the **get\_config** command.
+
+Currently available streams:
+
+- daq:status (DAQ status updates with 1Hz, **DAQ status** json)
+- daq:config (DAQ config pushed on change, **DAQ config** json)
+- daq:log (DAQ logs about created files, **DAQ logs** json)
+- daq:stat (DAQ performance statistics, **DAQ stats** json)
+
+The JSON object encoded in UTF-8 is stored in the **b\'json\'** field.
+
+Example on how to access the status stream:
+```python
+import json
+from redis.client import Redis
+
+redis = Redis()
+# Unique id of your detector.
+detector_name = 'eiger9m'
+# Start listening for new statuses.
+last_status_id = '$'
+while True:
+    # Block until new status is available.
+    response = redis.xread({f"{detector_name}:writer_status": last_status_id}, block=0)
+    # Decode status from 'json' field.
+    last_status_id, status = response[0][0], json.loads(response[0][1][b'json'])
+    
+    print(status)
+```
 
 ## Interface objects
 Every call returns a dictionary with some values inside. In case of state or logic problems with your request, 
@@ -66,6 +94,7 @@ This object is returned by:
 - start_writer_async
 - start_writer_sync
 - stop_writer
+- Redis stream daq:status 
 
 ```json
 {
@@ -137,6 +166,7 @@ way the data source is processed by stream processors.
 This object is returned by:
 - get_config
 - set_config
+- Redis stream daq:config
 
 ```json
 {
@@ -171,6 +201,7 @@ Current data flow statistics of the DAQ.
 
 This object is returned by:
 - get_stats
+- Redis stream daq:stat
 
 ```json
 {
@@ -192,6 +223,7 @@ Log of all acquisitions that produced a file. It is a list of acquisition object
 
 This object is returned by:
 - get_logs
+- Redis stream daq:log
 
 ```json
 [
