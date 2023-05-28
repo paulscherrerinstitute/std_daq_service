@@ -6,7 +6,7 @@ import zmq
 from flask import Flask
 from redis.client import Redis
 
-from std_daq_service.rest_v2.daq import DaqRestManager, WriterAcquisitionLogger
+from std_daq_service.rest_v2.daq import DaqRestManager, LogsDriver
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import StatsDriver
@@ -25,7 +25,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
     writer_manager = None
     ctx = None
     stats_driver = None
-    writer_acq_logger = None
+    logs_driver = None
 
     try:
         _logger.info(f'Starting Start Stop REST for {config_file} (rest_port={rest_port}).')
@@ -60,7 +60,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
 
         stats_driver = StatsDriver(ctx, storage=storage, image_stream_url=image_metadata_address,
                                    writer_status_url=out_status_address)
-        writer_acq_logger = WriterAcquisitionLogger(ctx, writer_driver.out_status_address, storage)
+        logs_driver = LogsDriver(ctx, writer_driver.out_status_address, storage)
 
         daq_manager = DaqRestManager(storage=storage)
 
@@ -86,7 +86,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
             writer_manager.close()
 
         stats_driver.close()
-        writer_acq_logger.close()
+        logs_driver.close()
 
         if ctx:
             ctx.destroy()

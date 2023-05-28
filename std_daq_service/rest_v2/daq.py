@@ -4,9 +4,7 @@ from threading import Event, Thread
 import zmq
 from zmq import Again
 
-from std_daq_service.rest_v2.stats import StatsDriver
 from std_daq_service.rest_v2.utils import update_config
-from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 
 
 _logger = logging.getLogger("DaqRestManager")
@@ -39,7 +37,7 @@ class DaqRestManager(object):
         return self.storage.get_deployment_status()
 
 
-class WriterAcquisitionLogger(object):
+class LogsDriver(object):
     def __init__(self, ctx, status_address, storage):
         self.ctx = ctx
         self.status_address = status_address
