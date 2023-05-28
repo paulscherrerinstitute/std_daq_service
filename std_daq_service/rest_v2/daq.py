@@ -15,11 +15,7 @@ RECV_TIMEOUT = 100
 
 
 class DaqRestManager(object):
-    def __init__(self, config_file, stats_driver: StatsDriver, writer_driver: WriterDriver, storage):
-        self.stats_driver = stats_driver
-        self.writer_driver = writer_driver
-        self.writer_acq_logger = WriterAcquisitionLogger(zmq.Context(), writer_driver.out_status_address, storage)
-
+    def __init__(self, storage):
         self.storage = storage
 
     def get_config(self):
@@ -34,17 +30,13 @@ class DaqRestManager(object):
         return new_daq_config
 
     def get_stats(self):
-        return self.stats_driver.get_stats()
+        return self.storage.get_stat()
 
     def get_logs(self, n_logs):
         return self.storage.get_logs(n_logs)
 
     def get_deployment_status(self):
         return self.storage.get_deployment_status()
-
-    def close(self):
-        self.stats_driver.close()
-        self.writer_acq_logger.close()
 
 
 class WriterAcquisitionLogger(object):

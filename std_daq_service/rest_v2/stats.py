@@ -114,6 +114,7 @@ class StatsDriver(object):
                         "bytes_per_second": n_bytes_writer / STATS_INTERVAL,
                         "images_per_second": n_images_writer / STATS_INTERVAL}
                 }
+                self.storage.add_stat(self.stats)
 
                 start_time = start_time + STATS_INTERVAL
                 n_bytes_detector = 0
@@ -126,9 +127,6 @@ class StatsDriver(object):
 
             n_bytes_writer += new_bytes_writer
             n_images_writer += new_images_writer
-
-    def get_stats(self):
-        return self.stats
 
     def close(self):
         self._stop_event.set()

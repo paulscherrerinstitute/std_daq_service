@@ -120,3 +120,14 @@ class StdDaqRedisStorage(object):
     def add_writer_status(self, writer_status):
         self.redis.xadd(self.KEY_STATUS, {FIELD_DAQ_JSON: json.dumps(writer_status)})
 
+    def add_stat(self, stat):
+        self.redis.xadd(self.KEY_STAT, {FIELD_DAQ_JSON: json.dumps(stat)})
+
+    def get_stat(self):
+        response = self.redis.xrevrange(self.KEY_STAT, count=1)
+        # Fails before a beamline is configured for the first time.
+        if response:
+            stat = json.loads(response[0][1][FIELD_DAQ_JSON])
+            return stat
+        else:
+            return None

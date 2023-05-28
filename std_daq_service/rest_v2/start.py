@@ -6,7 +6,7 @@ import zmq
 from flask import Flask
 from redis.client import Redis
 
-from std_daq_service.rest_v2.daq import DaqRestManager
+from std_daq_service.rest_v2.daq import DaqRestManager, WriterAcquisitionLogger
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import StatsDriver
@@ -24,6 +24,8 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
     daq_manager = None
     writer_manager = None
     ctx = None
+    stats_driver = None
+    writer_acq_logger = None
 
     try:
         _logger.info(f'Starting Start Stop REST for {config_file} (rest_port={rest_port}).')
@@ -58,8 +60,9 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
 
         stats_driver = StatsDriver(ctx, storage=storage, image_stream_url=image_metadata_address,
                                    writer_status_url=out_status_address)
-        daq_manager = DaqRestManager(config_file=config_file, stats_driver=stats_driver, writer_driver=writer_driver,
-                                     storage=storage)
+        writer_acq_logger = WriterAcquisitionLogger(ctx, writer_driver.out_status_address, storage)
+
+        daq_manager = DaqRestManager(storage=storage)
 
         mjpeg_streamer = MJpegLiveStream(ctx, live_stream_url=live_stream_url)
         register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base,
@@ -81,6 +84,9 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
 
         if writer_manager:
             writer_manager.close()
+
+        stats_driver.close()
+        writer_acq_logger.close()
 
         if ctx:
             ctx.destroy()
