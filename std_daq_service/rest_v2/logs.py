@@ -6,7 +6,7 @@ from zmq import Again
 from std_daq_service.rest_v2.daq import RECV_TIMEOUT, _logger
 
 
-class LogsDriver(object):
+class LogsLogger(object):
     def __init__(self, ctx, status_address, storage):
         self.ctx = ctx
         self.status_address = status_address

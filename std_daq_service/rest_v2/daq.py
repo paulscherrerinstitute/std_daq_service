@@ -31,5 +31,3 @@ class DaqRestManager(object):
 
     def get_deployment_status(self):
         return self.storage.get_deployment_status()
-
-

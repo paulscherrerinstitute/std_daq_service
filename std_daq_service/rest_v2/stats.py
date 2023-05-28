@@ -28,7 +28,7 @@ EMPTY_STATS = {
 _logger = logging.getLogger("StatsDriver")
 
 
-class StatsDriver(object):
+class StatsLogger(object):
     def __init__(self, ctx, storage: StdDaqRedisStorage, image_stream_url, writer_status_url):
         self.ctx = ctx
         self.storage = storage

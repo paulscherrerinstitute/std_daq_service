@@ -7,13 +7,13 @@ from flask import Flask
 from redis.client import Redis
 
 from std_daq_service.rest_v2.daq import DaqRestManager
-from std_daq_service.rest_v2.logs import LogsDriver
+from std_daq_service.rest_v2.logs import LogsLogger
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
-from std_daq_service.rest_v2.stats import StatsDriver
+from std_daq_service.rest_v2.stats import StatsLogger
 from std_daq_service.rest_v2.utils import validate_config
 from std_daq_service.writer_driver.start_stop_driver import WriterDriver
-from std_daq_service.rest_v2.writer import WriterRestManager
+from std_daq_service.rest_v2.writer import WriterRestManager, StatusLogger
 from std_daq_service.rest_v2.rest import register_rest_interface
 from std_daq_service.writer_driver.utils import get_stream_addresses
 from flask_cors import CORS
@@ -25,8 +25,9 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
     daq_manager = None
     writer_manager = None
     ctx = None
-    stats_driver = None
-    logs_driver = None
+    status_logger = None
+    stats_logger = None
+    logs_logger = None
 
     try:
         _logger.info(f'Starting Start Stop REST for {config_file} (rest_port={rest_port}).')
@@ -59,9 +60,10 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
-        stats_driver = StatsDriver(ctx, storage=storage, image_stream_url=image_metadata_address,
+        status_logger = StatusLogger(ctx=ctx,storage=storage, writer_status_url=out_status_address)
+        stats_logger = StatsLogger(ctx, storage=storage, image_stream_url=image_metadata_address,
                                    writer_status_url=out_status_address)
-        logs_driver = LogsDriver(ctx, writer_driver.out_status_address, storage)
+        logs_logger = LogsLogger(ctx, writer_driver.out_status_address, storage)
 
         daq_manager = DaqRestManager(storage=storage)
 
@@ -80,14 +82,16 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         _logger.info("Starting shutdown procedure.")
 
     finally:
-        if daq_manager:
-            daq_manager.close()
 
         if writer_manager:
             writer_manager.close()
 
-        stats_driver.close()
-        logs_driver.close()
+        if status_logger:
+            status_logger.close()
+        if stats_logger:
+            stats_logger.close()
+        if logs_logger:
+            logs_logger.close()
 
         if ctx:
             ctx.destroy()
