@@ -40,7 +40,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         redis_host, redis_port = redis_url.split(':')
         _logger.info(f"Connecting to Redis {redis_host}:{redis_port}")
         redis = Redis(host=redis_host, port=redis_port)
-        storage = StdDaqRedisStorage(redis, config_file)
+        storage = StdDaqRedisStorage(redis)
 
         # If the current config file is not in Redis - cold deploy, first time run.
         # This will cause a deploy of the config.

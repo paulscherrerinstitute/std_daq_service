@@ -7,7 +7,7 @@ FIELD_DAQ_JSON = b'json'
 
 
 class StdDaqRedisStorage(object):
-    def __init__(self, redis, redis_namespace):
+    def __init__(self, redis, redis_namespace='daq'):
         _logger.info(f"Using namespace {redis_namespace}.")
         self.redis = redis
 
@@ -15,13 +15,14 @@ class StdDaqRedisStorage(object):
             raise RuntimeError("Cannot connect to object store. Is Redis running?")
 
         self.KEY_CONFIG = f'{redis_namespace}:config'
-        self.KEY_ACQUISITION_LOG = f'{redis_namespace}:log'
-        self.KEY_WRITER_STATUS = f'{redis_namespace}:writer_status'
+        self.KEY_LOG = f'{redis_namespace}:log'
+        self.KEY_STAT = f'{redis_namespace}:stat'
+        self.KEY_STATUS = f'{redis_namespace}:status'
 
     def get_config(self):
         response = self.redis.xrevrange(self.KEY_CONFIG, count=1)
         # Fails before a beamline is configured for the first time.
-        if len(response) > 0:
+        if response:
             config_id = response[0][0].decode('utf8')
             daq_config = json.loads(response[0][1][FIELD_DAQ_JSON])
             return config_id, daq_config
@@ -109,13 +110,13 @@ class StdDaqRedisStorage(object):
 
     def add_acquisition_log(self, acq_status):
         _logger.info(f"Adding finished acquisition {acq_status} to log.")
-        self.redis.xadd(self.KEY_ACQUISITION_LOG, {FIELD_DAQ_JSON: json.dumps(acq_status)})
+        self.redis.xadd(self.KEY_LOG, {FIELD_DAQ_JSON: json.dumps(acq_status)})
 
     def get_acquisition_logs(self, n_acquisitions):
-        records = self.redis.xrevrange(self.KEY_ACQUISITION_LOG, count=n_acquisitions)
+        records = self.redis.xrevrange(self.KEY_LOG, count=n_acquisitions)
         logs = [json.loads(x[1][FIELD_DAQ_JSON]) for x in records]
         return logs
 
     def add_writer_status(self, writer_status):
-        self.redis.xadd(self.KEY_WRITER_STATUS, {FIELD_DAQ_JSON: json.dumps(writer_status)})
+        self.redis.xadd(self.KEY_STATUS, {FIELD_DAQ_JSON: json.dumps(writer_status)})
 

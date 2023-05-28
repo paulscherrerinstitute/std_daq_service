@@ -27,13 +27,13 @@ def start_manager(server_name, config_file, redis_url):
     if os.path.exists(last_deployed_config_filename):
         with open(last_deployed_config_filename, 'r') as input_file:
             last_seen_id = input_file.read()
-            _logger.info(f"Deployment record found. Last deployed config_if {last_seen_id}")
+            _logger.info(f"Deployment record found. Last deployed config_id {last_seen_id}")
 
     redis_host, redis_port = redis_url.split(':')
     _logger.info(f"Connecting to {redis_host}:{redis_port} to save {config_file}.")
     redis_client = redis.Redis(host=redis_host, port=redis_port)
 
-    storage = StdDaqRedisStorage(redis=redis_client, redis_namespace=config_file)
+    storage = StdDaqRedisStorage(redis=redis_client)
 
     while True:
         try:
