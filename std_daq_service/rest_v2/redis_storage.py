@@ -15,7 +15,7 @@ class StdDaqRedisStorage(object):
             raise RuntimeError("Cannot connect to object store. Is Redis running?")
 
         self.KEY_CONFIG = f'{redis_namespace}:config'
-        self.KEY_ACQUISITION_LOG = f'{redis_namespace}:acquisition'
+        self.KEY_ACQUISITION_LOG = f'{redis_namespace}:log'
         self.KEY_WRITER_STATUS = f'{redis_namespace}:writer_status'
 
     def get_config(self):
