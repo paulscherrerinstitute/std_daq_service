@@ -17,14 +17,14 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        std_cli_get_config=std_daq_client.cli.get_config:main
-        std_cli_get_deploy_status=std_daq_client.cli.get_deploy_status:main
-        std_cli_get_logs=std_daq_client.cli.get_logs:main
-        std_cli_get_stats=std_daq_client.cli.get_stats:main
-        std_cli_get_status=std_daq_client.cli.get_status:main
-        std_cli_write_async=std_daq_client.cli.write:write_sync
-        std_cli_write_sync=std_daq_client.cli.write:write_async
-        std_cli_write_stop=std_daq_client.cli.write:write_stop
+        std_cli_get_config=std_daq_client.cli:get_config
+        std_cli_get_deploy_status=std_daq_client.cli:get_deploy_status
+        std_cli_get_logs=std_daq_client.cli:get_logs
+        std_cli_get_stats=std_daq_client.cli:get_stats
+        std_cli_get_status=std_daq_client.cli:get_status
+        std_cli_write_async=std_daq_client.cli:write_sync
+        std_cli_write_sync=std_daq_client.cli:write_async
+        std_cli_write_stop=std_daq_client.cli:write_stop
     ''',
 
     author="Paul Scherrer Institute",
