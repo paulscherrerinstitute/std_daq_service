@@ -37,7 +37,7 @@ class DaqRestManager(object):
         return self.stats_driver.get_stats()
 
     def get_logs(self, n_logs):
-        return self.storage.get_acquisition_logs(n_logs)
+        return self.storage.get_logs(n_logs)
 
     def get_deployment_status(self):
         return self.storage.get_deployment_status()
@@ -70,7 +70,7 @@ class WriterAcquisitionLogger(object):
                 status = receiver.recv_json()
                 acq_status = status['acquisition']
                 if acq_status['state'] == 'FINISHED' and acq_status['stats']['start_time'] is not None:
-                    self.storage.add_acquisition_log(acq_status)
+                    self.storage.add_log(acq_status)
             except Again:
                 pass
 
