@@ -6,7 +6,8 @@ import zmq
 from flask import Flask
 from redis.client import Redis
 
-from std_daq_service.rest_v2.daq import DaqRestManager, LogsDriver
+from std_daq_service.rest_v2.daq import DaqRestManager
+from std_daq_service.rest_v2.logs import LogsDriver
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import StatsDriver
