@@ -37,6 +37,7 @@ def start_manager(server_name, config_file, redis_url):
 
     while True:
         try:
+            # TODO: Rewrite to blocking Redis call.
             config_id, daq_config = storage.get_config()
 
             if config_id is not None and config_id != last_seen_id:
