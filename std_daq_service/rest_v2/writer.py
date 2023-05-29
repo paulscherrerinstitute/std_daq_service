@@ -30,7 +30,7 @@ class WriterRestManager(object):
         start_time = time()
         while True:
             status = self.get_status()
-            if status != 'WRITING':
+            if status['state'] != 'WRITING':
                 return status
 
             sleep(SYNC_SLEEP_INTERVAL)
