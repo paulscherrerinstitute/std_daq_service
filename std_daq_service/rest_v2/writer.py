@@ -86,8 +86,8 @@ class StatusLogger(object):
         while not self.stop_event.is_set():
             try:
                 status = receiver.recv_json()
-                daq_status = status['writer']
-                self.storage.add_writer_status(writer_status=daq_status)
+                _logger.debug('Status:', status)
+                self.storage.add_writer_status(writer_status=status)
             except Again:
                 pass
             except Exception:
