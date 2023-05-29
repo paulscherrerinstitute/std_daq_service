@@ -44,10 +44,9 @@ All CLI tools accept the **--url\_base** parameter used to point the client to t
 your DAQ integrator to find out this address.
 
 ### Redis interface
-System state is available also on Redis in the form of Redis Streams. The stream name prefix is the system-wide unique 
-identifier for sources - detector_name. Contact your DAQ integrator to find out the host and port on which Redis is 
-running - generally this should be the same network interface as the REST api, on the default Redis port. You can 
-see the currently deployed detector_name with the **get\_config** command.
+System state is available also on Redis in the form of Redis Streams. Each Redis instance represents a DAQ instance. 
+Contact your DAQ integrator to find out the host and port on which Redis is running - generally this should be the 
+same network interface as the REST api, on the default Redis port.
 
 Currently available streams:
 
@@ -64,13 +63,12 @@ import json
 from redis.client import Redis
 
 redis = Redis()
-# Unique id of your detector.
-detector_name = 'eiger9m'
+
 # Start listening for new statuses.
 last_status_id = '$'
 while True:
     # Block until new status is available.
-    response = redis.xread({f"{detector_name}:writer_status": last_status_id}, block=0)
+    response = redis.xread({"daq:writer_status": last_status_id}, block=0)
     # Decode status from 'json' field.
     last_status_id, status = response[0][0], json.loads(response[0][1][b'json'])
     
