@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-CLIENT_VERSION = "1.3.4"
+CLIENT_VERSION = "1.3.5"
 
 with open(os.path.join(os.path.dirname(__file__), 'std_daq_client/', 'README.md')) as readme:
     long_description = readme.read()
@@ -22,8 +22,8 @@ setup(
         std_cli_get_logs=std_daq_client.cli:get_logs
         std_cli_get_stats=std_daq_client.cli:get_stats
         std_cli_get_status=std_daq_client.cli:get_status
-        std_cli_write_async=std_daq_client.cli:write_sync
-        std_cli_write_sync=std_daq_client.cli:write_async
+        std_cli_write_async=std_daq_client.cli:write_async
+        std_cli_write_sync=std_daq_client.cli:write_sync
         std_cli_write_stop=std_daq_client.cli:write_stop
     ''',
 
