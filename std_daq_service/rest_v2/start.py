@@ -22,7 +22,6 @@ _logger = logging.getLogger(__name__)
 
 
 def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
-    daq_manager = None
     writer_manager = None
     ctx = None
     status_logger = None
