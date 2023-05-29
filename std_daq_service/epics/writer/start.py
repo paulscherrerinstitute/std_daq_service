@@ -3,7 +3,7 @@ import logging
 import os
 
 from std_daq_service.broker.primary_service import PrimaryBrokerService
-from std_daq_service.epics_writer.service import EpicsWriterService
+from std_daq_service.epics.writer.service import EpicsWriterService
 from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("EpicsWriter")

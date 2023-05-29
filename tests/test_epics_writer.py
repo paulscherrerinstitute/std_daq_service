@@ -7,11 +7,9 @@ import h5py
 from epics import CAProcess
 from redis import Redis
 
-from std_daq_service.epics_buffer.buffer import start_epics_buffer, PULSE_ID_NAME
-from std_daq_service.epics_writer.service import download_pv_data, map_pv_data_to_pulse_id, get_pulse_id_timeline, \
-    EpicsWriterService
-from std_daq_service.epics_writer.start import start_epics_writer
-from std_daq_service.epics_writer.writer import EpicsH5Writer, prepare_data_for_writing
+from std_daq_service.epics.buffer import start_epics_buffer, PULSE_ID_NAME
+from std_daq_service.epics.writer.service import download_pv_data, map_pv_data_to_pulse_id, EpicsWriterService
+from std_daq_service.epics.writer import EpicsH5Writer, prepare_data_for_writing
 from tests.test_epics_buffer import start_test_ioc
 
 

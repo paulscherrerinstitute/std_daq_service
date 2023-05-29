@@ -4,8 +4,8 @@ from time import sleep, time_ns
 import epics
 from redis import Redis
 
-from std_daq_service.epics_buffer.receiver import EpicsReceiver
-from std_daq_service.epics_buffer.stats import EpicsBufferStats
+from std_daq_service.epics.buffer.receiver import EpicsReceiver
+from std_daq_service.epics.buffer.stats import EpicsBufferStats
 
 # Redis buffer for 1 day.
 # max 10/second updates for regular channels.

@@ -17,9 +17,9 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        epics_buffer=std_daq_service.epics_buffer.start:main
-        epics_writer=std_daq_service.epics_writer.start:main
-        epics_validator=std_daq_service.epics_validator.start:main
+        buffer=std_daq_service.buffer.start:main
+        writer=std_daq_service.writer.start:main
+        validator=std_daq_service.validator.start:main
         std_daq_request=std_daq_service.tools.request:main
         std_daq_monitor=std_daq_service.tools.monitor:main
         std_daq_current_pulse_id=std_daq_service.tools.current_pulse_id:main

@@ -8,8 +8,8 @@ Documentation of interfaces:
 
 Documentation of services:
 - [Writer agent](std_daq_service/writer_driver/README.md)
-- [Epics buffer](std_daq_service/epics_buffer/README.md)
-- [Epics writer](std_daq_service/epics_writer/README.md)
+- [Epics buffer](std_daq_service/epics/buffer/README.md)
+- [Epics writer](std_daq_service/epics/writer/README.md)
 
 ## Getting started
 
@@ -54,10 +54,10 @@ suggest you use the provided docker container for this.
 To run services in the docker container, from the project root:
 ```bash 
 docker run --net=host --rm  \
-    -e SERVICE_NAME=debug.epics_buffer \
-    -v $(pwd)/tests/redis_configs/debug.epics_buffer.json:/std_daq_service/config.json \
+    -e SERVICE_NAME=debug.buffer \
+    -v $(pwd)/tests/redis_configs/debug.buffer.json:/std_daq_service/config.json \
     paulscherrerinstitute/std-daq-service \
-    epics_buffer
+    buffer
 ```
 
 For more information on the parameters of the docker container please check the **Service container** section. 

@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 
-from std_daq_service.epics_buffer.buffer import start_epics_buffer
+from std_daq_service.epics.buffer.buffer import start_epics_buffer
 from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("EpicsBuffer")

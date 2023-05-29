@@ -5,7 +5,7 @@ import os
 import h5py
 
 from std_daq_service.broker.client import BrokerClient
-from std_daq_service.epics_validator.service import EpicsValidationService
+from std_daq_service.epics.validator.service import EpicsValidationService
 from std_daq_service.start_utils import default_service_setup
 
 _logger = logging.getLogger("EpicsWriter")

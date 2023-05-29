@@ -10,9 +10,9 @@ from epics import CAProcess
 from pcaspy import Driver, SimpleServer
 from redis import Redis
 
-from std_daq_service.epics_buffer.buffer import start_epics_buffer, PULSE_ID_NAME
-from std_daq_service.epics_buffer.receiver import EpicsReceiver
-from std_daq_service.epics_buffer.stats import EpicsBufferStats
+from std_daq_service.epics.buffer import start_epics_buffer, PULSE_ID_NAME
+from std_daq_service.epics.buffer import EpicsReceiver
+from std_daq_service.epics.buffer.stats import EpicsBufferStats
 
 
 class TestEpicsBuffer(unittest.TestCase):
@@ -136,7 +136,7 @@ class TestEpicsBuffer(unittest.TestCase):
         # Check if service identifying info is in the output.
         for line in stats_output:
             self.assertTrue("test_service" in line)
-            self.assertTrue("epics_buffer" in line)
+            self.assertTrue("buffer" in line)
 
 
 def start_test_ioc():
