@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-CLIENT_VERSION = "1.3.3"
+CLIENT_VERSION = "1.3.4"
 
 with open(os.path.join(os.path.dirname(__file__), 'std_daq_client/', 'README.md')) as readme:
     long_description = readme.read()
@@ -17,6 +17,7 @@ setup(
     entry_points='''
         [console_scripts]
         std_cli_get_config=std_daq_client.cli:get_config
+        std_cli_set_config=std_daq_client.cli:set_config
         std_cli_get_deploy_status=std_daq_client.cli:get_deploy_status
         std_cli_get_logs=std_daq_client.cli:get_logs
         std_cli_get_stats=std_daq_client.cli:get_stats
