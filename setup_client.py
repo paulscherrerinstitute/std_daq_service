@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-CLIENT_VERSION = "1.3.0"
+CLIENT_VERSION = "1.3.1"
 
 with open(os.path.join(os.path.dirname(__file__), 'std_daq_client/', 'README.md')) as readme:
     long_description = readme.read()
@@ -10,8 +10,7 @@ with open(os.path.join(os.path.dirname(__file__), 'std_daq_client/', 'README.md'
 setup(
     version=CLIENT_VERSION,
     name='std_daq_client',
-    packages=['std_daq_client',
-              'std_daq_client.cli'],
+    packages=['std_daq_client'],
     install_requires=[
         'requests',
     ],

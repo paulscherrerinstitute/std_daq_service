@@ -56,7 +56,7 @@ def get_stats():
                         help="Base URL of the REST Endpoint. Read also from environment variable STD_DAQ_API_URL")
     args = parser.parse_args()
 
-    client = StdDaqClient(url_base=args.url_base)
+    client = StdDaqClient(url_base=args.b)
     print(json.dumps(client.get_stats(), indent=2))
 
 
@@ -66,7 +66,7 @@ def get_status():
                         help="Base URL of the REST Endpoint. Read also from environment variable STD_DAQ_API_URL")
     args = parser.parse_args()
 
-    client = StdDaqClient(url_base=args.url_base)
+    client = StdDaqClient(url_base=args.b)
     print(json.dumps(client.get_status(), indent=2))
 
 
@@ -100,10 +100,10 @@ def write_async():
 
 def write_stop():
     parser = argparse.ArgumentParser(description='std_daq stop writer')
-    parser.add_argument("--url_base", type=str, default='http://localhost:5000', help="Base URL of the REST Endpoint")
-    url_base = parser.parse_args().url_base
+    parser.add_argument("-b", type=str, default='http://localhost:5000', help="Base URL of the REST Endpoint")
+    args = parser.parse_args()
 
-    client = StdDaqClient(url_base)
+    client = StdDaqClient(url_base=args.b)
     response = client.stop_writer()
 
     print(json.dumps(response, indent=2))
