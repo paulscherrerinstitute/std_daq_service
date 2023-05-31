@@ -1,0 +1,106 @@
+---
+- name: xbl-33 deploy
+  hosts: xbl-daq-33.psi.ch
+  become: true
+  roles:
+    - psi.std_daq_deploy
+  vars:
+    - ansible_remote_tmp: /tmp
+    - config_file: gf1.json
+      std_daq_sw_version: 0.5.9
+      microservices:
+        - prog_name: std_udp_recv_gf
+          instances:
+            - { id: x02da.xbl-daq-33.gf1.00.0, cpus: [16], params: [0] }
+            - { id: x02da.xbl-daq-33.gf1.01.0, cpus: [17], params: [1] }
+            - { id: x02da.xbl-daq-33.gf1.02.0, cpus: [18], params: [2] }
+            - { id: x02da.xbl-daq-33.gf1.03.0, cpus: [19], params: [3] }
+            - { id: x02da.xbl-daq-33.gf1.04.0, cpus: [3] , params: [4] }
+            - { id: x02da.xbl-daq-33.gf1.05.0, cpus: [4] , params: [5] }
+            - { id: x02da.xbl-daq-33.gf1.06.0, cpus: [5] , params: [6] }
+            - { id: x02da.xbl-daq-33.gf1.07.0, cpus: [6] , params: [7] }
+            - { id: x02da.xbl-daq-33.gf1.00.1, cpus: [20], params: [8] }
+            - { id: x02da.xbl-daq-33.gf1.01.1, cpus: [21], params: [9] }
+            - { id: x02da.xbl-daq-33.gf1.02.1, cpus: [22], params: [10] }
+            - { id: x02da.xbl-daq-33.gf1.03.1, cpus: [23], params: [11] }
+            - { id: x02da.xbl-daq-33.gf1.04.1, cpus: [7] , params: [12] }
+            - { id: x02da.xbl-daq-33.gf1.05.1, cpus: [8] , params: [13] }
+            - { id: x02da.xbl-daq-33.gf1.06.1, cpus: [9] , params: [14] }
+            - { id: x02da.xbl-daq-33.gf1.07.1, cpus: [10], params: [15] }
+        - prog_name: std_data_convert_gf
+          instances:
+            - { id: x02da.xbl-daq-33.gf1.00.0, cpus: [24], params: [0] }
+            - { id: x02da.xbl-daq-33.gf1.01.0, cpus: [25], params: [1] }
+            - { id: x02da.xbl-daq-33.gf1.02.0, cpus: [26], params: [2] }
+            - { id: x02da.xbl-daq-33.gf1.03.0, cpus: [27], params: [3] }
+            - { id: x02da.xbl-daq-33.gf1.04.0, cpus: [11], params: [4] }
+            - { id: x02da.xbl-daq-33.gf1.05.0, cpus: [12], params: [5] }
+            - { id: x02da.xbl-daq-33.gf1.06.0, cpus: [13], params: [6] }
+            - { id: x02da.xbl-daq-33.gf1.07.0, cpus: [14], params: [7] }
+            - { id: x02da.xbl-daq-33.gf1.00.1, cpus: [24], params: [8] }
+            - { id: x02da.xbl-daq-33.gf1.01.1, cpus: [25], params: [9] }
+            - { id: x02da.xbl-daq-33.gf1.02.1, cpus: [26], params: [10] }
+            - { id: x02da.xbl-daq-33.gf1.03.1, cpus: [27], params: [11] }
+            - { id: x02da.xbl-daq-33.gf1.04.1, cpus: [11], params: [12] }
+            - { id: x02da.xbl-daq-33.gf1.05.1, cpus: [12], params: [13] }
+            - { id: x02da.xbl-daq-33.gf1.06.1, cpus: [13], params: [14] }
+            - { id: x02da.xbl-daq-33.gf1.07.1, cpus: [14], params: [15] }
+        - prog_name: std_data_sync_module
+          instances:
+            - { id: x02da.xbl-daq-33.gf1, cpus: [30], params: [] }
+        - prog_name: std_stream_send
+          instances:
+            - { id: x02da.xbl-daq-33.gf1.0, cpus: [28], params: ["'tcp://192.168.10.229:10000'", 0] }
+            - { id: x02da.xbl-daq-33.gf1.1, cpus: [29], params: ["'tcp://192.168.10.229:10001'", 1] }
+            - { id: x02da.xbl-daq-33.gf1.2, cpus: [30], params: ["'tcp://192.168.10.229:10002'", 2] }
+            - { id: x02da.xbl-daq-33.gf1.3, cpus: [31], params: ["'tcp://192.168.10.229:10003'", 3] }
+            - { id: x02da.xbl-daq-33.gf1.4, cpus: [2] , params: ["'tcp://192.168.10.229:10004'", 4] }
+            - { id: x02da.xbl-daq-33.gf1.5, cpus: [15], params: ["'tcp://192.168.10.229:10005'", 5] }
+            - { id: x02da.xbl-daq-33.gf1.6, cpus: [1] , params: ["'tcp://192.168.10.229:10006'", 6] }
+            - { id: x02da.xbl-daq-33.gf1.7, cpus: [0] , params: ["'tcp://192.168.10.229:10007'", 7] }
+        - prog_name: std_daq_config_deployer
+          env: "PATH=/opt/rh/rh-python38/root/usr/bin/:LD_LIBRARY_PATH=/opt/rh/rh-python38/root/usr/lib64"
+          skip_watcher: True
+          instances:
+            - { id: x02da.xbl-daq-33.gf1, cpus: [0], params: ["xbl-daq-33", "--redis_url=xbl-daq-36:6379"] }
+        - prog_name: std_daq_udp_simulator
+          env: "PATH=/opt/rh/rh-python38/root/usr/bin/:LD_LIBRARY_PATH=/opt/rh/rh-python38/root/usr/lib64"
+          instances:
+            - { id: x02da.xbl-daq-33.gf1, cpus: [0], params: ["'10.4.0.102'", "--file /etc/std_daq/tmp/gigafrost.tiff"] }
+- name: xbl-36 deploy
+  hosts: xbl-daq-36.psi.ch
+  become: true
+  roles:
+    - psi.std_daq_deploy
+  vars:
+    - ansible_remote_tmp: /tmp
+    - config_file: gf1.json
+      std_daq_sw_version: 0.5.9
+      microservices:
+        - prog_name: std_stream_receive
+          instances:
+            - { id: x02da.xbl-daq-36.gf1.0, cpus: [3] , params: ["tcp://192.168.10.229:10000", 0] }
+            - { id: x02da.xbl-daq-36.gf1.1, cpus: [5] , params: ["tcp://192.168.10.229:10001", 1] }
+            - { id: x02da.xbl-daq-36.gf1.2, cpus: [7] , params: ["tcp://192.168.10.229:10002", 2] }
+            - { id: x02da.xbl-daq-36.gf1.3, cpus: [9] , params: ["tcp://192.168.10.229:10003", 3] }
+            - { id: x02da.xbl-daq-36.gf1.4, cpus: [11], params: ["tcp://192.168.10.229:10004", 4] }
+            - { id: x02da.xbl-daq-36.gf1.5, cpus: [13], params: ["tcp://192.168.10.229:10005", 5] }
+            - { id: x02da.xbl-daq-36.gf1.6, cpus: [23], params: ["tcp://192.168.10.229:10006", 6] }
+            - { id: x02da.xbl-daq-36.gf1.7, cpus: [21], params: ["tcp://192.168.10.229:10007", 7] }
+        - prog_name: std_data_sync_stream
+          instances:
+            - { id: x02da.xbl-daq-36.gf1, cpus: [2], params: [] }
+        - prog_name: std_live_stream
+          instances:
+            - { id: x02da.xbl-daq-36.gf1, cpus: [4], params: ['tcp://192.168.10.228:20000'] }
+        - prog_name: std_daq_config_deployer
+          env: "PATH=/opt/rh/rh-python38/root/usr/bin/:LD_LIBRARY_PATH=/opt/rh/rh-python38/root/usr/lib64"
+          skip_watcher: True
+          instances:
+            - { id: x02da.xbl-daq-36.gf1, cpus: [0], params: ["xbl-daq-36", "--redis_url=xbl-daq-36:6379"] }
+        - prog_name: std_daq_rest
+          env: "PATH=/opt/rh/rh-python38/root/usr/bin/:LD_LIBRARY_PATH=/opt/rh/rh-python38/root/usr/lib64"
+          skip_watcher: True
+          instances:
+            - { id: x02da.xbl-daq-36.gf1, cpus: [0], params: ["--sim_url_base http://xbl-daq-33:5001"] }
+
