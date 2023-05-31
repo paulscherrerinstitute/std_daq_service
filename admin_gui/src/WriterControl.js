@@ -22,7 +22,7 @@ function WriterControl(props) {
   const [open, setOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
-  const [filename_example, setFilenameExample] = React.useState(generate_filename(generate_run_id(), filename_suffix));
+  const [filename_example, setFilenameExample] = React.useState(generate_filename(filename_suffix));
 
   let status_chip;
 
@@ -45,7 +45,7 @@ function WriterControl(props) {
       break;
   };
 
-  function generate_run_id() {
+  function generate_filename_prefix() {
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -58,17 +58,16 @@ function WriterControl(props) {
     return timestamp;
   }
 
-  function generate_filename(run_id, suffix) {
-    return `${run_id}_${suffix}.h5`;
+  function generate_filename(suffix) {
+    const prefix = generate_filename_prefix()
+    return `${prefix}_${suffix}.h5`;
   }
 
   const handleStartClick = () => {
-    const run_id = generate_run_id();
-
     axios.post('/writer/write_async', {
       n_images: numImages,
-      run_id: run_id,
-      output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' + generate_filename(run_id, filename_suffix),
+      output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' +
+          generate_filename(filename_suffix),
     }).then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
@@ -105,7 +104,7 @@ function WriterControl(props) {
 
   const handleFilenameSuffixChange = (event) => {
     setFilenameSuffix(event.target.value);
-    setFilenameExample(generate_filename(generate_run_id(), event.target.value));
+    setFilenameExample(generate_filename(event.target.value));
   }
 
   const handleOutputFolderChange = (event) => {
