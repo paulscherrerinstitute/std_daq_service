@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Chip,
-  Alert
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Chip, Alert, Tooltip
 } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -106,7 +96,11 @@ function AcquisitionLog() {
             {acqs.map((acq, index) => (
               <TableRow key={index}>
                <TableCell style={{ width: '50px' }}>
-                  <AttachFileIcon fontSize="small"/>
+                  <Tooltip title={acq.info.output_file}>
+                    <AttachFileIcon fontSize="small" style={{cursor: 'pointer'}}
+                                    onClick={() => window.open(`http://localhost:5002/?f=${acq.info.output_file}`,
+                                        '_blank')}/>
+                  </Tooltip>
                   <InfoOutlinedIcon fontSize="small"/>
                 </TableCell> <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
                 <TableCell align="right" style={{ width: '50px' }}>{acq.info.n_images}</TableCell>
