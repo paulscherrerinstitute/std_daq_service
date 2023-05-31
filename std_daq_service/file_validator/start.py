@@ -68,7 +68,7 @@ def start_validator(config_file, redis_url):
             if not response:
                 continue
 
-            last_log_id, status = response[0][0], json.loads(response[0][1][b'json'])
+            last_log_id, status = response[0][0].decode(), json.loads(response[0][1][b'json'])
 
             report = validate_file(status, writer_user_id, detector_name)
             _logger.info(f"File {status['info']['output_file']} validated: {report}.")

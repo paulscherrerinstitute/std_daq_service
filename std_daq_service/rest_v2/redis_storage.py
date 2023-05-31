@@ -120,7 +120,7 @@ class StdDaqRedisStorage(object):
         logs_bytes = self.redis.xrevrange(self.KEY_LOG, count=n_acquisitions)
         logs_dict = OrderedDict()
         for log_id, log_data in logs_bytes:
-            logs_dict[log_id] = json.loads(log_data[FIELD_DAQ_JSON])
+            logs_dict[log_id.decode()] = json.loads(log_data[FIELD_DAQ_JSON])
 
         return logs_dict
 
