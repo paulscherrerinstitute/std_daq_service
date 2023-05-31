@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
+
 function AcquisitionLog() {
   const [acqs, setAcqs] = useState([]);
   const [restError, setRestError] = useState(false);
@@ -96,13 +97,23 @@ function AcquisitionLog() {
             {acqs.map((acq, index) => (
               <TableRow key={index}>
                <TableCell style={{ width: '50px' }}>
-                  <Tooltip title={acq.info.output_file}>
+                  <Tooltip title={<Typography variant="body2">Open file</Typography>}>
                     <AttachFileIcon fontSize="small" style={{cursor: 'pointer'}}
                                     onClick={() => window.open(`http://localhost:5002/?f=${acq.info.output_file}`,
                                         '_blank')}/>
                   </Tooltip>
-                  <InfoOutlinedIcon fontSize="small"/>
-                </TableCell> <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
+                 <Tooltip title={
+                   <div>
+                    <Typography variant="body2">Output file: {acq.info.output_file}</Typography>
+                    <Typography variant="body2">Run ID: {acq.info.run_id}</Typography>
+                    <Typography variant="body2">Requested images: {acq.stats.n_write_requested}</Typography>
+                    <Typography variant="body2">Written images: {acq.stats.n_write_completed}</Typography>
+                  </div>
+                 }>
+                    <InfoOutlinedIcon fontSize="small"/>
+                </Tooltip>
+               </TableCell>
+                <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
                 <TableCell align="right" style={{ width: '50px' }}>{acq.info.n_images}</TableCell>
                 <TableCell align="right" style={{ width: '50px' }}>{get_duration(acq).toFixed(2)}s</TableCell>
                 <TableCell>
