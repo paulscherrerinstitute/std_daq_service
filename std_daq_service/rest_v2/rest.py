@@ -85,7 +85,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
             status = requests.get(f'{sim_url_base}{STATUS_ENDPOINT}').json()
             return status
         except Exception as e:
-            _logger.error(f"Cannot communicate with simulator API on {sim_url_base}")
+            _logger.debug(f"Cannot communicate with simulator API on {sim_url_base}")
             return jsonify({'status': 'error', 'message': f'Cannot communicate with API on {sim_url_base}.'})
 
     @app.route(SIM_START_ENDPOINT, methods=['POST'])
