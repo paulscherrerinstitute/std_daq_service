@@ -64,7 +64,10 @@ def validate_output_file(output_file, user_id):
     try:
         # Set user_id for checking the directory permissions.
         if user_id > 0:
+            _logger.info(f"Setting effective user_id to {user_id}.")
             os.seteuid(user_id)
+        else:
+            _logger.info(f"Using process user_id.")
 
         path_folder = os.path.dirname(output_file)
         if not os.path.exists(path_folder):
@@ -72,6 +75,7 @@ def validate_output_file(output_file, user_id):
     finally:
         # In case you set the user_id, revert back to original.
         if user_id > 0:
+            _logger.info(f"Returning effective user_id to {os.getuid()}.")
             os.seteuid(os.getuid())
 
 
