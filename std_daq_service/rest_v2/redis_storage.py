@@ -1,5 +1,6 @@
 import json
 import logging
+from collections import OrderedDict
 
 _logger = logging.getLogger("StdDaqRedisStorage")
 
@@ -116,9 +117,12 @@ class StdDaqRedisStorage(object):
         self.redis.xadd(self.KEY_LOG, {FIELD_DAQ_JSON: json.dumps(acq_status)})
 
     def get_logs(self, n_acquisitions):
-        records = self.redis.xrevrange(self.KEY_LOG, count=n_acquisitions)
-        logs = [json.loads(x[1][FIELD_DAQ_JSON]) for x in records]
-        return logs
+        logs_bytes = self.redis.xrevrange(self.KEY_LOG, count=n_acquisitions)
+        logs_dict = OrderedDict()
+        for log_id, log_data in logs_bytes:
+            logs_dict[log_id] = json.loads(log_data[FIELD_DAQ_JSON])
+
+        return logs_dict
 
     def add_writer_status(self, writer_status):
         self.redis.xadd(self.KEY_STATUS, {FIELD_DAQ_JSON: json.dumps(writer_status)})
