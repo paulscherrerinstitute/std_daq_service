@@ -29,7 +29,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
     logs_logger = None
 
     try:
-        _logger.info(f'Starting Start Stop REST for {config_file} (rest_port={rest_port}).')
+        _logger.info(f'Starting Start Stop REST for file: {config_file} (rest_port={rest_port}).')
 
         with open(config_file, 'r') as input_file:
             daq_config = json.load(input_file)
