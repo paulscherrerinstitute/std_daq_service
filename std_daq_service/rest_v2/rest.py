@@ -3,6 +3,7 @@ from logging import getLogger
 import requests
 from flask import request, jsonify, Response, render_template, send_from_directory
 
+from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import get_parameters_from_write_request, generate_mjpg_image_stream
@@ -29,7 +30,7 @@ _logger = getLogger('rest')
 
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
-                            sim_url_base: str, streamer, user_id: int):
+                            sim_url_base: str, streamer, storage: StdDaqRedisStorage):
 
     @app.route('/')
     def react_app():
@@ -38,6 +39,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
         json_request = request.json
+        user_id = int(storage.get_config()[1]['writer_user_id'])
         output_file, n_images, run_id = get_parameters_from_write_request(json_request, user_id)
         request_logger.info(f'Sync write {n_images} images with run_id {run_id} and file {output_file}')
 
@@ -50,6 +52,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.route(WRITER_WRITE_ASYNC_ENDPOINT, methods=['POST'])
     def write_async_request():
         json_request = request.json
+        user_id = int(storage.get_config()[1]['writer_user_id'])
         output_file, n_images, run_id = get_parameters_from_write_request(json_request, user_id)
         request_logger.info(f'Async write {n_images} images with run_id {run_id} and file {output_file}')
 
