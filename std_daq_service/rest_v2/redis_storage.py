@@ -65,6 +65,9 @@ class StdDaqRedisStorage(object):
     def _get_deployment_key(self, config_id):
         return f'{self.KEY_CONFIG}:{config_id}'
 
+    def _get_report_key(self, log_id):
+        return f'{self.KEY_LOG}:{log_id}'
+
     def get_deployment_status(self):
         config_id, _ = self.get_config()
 
@@ -131,3 +134,13 @@ class StdDaqRedisStorage(object):
             return stat
         else:
             return None
+
+    def add_report(self, log_id, report):
+        _logger.info(f"Adding validation report to log {log_id}.")
+        self.redis.xadd(self._get_report_key(log_id), {FIELD_DAQ_JSON: json.dumps(report)})
+        pass
+
+    def get_reports(self, log_id):
+        reports_bytes = self.redis.xrange(self._get_report_key(log_id))
+        reports = [json.loads(x[1][FIELD_DAQ_JSON]) for x in reports_bytes]
+        return reports
