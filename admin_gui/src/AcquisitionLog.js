@@ -110,7 +110,7 @@ function AcquisitionLog() {
                     <Typography variant="body2">Written images: {acq.stats.n_write_completed}</Typography>
                   </div>
                  }>
-                    <InfoOutlinedIcon fontSize="small"/>
+                    <InfoOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }}/>
                 </Tooltip>
                </TableCell>
                 <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>

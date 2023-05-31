@@ -28,11 +28,11 @@ class DaqRestManager(object):
 
     def get_logs(self, n_logs):
         logs = self.storage.get_logs(n_logs)
-        for log_id, log_data in logs:
+        for log_id, log_data in logs.items():
             reports = self.storage.get_reports(log_id)
             log_data['reports'] = reports
 
-        return logs.items()
+        return list(logs.values())
 
     def get_deployment_status(self):
         return self.storage.get_deployment_status()
