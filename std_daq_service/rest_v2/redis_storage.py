@@ -19,6 +19,7 @@ class StdDaqRedisStorage(object):
         self.KEY_LOG = f'{redis_namespace}:log'
         self.KEY_STAT = f'{redis_namespace}:stat'
         self.KEY_STATUS = f'{redis_namespace}:status'
+        self.KEY_GIF = f'{redis_namespace}:gif'
 
     def get_config(self):
         response = self.redis.xrevrange(self.KEY_CONFIG, count=1)
@@ -68,6 +69,9 @@ class StdDaqRedisStorage(object):
 
     def _get_report_key(self, log_id):
         return f'{self.KEY_LOG}:{log_id}'
+
+    def _get_gif_key(self, log_id):
+        return f'{self.KEY_GIF}:{log_id}'
 
     def get_deployment_status(self):
         config_id, _ = self.get_config()
@@ -142,9 +146,15 @@ class StdDaqRedisStorage(object):
     def add_report(self, log_id, report):
         _logger.info(f"Adding validation report to log {log_id}.")
         self.redis.xadd(self._get_report_key(log_id), {FIELD_DAQ_JSON: json.dumps(report)})
-        pass
 
     def get_reports(self, log_id):
         reports_bytes = self.redis.xrange(self._get_report_key(log_id))
         reports = [json.loads(x[1][FIELD_DAQ_JSON]) for x in reports_bytes]
         return reports
+
+    def add_gif(self, log_id, gif_bytes):
+        self.redis.set(self._get_gif_key(log_id), gif_bytes)
+
+    def get_gif(self, log_id):
+        gif_bytes = self.redis.get(self._get_gif_key(log_id))
+        return gif_bytes

@@ -2,15 +2,41 @@ import argparse
 import logging
 import os
 
+import cv2
 import h5py as h5py
+import numpy as np
 import redis
 import json
+import imageio
+from io import BytesIO
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 
 _logger = logging.getLogger("FileValidator")
 
 REDIS_BLOCK_TIMEOUT = 500
+N_GIF_IMAGES = 5
+
+
+def create_gif(data, n_images):
+    total_images = data.shape[0]
+    selected_indices = np.linspace(0, total_images-1, n_images).astype(int)
+    images = []
+
+    for idx in selected_indices:
+        # Extract and normalize the image
+        image = data[idx][:]
+        image -= np.min(image)
+        image *= (255.0 / np.max(image))
+        image = image.astype(np.uint8)
+
+        # Resize image to 256x256 using OpenCV
+        img_resized = cv2.resize(image, (256, 256))
+        images.append(img_resized)
+
+    byte_object = BytesIO()
+    imageio.mimsave(byte_object, images, 'GIF', duration=1)
+    return byte_object.getvalue()
 
 
 def validate_file(log, user_id, detector_name):
@@ -36,6 +62,8 @@ def validate_file(log, user_id, detector_name):
 
             n_images = data_shape[0]
             image_id_range = [out_f[source_id]['image_id'][0], out_f[source_id]['image_id'][-1]]
+
+            gif_bytes = create_gif(out_f[source_id]['data'], N_GIF_IMAGES)
     finally:
         # Switch back to original process user.
         if user_id > 0:
@@ -46,7 +74,7 @@ def validate_file(log, user_id, detector_name):
         'readable': readable,
         'n_images': n_images,
         'image_id_range': image_id_range
-    }
+    }, gif_bytes
 
 
 def start_validator(config_file, redis_url):
@@ -70,13 +98,15 @@ def start_validator(config_file, redis_url):
 
             last_log_id, status = response[0][0].decode(), json.loads(response[0][1][b'json'])
 
-            report = validate_file(status, writer_user_id, detector_name)
+            report, gif_bytes = validate_file(status, writer_user_id, detector_name)
             _logger.info(f"File {status['info']['output_file']} validated: {report}.")
 
             storage.add_report(last_log_id, {
                 'report_type': 'file_validator',
                 'report': report
             })
+
+            storage.add_gif(last_log_id, gif_bytes)
 
         except KeyboardInterrupt:
             break
