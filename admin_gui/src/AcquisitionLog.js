@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Chip, Alert, Tooltip
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Chip, Alert, Tooltip,
+    Modal, Box
 } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import Button from "@mui/material/Button";
+
 
 
 function AcquisitionLog() {
   const [acqs, setAcqs] = useState([]);
   const [restError, setRestError] = useState(false);
   const [restErrorText, setRestErrorText] = useState("Unknown")
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,7 +80,12 @@ function AcquisitionLog() {
     }
   }
 
+  const onClose = () => {
+    setIsModalOpen(false);
+  }
+
   return (
+      <div>
     <Paper sx={{ p: 2 }} elevation={3}>
       <Typography variant="h6" gutterBottom>Acquisition Log</Typography>
       {restError ? (
@@ -86,7 +96,7 @@ function AcquisitionLog() {
           <TableHead>
             <TableRow>
               {/*<TableCell style={{ width: '50px' }}></TableCell>*/}
-              <TableCell style={{ width: '50px' }}>Actions</TableCell>
+              <TableCell style={{ width: '60px' }}>Actions</TableCell>
               <TableCell style={{ width: '140px' }}>Stop time</TableCell>
               <TableCell style={{ width: '50px' }}>Images</TableCell>
               <TableCell style={{ width: '50px' }}>Duration</TableCell>
@@ -111,7 +121,12 @@ function AcquisitionLog() {
                   </div>
                  }>
                     <InfoOutlinedIcon fontSize="small" sx={{ color: 'primary.main' }}/>
-                </Tooltip>
+                 </Tooltip>
+                 <Tooltip title={<Typography variant="body2">
+                   {acq.reports.length > 0 ? "Show details" : "Show details"}</Typography>}>
+                   <AssessmentIcon fontSize="small" onClick={() => setIsModalOpen(true)} sx={{ cursor: 'pointer',
+                     color: acq.reports.length > 0 ? 'success.main': '' }} />
+                 </Tooltip>
                </TableCell>
                 <TableCell style={{ width: '140px' }}>{formatTimestamp(acq.stats.stop_time)}</TableCell>
                 <TableCell align="right" style={{ width: '50px' }}>{acq.info.n_images}</TableCell>
@@ -126,6 +141,35 @@ function AcquisitionLog() {
       </TableContainer>
           )}
     </Paper>
+
+    <Modal open={isModalOpen} onClose={onClose}>
+          <Box
+            sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper',
+              boxShadow: 24, p: 4, maxWidth: '90%', maxHeight: '90%', overflow: 'auto', width: '480px' }} >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h5" component="h2">Acquisition details</Typography>
+            </Box>
+            <Paper sx={{ p: 2 }} elevation={3}>
+              <Typography variant="h6" gutterBottom>Status</Typography>
+            </Paper>
+            <Paper sx={{ p: 2 }} elevation={3}>
+              <Typography variant="h6" gutterBottom>Request info</Typography>
+            </Paper>
+            <Paper sx={{ p: 2 }} elevation={3}>
+              <Typography variant="h6" gutterBottom>Reports</Typography>
+            </Paper>
+            <Paper sx={{ p: 2 }} elevation={3}>
+              <Typography variant="h6" gutterBottom>Stats</Typography>
+            </Paper>
+
+            <Box mt={4}>
+              <Button variant="contained" color="primary" onClick={onClose} sx={{ ml: 2 }} > Close </Button>
+            </Box>
+          </Box>
+        </Modal>
+
+
+        </div>
   )
 }
 
