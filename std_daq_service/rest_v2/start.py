@@ -66,7 +66,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
-        status_logger = StatusLogger(ctx=ctx,storage=storage, writer_status_url=out_status_address)
+        status_logger = StatusLogger(ctx=ctx, storage=storage, writer_status_url=out_status_address)
         stats_logger = StatsLogger(ctx, storage=storage, image_stream_url=image_metadata_address,
                                    writer_status_url=out_status_address)
         logs_logger = LogsLogger(ctx, writer_driver.out_status_address, storage)
