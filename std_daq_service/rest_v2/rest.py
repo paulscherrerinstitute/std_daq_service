@@ -36,10 +36,6 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     def react_app():
         return send_from_directory('static', 'index.html')
 
-    @app.route('/viewer')
-    def h5web_app():
-        return send_from_directory('static_file', 'index.html')
-
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
         json_request = request.json

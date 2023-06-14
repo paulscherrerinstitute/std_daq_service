@@ -12,6 +12,7 @@ import LiveStream from "./LiveStream";
 import AcquisitionLog from "./AcquisitionLog";
 import DaqDeployment from "./DaqDeployment";
 import SimulatorControl from "./SimulatorControl";
+import FileViewer from "./FileViewer";
 
 function App() {
   const [state, setState] = useState({
@@ -59,6 +60,7 @@ function App() {
         <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
       <Grid item xs={6}>
+        <FileViewer></FileViewer>
         <LiveStream state={state.config.config} />
         <AcquisitionLog />
       </Grid>
