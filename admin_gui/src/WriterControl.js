@@ -14,7 +14,8 @@ import {
     TextField,
     Button,
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-    InputAdornment, IconButton
+    InputAdornment, IconButton,
+    Checkbox, FormControlLabel
 } from '@mui/material';
 
 function WriterControl(props) {
@@ -25,6 +26,7 @@ function WriterControl(props) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
   const [filename_example, setFilenameExample] = React.useState(generate_filename(filename_suffix));
+  const [disablePrefix, setDisablePrefix] = React.useState(false);
 
   let status_chip;
 
@@ -61,7 +63,10 @@ function WriterControl(props) {
   }
 
   function generate_filename(suffix) {
-    const prefix = generate_filename_prefix()
+    let prefix = generate_filename_prefix();
+    if (disablePrefix) {
+        prefix = "";
+    }     
     return `${prefix}_${suffix}.h5`;
   }
 
@@ -194,6 +199,16 @@ function WriterControl(props) {
                         </IconButton>
                     </InputAdornment>),}}
               />
+      <FormControlLabel
+                  control={
+                                    <Checkbox
+                                      checked={disablePrefix}
+                                      onChange={(event) => setDisablePrefix(event.target.checked)}
+                                      color="primary"
+                                    />
+                                  }
+                  label="Disable filename timestemp prefix"
+                />
             </Grid>
           </Grid>
         </AccordionDetails>
