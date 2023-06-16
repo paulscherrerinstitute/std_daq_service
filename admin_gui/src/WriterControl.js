@@ -1,5 +1,6 @@
 import React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft'; 
 import axios from 'axios';
 
 import {
@@ -12,7 +13,8 @@ import {
   AccordionSummary,
     TextField,
     Button,
-    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+    InputAdornment, IconButton
 } from '@mui/material';
 
 function WriterControl(props) {
@@ -102,6 +104,7 @@ function WriterControl(props) {
     setNumImages(event.target.value);
   };
 
+
   const handleFilenameSuffixChange = (event) => {
     setFilenameSuffix(event.target.value);
     setFilenameExample(generate_filename(event.target.value));
@@ -110,6 +113,19 @@ function WriterControl(props) {
   const handleOutputFolderChange = (event) => {
     setOutputFolder(event.target.value);
   };
+
+  const handleCopyOutputFolder = () => {
+  if (props.state.acquisition && props.state.acquisition.info) {
+      if (props.state.acquisition.info.output_file) {
+            const fullPath = props.state.acquisition.info.output_file;
+            const lastSlashIndex = fullPath.lastIndexOf('/');
+            const folderPath = fullPath.substring(0, lastSlashIndex + 1);
+
+            setOutputFolder(folderPath);
+            return;
+          };
+        };
+    };
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
@@ -170,6 +186,13 @@ function WriterControl(props) {
                 value={outputFolder}
                 onChange={handleOutputFolderChange}
                 fullWidth
+                InputProps={{ 
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleCopyOutputFolder} title="Load last used output folder">
+                            <RotateLeftIcon />
+                        </IconButton>
+                    </InputAdornment>),}}
               />
             </Grid>
           </Grid>
