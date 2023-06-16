@@ -76,9 +76,9 @@ class MJpegLiveStream(object):
 
                 shape, dtype = meta['shape'], meta['type']
                 metadata_text = f'{shape} ({dtype})'
-                metadata_text_size = cv2.getTextSize(metadata_text, font, 0.5, 1)
-                cv2.putText(image, metadata_text, (10, STREAM_HEIGHT - metadata_text_size[1] - 20),
-                            font, 0.5, text_color, 1)
+                metadata_text_size = cv2.getTextSize(metadata_text, font, 1, 2)[0]
+                cv2.putText(image, metadata_text, (10, metadata_text_size[1] + 20),
+                            font, 1, text_color, 2)
 
             else:
                 text = 'No data'
