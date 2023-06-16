@@ -15,7 +15,7 @@ import {
     Button,
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
     InputAdornment, IconButton,
-    Checkbox, FormControlLabel
+    Switch, FormControlLabel
 } from '@mui/material';
 
 function WriterControl(props) {
@@ -26,7 +26,7 @@ function WriterControl(props) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
   const [filename_example, setFilenameExample] = React.useState(generate_filename(filename_suffix));
-  const [disablePrefix, setDisablePrefix] = React.useState(false);
+  const [enablePrefix, setEnablePrefix] = React.useState(true);
 
   let status_chip;
 
@@ -58,16 +58,16 @@ function WriterControl(props) {
     const minute = now.getMinutes().toString().padStart(2, '0');
     const second = now.getSeconds().toString().padStart(2, '0');
     const millisecond = now.getMilliseconds().toString().padStart(3, '0');
-    const timestamp = `${year}${month}${day}_${hour}${minute}${second}.${millisecond}`;
+    const timestamp = `${year}${month}${day}_${hour}${minute}${second}.${millisecond}_`;
     return timestamp;
   }
 
   function generate_filename(suffix) {
-    let prefix = generate_filename_prefix();
-    if (disablePrefix) {
-        prefix = "";
+    let prefix = "";   
+      if (enablePrefix) {
+        prefix = generate_filename_prefix();
     }     
-    return `${prefix}_${suffix}.h5`;
+    return `${prefix}${suffix}.h5`;
   }
 
   const handleStartClick = () => {
@@ -130,6 +130,12 @@ function WriterControl(props) {
             return;
           };
         };
+    };
+
+    const handlePrefixToggle = (event) => {
+            const newEnablePrefix = event.target.checked;
+            setEnablePrefix(newEnablePrefix);
+            setFilenameExample(generate_filename(filename_suffix));
     };
 
   return (
@@ -201,13 +207,13 @@ function WriterControl(props) {
               />
       <FormControlLabel
                   control={
-                                    <Checkbox
-                                      checked={disablePrefix}
-                                      onChange={(event) => setDisablePrefix(event.target.checked)}
+                                    <Switch
+                                      checked={enablePrefix}
+                                      onChange={handlePrefixToggle}
                                       color="primary"
                                     />
                                   }
-                  label="Disable filename timestemp prefix"
+                  label="Prefix filename with timestamp"
                 />
             </Grid>
           </Grid>
