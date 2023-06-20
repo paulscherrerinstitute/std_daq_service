@@ -1,6 +1,11 @@
+import logging
 import os
 import re
+import stat
 from collections import OrderedDict
+from time import time_ns
+
+from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 import cv2
 import numpy as np
@@ -8,25 +13,44 @@ import zmq
 
 DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
                      'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
-                     'module_positions']
+                     'writer_user_id', 'module_positions']
 
-DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port']
+DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
+                         'writer_user_id']
 
 
-def get_parameters_from_write_request(json_request):
+_logger = logging.getLogger("utils")
+
+
+def get_image_n_bytes(image_meta: ImageMetadata):
+    dtype_to_bytes = {
+        'uint8': 1, 'int8': 1,
+        'uint16': 2, 'int16': 2,
+        'uint32': 4, 'int32': 4, 'float32': 24,
+        'uint64': 8, 'int64': 8, 'float64': 8
+    }
+
+    image_n_bytes = image_meta.width * image_meta.height * (dtype_to_bytes[ImageMetadataDtype.Name(image_meta.dtype)])
+    return image_n_bytes
+
+
+def get_parameters_from_write_request(json_request, user_id):
     if 'output_file' not in json_request:
         raise RuntimeError(f'Mandatory field missing: output_file')
 
     output_file = json_request.get('output_file')
-    validate_output_file(output_file)
+    validate_output_file(output_file, user_id)
 
     n_images_str = json_request.get('n_images')
     n_images = validate_n_images(n_images_str)
 
-    return output_file, n_images
+    # Needs to be in nanoseconds because run_id is uint64.
+    run_id = json_request.get('run_id', time_ns())
+
+    return output_file, n_images, run_id
 
 
-def validate_output_file(output_file):
+def validate_output_file(output_file, user_id):
     if output_file is None:
         raise RuntimeError(f'Mandatory field missing: output_file')
 
@@ -37,9 +61,22 @@ def validate_output_file(output_file):
     if not re.compile(path_validator).match(output_file):
         raise RuntimeError(f'Invalid output_file={output_file}. Must be a valid posix path.')
 
-    path_folder = os.path.dirname(output_file)
-    if not os.path.exists(path_folder):
-        raise RuntimeError(f'Output file folder {path_folder} does not exist. Please create it first.')
+    try:
+        # Set user_id for checking the directory permissions.
+        if user_id > 0:
+            _logger.info(f"Setting effective user_id to {user_id}.")
+            os.seteuid(user_id)
+        else:
+            _logger.info(f"Using process user_id.")
+
+        path_folder = os.path.dirname(output_file)
+        if not os.path.exists(path_folder):
+            raise RuntimeError(f'Output file folder {path_folder} does not exist. Please create it first.')
+    finally:
+        # In case you set the user_id, revert back to original.
+        if user_id > 0:
+            _logger.info(f"Returning effective user_id to {os.getuid()}.")
+            os.seteuid(os.getuid())
 
 
 def validate_n_images(n_images_str):
@@ -111,3 +148,12 @@ def generate_mjpg_image_stream(ctx, image_stream_url):
 
         # yield the frame for the MJPG stream
         yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n'
+
+
+def set_ipc_rights(ipc_path):
+    if ipc_path.startswith("ipc://"):
+        filename = ipc_path[6:]
+        current_p = os.stat(filename).st_mode
+        additional_p = stat.S_IWGRP | stat.S_IWOTH
+        _logger.info(f"Relax permission on {filename}.")
+        os.chmod(filename, current_p | additional_p)

@@ -1,7 +1,7 @@
 # Epics writer
 This service reads from Redis and saves the Epics PVs into H5 format. It listens on RabbitMQ (broker) for user requests.
 
-The buffering of Epics data to Redis is implemented in the [Epics buffer](../epics_buffer/README.md) service.
+The buffering of Epics data to Redis is implemented in the [Epics buffer](../buffer/README.md) service.
 
 ## Requirements
 This service needs:
@@ -24,12 +24,12 @@ Start the service by running the docker container:
 
 ```bash
 docker run --net=host --rm  \
-    --name debug.epics_writer \
-    -e SERVICE_NAME=debug.epics_writer \
+    --name debug.writer \
+    -e SERVICE_NAME=debug.writer \
     -e BROKER_HOST=127.0.0.1 \
     -e REDIS_HOST=127.0.0.1 \
     paulscherrerinstitute/std-daq-service \
-    epics_writer
+    writer
 ```
 
 Please adjust the **SERVICE\_NAME** (also docker --name flag; the docker container name should match the SERVICE_NAME).
@@ -39,7 +39,7 @@ Please adjust the **SERVICE\_NAME** (also docker --name flag; the docker contain
 You can monitor the performance metrics of the service by running (in the host machine, while the buffer container 
 is active):
 ```bash
-docker exec -it debug.epics_writer tail -f /var/log/std-daq/perf.log
+docker exec -it debug.writer tail -f /var/log/std-daq/perf.log
 ```
 
 The output is in InfluxDB line protocol. This command can also be used to periodically read the metrics and 

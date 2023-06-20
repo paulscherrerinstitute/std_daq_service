@@ -26,7 +26,7 @@ function App() {
     },
     config: { config:{
       detector_type: 'eiger', detector_name: '...', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
-      n_modules: 0, start_udp_port: 0 }}
+      n_modules: 0, writer_user_id: 0, start_udp_port: 0, module_positions: {} }}
   });
 
 

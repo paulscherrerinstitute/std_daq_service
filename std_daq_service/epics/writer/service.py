@@ -1,8 +1,8 @@
 from logging import getLogger
 from redis import Redis
 
-from std_daq_service.epics_buffer.buffer import PULSE_ID_NAME_REVERSE
-from std_daq_service.epics_writer.writer import EpicsH5Writer
+from std_daq_service.epics.buffer.buffer import PULSE_ID_NAME_REVERSE
+from std_daq_service.epics.writer.writer import EpicsH5Writer
 
 _logger = getLogger("EpicsWriterService")
 

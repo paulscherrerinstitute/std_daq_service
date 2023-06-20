@@ -5,5 +5,7 @@
   "bit_depth": 16,
   "image_pixel_height": 2016,
   "image_pixel_width": 2016,
-  "start_udp_port": 2000
+  "start_udp_port": 2000,
+  "writer_user_id": 0,
+  "module_positions": {}
 }

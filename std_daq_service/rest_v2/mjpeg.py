@@ -13,21 +13,13 @@ from zmq import Again
 app = Flask(__name__)
 CORS(app)
 
-WIDTH = 800
-HEIGHT = 600
+STREAM_WIDTH = 800
+STREAM_HEIGHT = 600
 # milliseconds
 RECV_TIMEOUT = 500
-
-_logger = logging.getLogger('MJpegLiveStream')
 LIVE_STREAM_URL = 'tcp://localhost:20000'
 
-@app.route('/')
-def index():
-    return "Welcome to the MJPG Stream Demo!"
-
-@app.route('/live')
-def live_stream():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+_logger = logging.getLogger('MJpegLiveStream')
 
 
 class MJpegLiveStream(object):
@@ -42,8 +34,10 @@ class MJpegLiveStream(object):
         receiver.setsockopt(zmq.RCVTIMEO, RECV_TIMEOUT)
 
         full_circle = True
+        meta = None
 
         _logger.info("Live stream started.")
+        n_timeouts = 0
         while True:
             try:
                 raw_meta, raw_data = receiver.recv_multipart()
@@ -60,11 +54,17 @@ class MJpegLiveStream(object):
                 frame = ((new_frame - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
                 image_id = meta["frame"]
 
+                n_timeouts = 0
+
             except Again:
-                frame = np.zeros(shape=(HEIGHT, WIDTH), dtype=np.uint8)
+                if n_timeouts < 3:
+                    n_timeouts += 1
+                    continue
+
+                frame = np.zeros(shape=(STREAM_HEIGHT, STREAM_WIDTH), dtype=np.uint8)
                 image_id = None
 
-            image = cv2.resize(frame, (WIDTH, HEIGHT))
+            image = cv2.resize(frame, (STREAM_WIDTH, STREAM_HEIGHT))
             # apply a color scheme to the grayscale image
             image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
 
@@ -73,15 +73,22 @@ class MJpegLiveStream(object):
             if image_id is not None:
                 text = 'Frame {}'.format(image_id)
                 text_color = (0, 255, 0)
+
+                shape, dtype = meta['shape'], meta['type']
+                metadata_text = f'{shape} ({dtype})'
+                metadata_text_size = cv2.getTextSize(metadata_text, font, 1, 2)[0]
+                cv2.putText(image, metadata_text, (10, metadata_text_size[1] + 20),
+                            font, 1, text_color, 2)
+
             else:
                 text = 'No data'
                 text_color = (0, 0, 255)
                 # Display circle next to text to show connection to the mjpeg stream.
-                image = cv2.circle(image, (160, HEIGHT - 40), 8, (0, 0, 255), -1 if full_circle else 2)
+                image = cv2.circle(image, (160, STREAM_HEIGHT - 40), 8, (0, 0, 255), -1 if full_circle else 2)
                 full_circle = not full_circle
 
             text_size = cv2.getTextSize(text, font, 1, 2)[0]
-            cv2.putText(image, text, (10, HEIGHT - text_size[1] - 10), font, 1, text_color, 2)
+            cv2.putText(image, text, (10, STREAM_HEIGHT - text_size[1] - 10), font, 1, text_color, 2)
 
             # encode the color image as JPEG
             _, buffer = cv2.imencode('.jpg', image)
@@ -91,20 +98,27 @@ class MJpegLiveStream(object):
             yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n'
 
 
+@app.route('/')
+def live_stream():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 def generate_frames():
     context = zmq.Context()
     stream = MJpegLiveStream(context, LIVE_STREAM_URL)
 
-    yield stream.generate_frames()
+    return stream.generate_frames()
 
 
 def main():
     parser = argparse.ArgumentParser(description='MJPEG converter')
-    parser.add_argument("live_stream_address", type=str, help="Path to JSON config file.")
-    parser.add_argument("--rest_port", type=int, help="Port for REST api", default=5001)
+    parser.add_argument("live_stream_address", type=str, help="Address of std-daq live stream.")
+    parser.add_argument("--rest_port", type=int, help="Port for serving the stream", default=5001)
 
     args = parser.parse_args()
     rest_port = args.rest_port
+
+    global LIVE_STREAM_URL
     LIVE_STREAM_URL = args.live_stream_address
 
     logging.basicConfig(level=logging.INFO)

@@ -1,5 +1,6 @@
 import React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft'; 
 import axios from 'axios';
 
 import {
@@ -12,7 +13,9 @@ import {
   AccordionSummary,
     TextField,
     Button,
-    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+    InputAdornment, IconButton,
+    Switch, FormControlLabel
 } from '@mui/material';
 
 function WriterControl(props) {
@@ -22,7 +25,8 @@ function WriterControl(props) {
   const [open, setOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
-  const [filename_example, setFilenameExample] = React.useState(generate_filename(generate_run_id(), filename_suffix));
+  const [filename_example, setFilenameExample] = React.useState(generate_filename(filename_suffix));
+  const [enablePrefix, setEnablePrefix] = React.useState(true);
 
   let status_chip;
 
@@ -41,10 +45,11 @@ function WriterControl(props) {
       break;
     default:
       status_chip = <Chip variant="outlined" label="..." color="error" />;
+      stop_button_disabled = false;
       break;
   };
 
-  function generate_run_id() {
+  function generate_filename_prefix() {
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -53,21 +58,23 @@ function WriterControl(props) {
     const minute = now.getMinutes().toString().padStart(2, '0');
     const second = now.getSeconds().toString().padStart(2, '0');
     const millisecond = now.getMilliseconds().toString().padStart(3, '0');
-    const timestamp = `${year}${month}${day}_${hour}${minute}${second}.${millisecond}`;
+    const timestamp = `${year}${month}${day}_${hour}${minute}${second}.${millisecond}_`;
     return timestamp;
   }
 
-  function generate_filename(run_id, suffix) {
-    return `${run_id}_${suffix}.h5`;
+  function generate_filename(suffix) {
+    let prefix = "";   
+      if (enablePrefix) {
+        prefix = generate_filename_prefix();
+    }     
+    return `${prefix}${suffix}.h5`;
   }
 
   const handleStartClick = () => {
-    const run_id = generate_run_id();
-
     axios.post('/writer/write_async', {
       n_images: numImages,
-      run_id: run_id,
-      output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' + generate_filename(run_id, filename_suffix),
+      output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' +
+          generate_filename(filename_suffix),
     }).then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
@@ -102,14 +109,34 @@ function WriterControl(props) {
     setNumImages(event.target.value);
   };
 
+
   const handleFilenameSuffixChange = (event) => {
     setFilenameSuffix(event.target.value);
-    setFilenameExample(generate_filename(generate_run_id(), event.target.value));
+    setFilenameExample(generate_filename(event.target.value));
   }
 
   const handleOutputFolderChange = (event) => {
     setOutputFolder(event.target.value);
   };
+
+  const handleCopyOutputFolder = () => {
+  if (props.state.acquisition && props.state.acquisition.info) {
+      if (props.state.acquisition.info.output_file) {
+            const fullPath = props.state.acquisition.info.output_file;
+            const lastSlashIndex = fullPath.lastIndexOf('/');
+            const folderPath = fullPath.substring(0, lastSlashIndex + 1);
+
+            setOutputFolder(folderPath);
+            return;
+          };
+        };
+    };
+
+    const handlePrefixToggle = (event) => {
+            const newEnablePrefix = event.target.checked;
+            setEnablePrefix(newEnablePrefix);
+            setFilenameExample(generate_filename(filename_suffix));
+    };
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
@@ -170,7 +197,24 @@ function WriterControl(props) {
                 value={outputFolder}
                 onChange={handleOutputFolderChange}
                 fullWidth
+                InputProps={{ 
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleCopyOutputFolder} title="Load last used output folder">
+                            <RotateLeftIcon />
+                        </IconButton>
+                    </InputAdornment>),}}
               />
+      <FormControlLabel
+                  control={
+                                    <Switch
+                                      checked={enablePrefix}
+                                      onChange={handlePrefixToggle}
+                                      color="primary"
+                                    />
+                                  }
+                  label="Prefix filename with timestamp"
+                />
             </Grid>
           </Grid>
         </AccordionDetails>

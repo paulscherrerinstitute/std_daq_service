@@ -2,7 +2,7 @@
 This service connects to Epics channels and stores their values in a Redis database.
 In addition it allows for pulse_id to timestamp mapping by saving a pulse_id channel (this is not mandatory).
 
-The retrieval and writing of Epics channels is implemented in the [Epics writer](../epics_writer/README.md) service.
+The retrieval and writing of Epics channels is implemented in the [Epics writer](../writer/README.md) service.
 
 ## Requirements 
 To run this service you will need:
@@ -40,13 +40,13 @@ Start the service by running the docker container:
 
 ```bash
 docker run --net=host --rm  \
-    --name debug.epics_buffer \
-    -e SERVICE_NAME=debug.epics_buffer \
+    --name debug.buffer \
+    -e SERVICE_NAME=debug.buffer \
     -e REDIS_HOST=127.0.0.1 \
     -e EPICS_CA_ADDR_LIST=sf-daq-cagw.psi.ch:5062 \
-    -v $(pwd)/tests/redis_configs/debug.epics_buffer.json:/std_daq_service/config.json \
+    -v $(pwd)/tests/redis_configs/debug.buffer.json:/std_daq_service/config.json \
     paulscherrerinstitute/std-daq-service \
-    epics_buffer
+    buffer
 ```
 
 Please adjust the **SERVICE\_NAME** (also docker --name flag; the docker container name should match the SERVICE_NAME) 
@@ -57,7 +57,7 @@ to the correct name and config mount (-v flag) to point to the correct file.
 You can monitor the performance metrics of the service by running (in the host machine, while the buffer container 
 is active):
 ```bash
-docker exec -it debug.epics_buffer tail -f /var/log/std-daq/perf.log
+docker exec -it debug.buffer tail -f /var/log/std-daq/perf.log
 ```
 
 The output is in InfluxDB line protocol. This command can also be used to periodically read the metrics and 

@@ -8,13 +8,15 @@ from time import time, sleep, time_ns
 import logging
 import zmq
 
+from std_daq_service.rest_v2.utils import set_ipc_rights
+
 _logger = logging.getLogger(__name__)
 
 STATS_INTERVAL_TIME = 0.5
 WRITER_STATUS_TIMEOUT_MS = 500
 # In seconds.
 RECV_TIMEOUT_MS = 200
-SYNC_WINDOW_SIZE = 2
+SYNC_WINDOW_SIZE = 20
 N_LOGS = 50
 
 WRITER_STATUS_POLL_INTERVAL = 0.1
@@ -30,10 +32,9 @@ class WriterStatusTracker(object):
         self.stop_event = Event()
         self.rate_limiter = None
 
-        self.status = {'state': 'READY', 'acquisition': {'state': "FINISHED",
-                                                         'info': {'n_images': 0},
-                                                         'stats': dict(self.EMPTY_STATS)}}
+        self.status = None
         self.status_lock = Lock()
+        self.set_unknown_status()
 
         self.last_status_send_time = 0
         self._current_run_id = None
@@ -41,12 +42,20 @@ class WriterStatusTracker(object):
         self.status_receiver = self.ctx.socket(zmq.PULL)
         self.status_receiver.RCVTIMEO = WRITER_STATUS_TIMEOUT_MS
         self.status_receiver.bind(in_status_address)
+        set_ipc_rights(in_status_address)
 
         self.status_sender = self.ctx.socket(zmq.PUB)
         self.status_sender.bind(out_status_address)
 
         self._status_thread = Thread(target=self._status_rcv_thread)
         self._status_thread.start()
+
+    def set_unknown_status(self):
+        with self.status_lock:
+            self.status = {'state': 'UNKNOWN', 'acquisition': {'state': "FINISHED",
+                                                               'message': "",
+                                                               'info': {'n_images': 0},
+                                                               'stats': dict(self.EMPTY_STATS)}}
 
     def get_status(self):
         with self.status_lock:
@@ -102,6 +111,7 @@ class WriterStatusTracker(object):
         with self.status_lock:
             self.status = {'state': "WRITING",
                            'acquisition': {'state': 'WAITING_IMAGES',
+                                           'message': '',
                                            'stats': dict(self.EMPTY_STATS),
                                            'info': {'output_file': status.run_info.output_file,
                                                     'n_images': status.run_info.n_images,
@@ -120,6 +130,10 @@ class WriterStatusTracker(object):
             self.status['state'] = 'READY'
             self.status['acquisition']['state'] = 'FINISHED'
             self.status['acquisition']['stats']['stop_time'] = time()
+            self.status['acquisition']['message'] = status.error_message
+            if status.error_message.startswith("ERROR:"):
+                self.status['acquisition']['stats']['start_time'] = self.status['acquisition']['stats']['stop_time']
+                self.status['acquisition']['state'] = 'FAILED'
 
         self._current_run_id = None
 
@@ -176,6 +190,7 @@ class WriterDriver(object):
         # Send commands to writer instances.
         self.writer_command_sender = self.ctx.socket(zmq.PUB)
         self.writer_command_sender.bind(command_address)
+        set_ipc_rights(command_address)
 
         # Receive the image metadata stream from the detector.
         self.image_metadata_receiver = self.ctx.socket(zmq.SUB)
@@ -199,13 +214,21 @@ class WriterDriver(object):
 
         self.user_command_sender.send_json({'COMMAND': self.START_COMMAND, 'run_info': run_info or {}})
 
-        self.wait_for_state("WRITING")
+        try:
+            self.wait_for_state("WRITING")
+        except RuntimeError:
+            self.status.set_unknown_status()
+            raise
 
     def stop(self):
         _logger.info(f"Stop acquisition requested.")
         self.user_command_sender.send_json({'COMMAND': self.STOP_COMMAND})
 
-        self.wait_for_state('READY')
+        try:
+            self.wait_for_state("READY")
+        except RuntimeError:
+            self.status.set_unknown_status()
+            raise
 
     def close(self):
         _logger.info(f'Closing writer driver.')
@@ -303,5 +326,7 @@ class WriterDriver(object):
             status = self.get_status()
             if status['state'] == target_state:
                 return
+            if status['acquisition']['message'].startswith("ERROR:"):
+                raise ValueError(status['acquisition']['message'])
         else:
-            raise RuntimeError(f"Cannot reach {target_state} state. The writer needs to be restarted.")
+            raise RuntimeError(f"Cannot reach {target_state}. Writer needs to be restarted.")

@@ -1,6 +1,7 @@
-flask
-opencv-python
 numpy
+flask
+flask-cors
+opencv-python
 pyzmq
 setuptools
 requests
