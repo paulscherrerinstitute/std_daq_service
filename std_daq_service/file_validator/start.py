@@ -27,8 +27,8 @@ def create_gif(data, n_images):
         # Extract and normalize the image
         image = data[idx][:]
         image -= np.min(image)
-        image *= (255.0 / np.max(image))
-        image = image.astype(np.uint8)
+        scaled_image = image * (255.0 / np.max(image))
+        image = scaled_image.astype(np.uint8, casting='unsafe')
 
         # Resize image to 256x256 using OpenCV
         img_resized = cv2.resize(image, (256, 256))
@@ -61,7 +61,7 @@ def validate_file(log, user_id, detector_name):
             data_shape = out_f[source_id]['data'].shape
 
             n_images = data_shape[0]
-            image_id_range = [out_f[source_id]['image_id'][0], out_f[source_id]['image_id'][-1]]
+            image_id_range = [int(out_f[source_id]['image_id'][0]), int(out_f[source_id]['image_id'][-1])]
 
             gif_bytes = create_gif(out_f[source_id]['data'], N_GIF_IMAGES)
     finally:
@@ -72,7 +72,7 @@ def validate_file(log, user_id, detector_name):
 
     return {
         'readable': readable,
-        'n_images': n_images,
+        'n_images': int(n_images),
         'image_id_range': image_id_range
     }, gif_bytes
 
@@ -92,11 +92,11 @@ def start_validator(config_file, redis_url):
     last_log_id = '$'
     while True:
         try:
-            response = redis.xread({"daq:log": last_log_id}, block=REDIS_BLOCK_TIMEOUT)
+            response = redis_client.xread({"daq:log": last_log_id}, block=REDIS_BLOCK_TIMEOUT)
             if not response:
                 continue
-
-            last_log_id, status = response[0][0].decode(), json.loads(response[0][1][b'json'])
+            _, response_data = response[0]
+            last_log_id, status = response_data[0][0].decode(), json.loads(response_data[0][1][b'json'])
 
             report, gif_bytes = validate_file(status, writer_user_id, detector_name)
             _logger.info(f"File {status['info']['output_file']} validated: {report}.")

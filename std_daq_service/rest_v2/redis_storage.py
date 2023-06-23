@@ -144,6 +144,7 @@ class StdDaqRedisStorage(object):
             return None
 
     def add_report(self, log_id, report):
+        print(log_id, report)
         _logger.info(f"Adding validation report to log {log_id}.")
         self.redis.xadd(self._get_report_key(log_id), {FIELD_DAQ_JSON: json.dumps(report)})
 

@@ -25,8 +25,8 @@ function WriterControl(props) {
   const [open, setOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
-  const [filename_example, setFilenameExample] = React.useState(generate_filename(filename_suffix));
   const [enablePrefix, setEnablePrefix] = React.useState(true);
+  const [filename_example, setFilenameExample] = React.useState(generate_filename(enablePrefix, filename_suffix));
 
   let status_chip;
 
@@ -62,9 +62,9 @@ function WriterControl(props) {
     return timestamp;
   }
 
-  function generate_filename(suffix) {
+  function generate_filename(use_prefix, suffix) {
     let prefix = "";   
-      if (enablePrefix) {
+      if (use_prefix) {
         prefix = generate_filename_prefix();
     }     
     return `${prefix}${suffix}.h5`;
@@ -74,7 +74,7 @@ function WriterControl(props) {
     axios.post('/writer/write_async', {
       n_images: numImages,
       output_file: (outputFolder.endsWith("/") ? outputFolder.slice(0, -1) : outputFolder) + '/' +
-          generate_filename(filename_suffix),
+          generate_filename(enablePrefix, filename_suffix),
     }).then(response => {
         if (response.data.status === "error") {
           setErrorMessage(response.data.message);
@@ -112,7 +112,7 @@ function WriterControl(props) {
 
   const handleFilenameSuffixChange = (event) => {
     setFilenameSuffix(event.target.value);
-    setFilenameExample(generate_filename(event.target.value));
+    setFilenameExample(generate_filename(enablePrefix, event.target.value));
   }
 
   const handleOutputFolderChange = (event) => {
@@ -135,7 +135,7 @@ function WriterControl(props) {
     const handlePrefixToggle = (event) => {
             const newEnablePrefix = event.target.checked;
             setEnablePrefix(newEnablePrefix);
-            setFilenameExample(generate_filename(filename_suffix));
+            setFilenameExample(generate_filename(newEnablePrefix, filename_suffix));
     };
 
   return (
