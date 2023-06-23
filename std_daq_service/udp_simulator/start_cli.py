@@ -1,9 +1,7 @@
 import argparse
-
 import json
 import logging
 
-from std_daq_service.udp_simulator.gigafrost import GFUdpPacketGenerator
 from std_daq_service.udp_simulator.udp_stream import generate_udp_stream
 from std_daq_service.udp_simulator.util import get_detector_generator
 
@@ -30,7 +28,11 @@ def main():
     detector_type = config['detector_type']
     image_height = config['image_pixel_height']
     image_width = config['image_pixel_width']
-    generator = get_detector_generator(detector_type, image_height, image_width, image_filename=image_filename)
+    bit_depth = config['bit_depth']
+    n_modules = config['n_modules']
+    modules_info = config.get('submodule_info', None)
+
+    generator = get_detector_generator(detector_type, image_height, image_width, bit_depth, n_modules, modules_info, image_filename=image_filename)
 
     _logger.info(f'Starting simulated {config["detector_type"]} with rep_rate {rep_rate} on {output_ip} '
                  f'with start_udp_port {config["start_udp_port"]} with image_shape {(image_height, image_width)} '
