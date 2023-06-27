@@ -1,10 +1,15 @@
+import os
+
 from setuptools import setup
+
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
+    long_description = readme.read()
 
 setup(
     name='std_daq_service',
     packages=['std_daq_service'],
     install_requires=[
-        'std_buffer',
+        'std-buffer',
         'pyzmq',
         'pcaspy',
         'opencv-python',
@@ -36,4 +41,6 @@ setup(
         std_cli_monitor_cpu=std_daq_service.tools.monitor_cpu:main
         std_cli_move_irq=std_daq_service.tools.move_irq:main
     ''',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
 )
