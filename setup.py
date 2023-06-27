@@ -5,9 +5,12 @@ from setuptools import setup
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     long_description = readme.read()
 
+version = os.getenv('GITHUB_REF', '0.0.0')
+
 setup(
     name='std_daq_service',
     packages=['std_daq_service'],
+    version=version,
     install_requires=[
         'std-buffer',
         'pyzmq',
