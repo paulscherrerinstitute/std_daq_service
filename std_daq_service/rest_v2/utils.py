@@ -5,7 +5,7 @@ import stat
 from collections import OrderedDict
 from time import time_ns
 
-from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
+from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 import cv2
 import numpy as np

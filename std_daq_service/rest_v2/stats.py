@@ -5,7 +5,7 @@ from time import time, sleep
 
 from zmq import Again
 
-from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
+from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 import zmq
 import copy

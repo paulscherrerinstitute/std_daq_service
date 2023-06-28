@@ -1,8 +1,8 @@
 from time import sleep
 
 import zmq
-from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata
-from std_buffer.std_daq.writer_command_pb2 import WriterCommand, CommandType, RunInfo, WriterStatus
+from std_buffer.image_metadata_pb2 import ImageMetadata
+from std_buffer.writer_command_pb2 import WriterCommand, CommandType, RunInfo, WriterStatus
 
 from std_daq_service.rest_v2.utils import set_ipc_rights
 from std_daq_service.writer_driver.utils import get_stream_addresses

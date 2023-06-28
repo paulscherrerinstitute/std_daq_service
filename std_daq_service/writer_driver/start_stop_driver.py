@@ -2,8 +2,8 @@ import copy
 from collections import deque
 from threading import Thread, Event, Lock, Semaphore
 from google.protobuf.json_format import MessageToDict
-from std_buffer.std_daq.image_metadata_pb2 import ImageMetadata
-from std_buffer.std_daq.writer_command_pb2 import WriterCommand, CommandType, RunInfo, WriterStatus
+from std_buffer.image_metadata_pb2 import ImageMetadata
+from std_buffer.writer_command_pb2 import WriterCommand, CommandType, RunInfo, WriterStatus
 from time import time, sleep, time_ns
 import logging
 import zmq
