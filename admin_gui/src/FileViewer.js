@@ -1,51 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { TreeView, TreeItem } from '@mui/lab';
-import { Box } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { Box, Slider, Typography, Paper } from '@mui/material';
 import axios from 'axios';
 
-const FileViewer = () => {
-  const [treeData, setTreeData] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
+const FileViewer = ({ fileId }) => {
+  const [imageIndex, setImageIndex] = useState(0);
+  const [metadata, setMetadata] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/folder-tree')
+    axios.get(`/file/${fileId}`)
       .then(response => {
-        setTreeData(response.data);
+        setMetadata(response.data);
       });
-  }, []);
+  }, [fileId]);
 
-  const handleNodeSelect = (event, nodeId) => {
-    axios.get(`/api/files/${nodeId}`)
-      .then(response => {
-        setSelectedFile(response.data);
-      });
+  const handleSliderChange = (event, newValue) => {
+    setImageIndex(newValue);
   };
 
-  const renderTree = (nodes) => (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
-      {Array.isArray(nodes.children) ? nodes.children.map(node => renderTree(node)) : null}
-    </TreeItem>
-  );
-
   return (
-    <Box display="flex">
-      <Box width="50%">
-        <TreeView
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          onNodeSelect={handleNodeSelect}
-        >
-          {treeData.map(tree => renderTree(tree))}
-        </TreeView>
-      </Box>
-      <Box width="50%">
-        {selectedFile && (
-          <img src={`/api/files/${selectedFile.id}`} alt={selectedFile.name} style={{ width: '100%', height: 'auto' }} />
+    <Paper sx={{ p: 2 }} elevation={3}>
+      <Typography variant="h6" gutterBottom>File viewer</Typography>
+      <Box display="flex" flexDirection="column" alignItems="center">
+        {metadata && (
+          <Box>
+            <Typography variant="body1">Number of images: {metadata.n_images}</Typography>
+            <Typography variant="body1">Image height: {metadata.image_height}</Typography>
+            <Typography variant="body1">Image width: {metadata.image_width}</Typography>
+            <Typography variant="body1">Data type: {metadata.dtype}</Typography>
+          </Box>
         )}
+        <Slider
+          defaultValue={0}
+          step={1}
+          marks
+          min={0}
+          max={metadata ? metadata.n_images : 0}
+          value={imageIndex}
+          onChange={handleSliderChange}
+        />
+        <img src={`/file_view/${fileId}/image/${imageIndex}`} alt={`Image ${imageIndex}`} style={{ width: '100%', height: 'auto' }} />
       </Box>
-    </Box>
+    </Paper>
   );
 };
 
