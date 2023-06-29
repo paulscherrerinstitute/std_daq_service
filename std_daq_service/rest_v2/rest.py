@@ -63,9 +63,9 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(FILE_IMAGE)
     def get_file_image(acquisition_id, i_image):
-        STREAM_WIDTH = 800
-        STREAM_HEIGHT = 600
-        frame = np.zeros(shape=(STREAM_WIDTH, STREAM_HEIGHT), dtype=np.uint8)
+        STREAM_WIDTH = 640
+        STREAM_HEIGHT = 480
+        frame = np.random.randint(low=0, high=256, size=(STREAM_HEIGHT, STREAM_WIDTH), dtype=np.uint8)
         image = cv2.resize(frame, (STREAM_WIDTH, STREAM_HEIGHT))
         # apply a color scheme to the grayscale image
         image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)

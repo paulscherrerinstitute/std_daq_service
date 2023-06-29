@@ -7,6 +7,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import Button from "@mui/material/Button";
+import FileViewer from "./FileViewer";
 
 
 
@@ -15,6 +16,8 @@ function AcquisitionLog() {
   const [restError, setRestError] = useState(false);
   const [restErrorText, setRestErrorText] = useState("Unknown")
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+  const [currentAcquisitionId, setCurrentAcquisitionId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,6 +87,15 @@ function AcquisitionLog() {
     setIsModalOpen(false);
   }
 
+  const openFileViewer = (acquisition_id) => {
+    setCurrentAcquisitionId(acquisition_id);
+    setIsFileViewerOpen(true);
+  }
+
+  const closeFileViewer = () => {
+    setIsFileViewerOpen(false);
+  }
+
   return (
       <div>
     <Paper sx={{ p: 2 }} elevation={3}>
@@ -109,8 +121,7 @@ function AcquisitionLog() {
                <TableCell style={{ width: '50px' }}>
                   <Tooltip title={<Typography variant="body2">Open file</Typography>}>
                     <AttachFileIcon fontSize="small" style={{cursor: 'pointer'}}
-                                    onClick={() => window.open(`http://localhost:5002/?f=${acq.info.output_file}`,
-                                        '_blank')}/>
+                                    onClick={() => openFileViewer(acq.info.run_id)}/>
                   </Tooltip>
                  <Tooltip title={
                    <div>
@@ -168,7 +179,7 @@ function AcquisitionLog() {
           </Box>
         </Modal>
 
-
+        <FileViewer acquisition_id={currentAcquisitionId} isOpen={isFileViewerOpen} onClose={closeFileViewer} />
         </div>
   )
 }

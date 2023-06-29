@@ -60,7 +60,6 @@ function App() {
         <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
       <Grid item xs={6}>
-        <FileViewer></FileViewer>
         <LiveStream state={state.config.config} />
         <AcquisitionLog />
       </Grid>
