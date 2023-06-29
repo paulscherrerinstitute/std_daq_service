@@ -159,3 +159,12 @@ class StdDaqRedisStorage(object):
     def get_gif(self, log_id):
         gif_bytes = self.redis.get(self._get_gif_key(log_id))
         return gif_bytes
+
+    def get_log(self, log_id):
+        log_bytes = self.redis.xrange(self.KEY_LOG, min=log_id, max=log_id)
+        if log_bytes:
+            # It can return at max 1 record.
+            log = json.loads(log_bytes[0][1][FIELD_DAQ_JSON])
+            return log
+
+        raise RuntimeError(f"Cannot find log with log_id{log_id}.")
