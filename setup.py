@@ -22,7 +22,6 @@ setup(
         'flask-cors',
         'numpy',
         'redis',
-        'h5grove[flask]'
     ],
     entry_points='''
         [console_scripts]

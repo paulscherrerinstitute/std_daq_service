@@ -1,7 +1,6 @@
 import argparse
 import json
 import logging
-import os
 
 import zmq
 from flask import Flask
@@ -19,8 +18,6 @@ from std_daq_service.rest_v2.rest import register_rest_interface
 from std_daq_service.writer_driver.utils import get_stream_addresses
 from flask_cors import CORS
 
-os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
-from h5grove.flask_utils import BLUEPRINT as h5grove_blueprint
 
 _logger = logging.getLogger(__name__)
 
@@ -58,8 +55,6 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
 
         app = Flask(__name__, static_folder='static')
         CORS(app)
-        app.config["H5_BASE_DIR"] = '/'
-        app.register_blueprint(h5grove_blueprint)
 
         ctx = zmq.Context()
 
