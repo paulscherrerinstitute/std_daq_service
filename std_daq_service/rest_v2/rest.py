@@ -1,7 +1,10 @@
+from io import BytesIO
 from logging import getLogger
 
+import cv2
+import numpy as np
 import requests
-from flask import request, jsonify, Response, render_template, send_from_directory
+from flask import request, jsonify, Response, render_template, send_from_directory, send_file
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
@@ -25,16 +28,53 @@ DAQ_STATS_ENDPOINT = '/daq/stats'
 DAQ_LOGS_ENDPOINT = '/daq/logs/<int:n_logs>'
 DAQ_DEPLOYMENT_STATUS_ENDPOINT = '/daq/deployment'
 
+FILE_METADATA = '/file/<string:acquisition_id>'
+FILE_IMAGE = '/file/<string:acquisition_id>/image/<int:i_image>'
+
 request_logger = getLogger('request_log')
 _logger = getLogger('rest')
 
 
+def read_file_metadata(output_file):
+    return {
+        'n_files': 100,
+        'image_pixel_width': 2016,
+        'image_pixel_height': 2016,
+        'dtype': 'uint16'
+    }
+
+
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
                             sim_url_base: str, streamer, storage: StdDaqRedisStorage):
-
     @app.route('/')
     def react_app():
         return send_from_directory('static', 'index.html')
+
+    @app.route(FILE_METADATA)
+    def get_file_metadata(acquisition_id):
+        log = storage.get_log(log_id=acquisition_id)
+
+        return jsonify({"status": "ok",
+                        "message": "Metadata retrieved.",
+                        'file_metadata': {
+                            "log_info": log['info'],
+                            "file_info": read_file_metadata(log['info']['output_file'])
+                        }})
+
+    @app.route(FILE_IMAGE)
+    def get_file_image(acquisition_id, i_image):
+        STREAM_WIDTH = 800
+        STREAM_HEIGHT = 600
+        frame = np.zeros(shape=(STREAM_WIDTH, STREAM_HEIGHT), dtype=np.uint8)
+        image = cv2.resize(frame, (STREAM_WIDTH, STREAM_HEIGHT))
+        # apply a color scheme to the grayscale image
+        image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
+
+        _, buffer = cv2.imencode('.jpg', image)
+        image_bytes = buffer.tobytes()
+
+        return send_file(BytesIO(image_bytes), mimetype='image/jpeg')
+
 
     @app.route(WRITER_WRITE_SYNC_ENDPOINT, methods=['POST'])
     def write_sync_request():
