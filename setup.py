@@ -22,6 +22,8 @@ setup(
         'flask-cors',
         'numpy',
         'redis',
+        'fastapi',
+        'uvicorn'
     ],
     entry_points='''
         [console_scripts]
