@@ -3,8 +3,10 @@ import json
 import logging
 
 import zmq
-from flask import Flask
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from redis.client import Redis
+from uvicorn import run
 
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.logs import LogsLogger
@@ -16,7 +18,6 @@ from std_daq_service.writer_driver.start_stop_driver import WriterDriver
 from std_daq_service.rest_v2.writer import WriterRestManager, StatusLogger
 from std_daq_service.rest_v2.rest import register_rest_interface
 from std_daq_service.writer_driver.utils import get_stream_addresses
-from flask_cors import CORS
 
 
 _logger = logging.getLogger(__name__)
@@ -53,12 +54,14 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
             _logger.info("No config present in storage. Re-deploying config.")
             storage.set_config(daq_config)
 
-        app = Flask(__name__, static_folder='static')
-        CORS(app)
+        app = FastAPI()
+        app.add_middleware(CORSMiddleware,
+                           allow_origins=['*'], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
         ctx = zmq.Context()
 
-        writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address, image_metadata_address)
+        writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address,
+                                     image_metadata_address)
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
         status_logger = StatusLogger(ctx=ctx, storage=storage, writer_status_url=out_status_address)
@@ -72,9 +75,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         register_rest_interface(app, writer_manager=writer_manager, daq_manager=daq_manager, sim_url_base=sim_url_base,
                                 streamer=mjpeg_streamer, storage=storage)
 
-        log = logging.getLogger('werkzeug')
-        log.setLevel(logging.ERROR)
-        app.run(host='0.0.0.0', port=rest_port, threaded=True)
+        run(app, host='0.0.0.0', port=rest_port, log_level='warning')
 
     except Exception as e:
         _logger.exception("Error while trying to run the REST api")
