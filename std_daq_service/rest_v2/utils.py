@@ -34,33 +34,7 @@ def get_image_n_bytes(image_meta: ImageMetadata):
     return image_n_bytes
 
 
-def get_parameters_from_write_request(json_request, user_id):
-    if 'output_file' not in json_request:
-        raise RuntimeError(f'Mandatory field missing: output_file')
-
-    output_file = json_request.get('output_file')
-    validate_output_file(output_file, user_id)
-
-    n_images_str = json_request.get('n_images')
-    n_images = validate_n_images(n_images_str)
-
-    # Needs to be in nanoseconds because run_id is uint64.
-    run_id = json_request.get('run_id', time_ns())
-
-    return output_file, n_images, run_id
-
-
 def validate_output_file(output_file, user_id):
-    if output_file is None:
-        raise RuntimeError(f'Mandatory field missing: output_file')
-
-    if not output_file.startswith('/'):
-        raise RuntimeError(f'Invalid output_file={output_file}. Path must be absolute - starts with "/".')
-
-    path_validator = '\/[a-zA-Z0-9_\/-]*\..+[^\/]$'
-    if not re.compile(path_validator).match(output_file):
-        raise RuntimeError(f'Invalid output_file={output_file}. Must be a valid posix path.')
-
     try:
         # Set user_id for checking the directory permissions.
         if user_id > 0:
@@ -77,21 +51,6 @@ def validate_output_file(output_file, user_id):
         if user_id > 0:
             _logger.info(f"Returning effective user_id to {os.getuid()}.")
             os.seteuid(os.getuid())
-
-
-def validate_n_images(n_images_str):
-    if n_images_str is None:
-        raise RuntimeError(f'Mandatory field missing: n_images')
-
-    try:
-        n_images = int(n_images_str)
-    except:
-        raise RuntimeError(f'Cannot convert n_images={n_images_str} to an integer. Must be an integer >= 1.')
-
-    if n_images < 1:
-        raise RuntimeError(f'Invalid n_images={n_images}. Must be an integer >= 1.')
-
-    return n_images
 
 
 def update_config(old_config, config_updates):
