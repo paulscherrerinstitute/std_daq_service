@@ -21,10 +21,12 @@ class SimulationRestManager(object):
         height = self.daq_config['image_pixel_height']
         width = self.daq_config['image_pixel_width']
         bit_depth = self.daq_config['bit_depth']
+        n_modules = self.daq_config['n_modules']
+        modules_info = self.daq_config.get('submodule_info', None)
 
         self._image_size_bytes = height * width * bit_depth / 8
 
-        self.generator = get_detector_generator(detector_type, height, width, image_filename)
+        self.generator = get_detector_generator(detector_type, height, width, bit_depth, n_modules, modules_info, image_filename=image_filename)
         self.stop_event = Event()
 
         self._generator_thread = None
