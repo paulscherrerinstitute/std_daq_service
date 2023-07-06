@@ -73,8 +73,8 @@ class WriterStatus(BaseModel):
             "UNKNOWN: The DAQ is in an unknown state (usually after reboot). Call Stop to reset."
         )
     )
-    acquisition: AcquisitionLog = Field(..., description="Stats about the currently running or last "
-                                                         "finished acquisition")
+    acquisition: Optional[AcquisitionLog] = Field(None, description="Stats about the currently running or last "
+                                                                    "finished acquisition")
 
 
 class ApiStatus(str, Enum):
@@ -121,7 +121,14 @@ class StatsResponse(BaseModel):
 
 
 class LogsResponse(BaseModel):
-    __root__: List[AcquisitionLog]
+    status: ApiStatus = Field(..., description='Api request status.'
+                                               'OK: The request completed without API errors.'
+                                               'ERROR: An error occurred in the API. Check message for details.',
+                              example='ok')
+    message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
+                         example='DAQ configuration changed.')
+    logs: List[AcquisitionLog] = Field(..., description="List of logs. The number equals to the requested number."
+                                                        "Empty list if no logs exist.")
 
 
 class StatusResponse(BaseModel):

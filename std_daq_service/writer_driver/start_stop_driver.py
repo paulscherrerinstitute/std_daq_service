@@ -52,10 +52,7 @@ class WriterStatusTracker(object):
 
     def set_unknown_status(self):
         with self.status_lock:
-            self.status = {'state': 'UNKNOWN', 'acquisition': {'state': "FINISHED",
-                                                               'message': "",
-                                                               'info': {'n_images': 0},
-                                                               'stats': dict(self.EMPTY_STATS)}}
+            self.status = {'state': 'UNKNOWN', 'acquisition': None}
 
     def get_status(self):
         with self.status_lock:
@@ -326,7 +323,7 @@ class WriterDriver(object):
             status = self.get_status()
             if status['state'] == target_state:
                 return
-            if status['acquisition']['message'].startswith("ERROR:"):
+            if status['acquisition'] and status['acquisition']['message'].startswith("ERROR:"):
                 raise ValueError(status['acquisition']['message'])
         else:
             raise RuntimeError(f"Cannot reach {target_state}. Writer needs to be restarted.")

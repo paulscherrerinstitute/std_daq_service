@@ -4,7 +4,26 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {Chip, Grid, Paper, LinearProgress, Typography, Accordion, AccordionDetails, AccordionSummary,} from '@mui/material';
 
 function AcquisitionStatus(props) {
-  const { state } = props;
+  const { input_state } = props;
+
+  const defaultState = {
+    stats: {
+      n_write_completed: 0,
+      start_time: 0,
+      stop_time: 0,
+      n_write_requested: 0,
+    },
+    info: {
+      n_images: 0,
+      output_file: null,
+      run_id: null,
+    },
+    message: "...",
+    state: "..."
+  };
+
+  const state = input_state || defaultState;
+
   let progress = (state.stats.n_write_completed / state.info.n_images) * 100;
   if (!progress) {
     progress = 0;
