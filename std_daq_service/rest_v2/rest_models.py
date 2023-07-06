@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 from time import time_ns
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field, validator
 
 
@@ -131,8 +131,42 @@ class LogsResponse(BaseModel):
                                                         "Empty list if no logs exist.")
 
 
-class StatusResponse(BaseModel):
-    pass
+class DeploymentStatusEnum(str, Enum):
+    UNKNOWN = 'UNKNOWN'
+    SUCCESS = 'SUCCESS'
+    ERROR = 'ERROR'
+    RUNNING = 'RUNNING'
+
+
+class DeploymentStats(BaseModel):
+    start_time: float = Field(..., description="Start time of the deployment", example=1685090990.182)
+    stop_time: float = Field(..., description="End time of the deployment", example=1685090990.347)
+
+
+class DeploymentStatus(BaseModel):
+    config_id: Optional[str] = Field(None, description="Configuration id -> timestamp of the config change.",
+                                     example="1685090990182-0")
+    status: DeploymentStatusEnum = Field(..., description="Current status of the deployment.", example="SUCCESS")
+    message: str = Field(..., description="User displayable message", example="Deployment successful")
+    servers: Optional[Dict[str, str]] = Field(None,
+                                              description="Dictionary of server that replied to the config change.",
+                                              example={"xbl-daq-28": "Done", "xbl-daq-29": "Done"})
+    stats: Optional[DeploymentStats] = Field(None, description="Statistics regarding the deployment")
+
+    class Config:
+        description = "If the config_id is None, there are currently no config deployments in the database. " \
+                      "Deploy a config file via the admin interface."
+
+
+class DeploymentStatusResponse(BaseModel):
+    status: ApiStatus = Field(..., description='Api request status.'
+                                               'OK: The request completed without API errors.'
+                                               'ERROR: An error occurred in the API. Check message for details.',
+                              example='ok')
+    message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
+                         example='DAQ configuration changed.')
+
+    deployment: DeploymentStatus = Field(..., description="Status of the deployment.")
 
 
 class ConfigRequest(BaseModel):

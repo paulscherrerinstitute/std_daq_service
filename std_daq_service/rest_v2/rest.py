@@ -8,7 +8,7 @@ from starlette.responses import FileResponse, JSONResponse, StreamingResponse
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.rest_models import WriterResponse, SimResponse, ConfigResponse, StatsResponse, \
-    LogsResponse, StatusResponse, ConfigRequest, WriteRequest
+    LogsResponse, DeploymentStatusResponse, ConfigRequest, WriteRequest
 from std_daq_service.udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.utils import validate_output_file
@@ -181,7 +181,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
         return {"status": "ok", "message": f"DAQ logs",
                 'logs': logs}
 
-    @app.get(DAQ_DEPLOYMENT_STATUS_ENDPOINT, response_model=StatusResponse)
+    @app.get(DAQ_DEPLOYMENT_STATUS_ENDPOINT, response_model=DeploymentStatusResponse)
     def get_deployment_status_request():
         deployment_status = daq_manager.get_deployment_status()
         return {"status": "ok", "message": f"Deployment status",

@@ -175,3 +175,4 @@ yarn-debug.log*
 yarn-error.log*
 /dump.rdb
 node_modules/
+/tests/deployment/configs/LAST_DEPLOYED_CONFIG_ID

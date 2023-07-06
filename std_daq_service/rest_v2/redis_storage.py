@@ -77,11 +77,11 @@ class StdDaqRedisStorage(object):
         config_id, _ = self.get_config()
 
         deployed_servers = None
-        start_timestamp = 0
-        stop_timestamp = 0
+        stats = None
 
         if config_id is not None:
             start_timestamp = self._redis_to_unix_timestamp(config_id)
+            stop_timestamp = 0
             deployed_servers = {}
             # Collect latest status from each server.
             for deployment_event in self.redis.xrange(self._get_deployment_key(config_id)):
@@ -96,13 +96,16 @@ class StdDaqRedisStorage(object):
                 # Return only the last state received from a specific server.
                 deployed_servers[server_name] = server_message
 
+            stats = {'start_time': start_timestamp, 'stop_time': stop_timestamp}
+
+
         status, message = self._interpret_deployment_status(deployed_servers)
 
         return {'config_id': config_id,
                 'status': status,
                 'message': message,
-                'servers': deployed_servers or {},
-                'stats': {'start_time': start_timestamp, 'stop_time': stop_timestamp}}
+                'servers': deployed_servers,
+                'stats': stats}
 
     def set_deployment_status(self, config_id, server_name, message):
         _logger.info(f"Set deployment status on config_id {config_id} from "
