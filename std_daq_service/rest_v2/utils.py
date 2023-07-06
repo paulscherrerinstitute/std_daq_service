@@ -5,15 +5,14 @@ import stat
 from collections import OrderedDict
 from time import time_ns
 
-from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
-
 import cv2
 import numpy as np
 import zmq
+from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
                      'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
-                     'writer_user_id', 'module_positions']
+                     'writer_user_id', 'module_positions', 'submodule_info']
 
 DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
                          'writer_user_id']
