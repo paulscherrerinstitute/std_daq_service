@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 from time import time_ns
-from typing import List, Optional, OrderedDict
+from typing import List, Optional, OrderedDict, Dict
 from pydantic import BaseModel, Field, validator
 
 
@@ -96,8 +96,51 @@ class SimResponse(BaseModel):
     pass
 
 
+class SubmoduleInfo(BaseModel):
+    # If there are specific fields in the submodule_info, you can add them here
+
+    class Config:
+        description = "Detector module detailed information."
+
+
+class ModulePositions(BaseModel):
+    start_x: int = Field(..., example=0)
+    start_y: int = Field(..., example=3263)
+    end_x: int = Field(..., example=513)
+    end_y: int = Field(..., example=3008)
+
+    class Config:
+        description = "Mapping between module number and image position."
+
+
+class ConfigStatus(BaseModel):
+    bit_depth: int = Field(..., description="Bit depth of the image.", example=16)
+    detector_name: str = Field(..., description="Name of the detector. Must be unique, used as "
+                                                "internal DAQ identifier.", example="EG9M")
+    detector_type: str = Field(..., description="Type of detector. Currently supported: eiger, "
+                                                "jungfrau, gigafrost, bsread", example="eiger")
+    image_pixel_height: int = Field(..., description="Assembled image height in pixels, including gap pixels.",
+                                    example=3264)
+    image_pixel_width: int = Field(..., description="Assembled image width in pixels, including gap pixels.",
+                                   example=3106)
+    n_modules: int = Field(..., description="Number of modules to assemble.", example=2)
+    start_udp_port: int = Field(..., description="Start UDP port where the detector is streaming modules.",
+                                example=50000)
+    writer_user_id: int = Field(..., description="User_id under which the writer will create and write files.",
+                                example=12345)
+    submodule_info: SubmoduleInfo = Field(..., description="Detector module detailed information.")
+    module_positions: Dict[str, ModulePositions] = Field(..., description="Dictionary with mapping between module "
+                                                                          "number and image position.")
+
+
 class ConfigResponse(BaseModel):
-    pass
+    status: ApiStatus = Field(..., description='Api request status.'
+                                               'OK: The request completed without API errors.'
+                                               'ERROR: An error occurred in the API. Check message for details.',
+                              example='ok')
+    message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
+                         example='DAQ configuration changed.')
+    config: ConfigStatus = Field(..., description="DAQ configuration status.")
 
 
 class StreamStats(BaseModel):
@@ -171,4 +214,20 @@ class DeploymentStatusResponse(BaseModel):
 
 
 class ConfigRequest(BaseModel):
-    pass
+    bit_depth: Optional[int] = Field(None, description="Bit depth of the image.", example=16)
+    detector_name: Optional[str] = Field(None, description="Name of the detector. Must be unique, used as internal "
+                                                           "DAQ identifier.", example="EG9M")
+    detector_type: Optional[str] = Field(None, description="Type of detector. Currently supported: eiger, jungfrau, "
+                                                           "gigafrost, bsread", example="eiger")
+    image_pixel_height: Optional[int] = Field(None, description="Assembled image height in pixels, including gap "
+                                                                "pixels.", example=3264)
+    image_pixel_width: Optional[int] = Field(None, description="Assembled image width in pixels, including gap pixels.",
+                                             example=3106)
+    n_modules: Optional[int] = Field(None, description="Number of modules to assemble.", example=2)
+    start_udp_port: Optional[int] = Field(None, description="Start UDP port where the detector is streaming modules.",
+                                          example=50000)
+    writer_user_id: Optional[int] = Field(None, description="User_id under which the writer will create and write "
+                                                            "files.", example=12345)
+    submodule_info: Optional[SubmoduleInfo] = Field(None, description="Detector module detailed information.")
+    module_positions: Optional[Dict[str, ModulePositions]] = \
+        Field(None, description="Dictionary with mapping between module number and image position.")

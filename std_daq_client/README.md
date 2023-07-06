@@ -176,6 +176,7 @@ This object is returned by:
   "n_modules": 2,                    // Number of modules to assemble.
   "start_udp_port": 50000,           // Start UDP port where the detector is streaming modules.
   "writer_user_id": 12345,           // User_id under which the writer will create and write files.
+  "submodule_info": {},              // Detector module detailed information.
   "module_positions": {              // Dictionary with mapping between module number -> image position.
     "0": [0, 3263, 513, 3008 ],      //   Format: [start_x, start_y, end_x, end_y]
     "1": [516, 3263, 1029, 3008 ]
