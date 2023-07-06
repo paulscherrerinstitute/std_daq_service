@@ -105,9 +105,19 @@ class StreamStats(BaseModel):
     images_per_second: float
 
 
-class StatsResponse(BaseModel):
+class DaqStats(BaseModel):
     detector: StreamStats
     writer: StreamStats
+
+
+class StatsResponse(BaseModel):
+    status: ApiStatus = Field(..., description='Api request status.'
+                                               'OK: The request completed without API errors.'
+                                               'ERROR: An error occurred in the API. Check message for details.',
+                              example='ok')
+    message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
+                         example='DAQ configuration changed.')
+    stats: DaqStats = Field(..., description="DAQ statistics.")
 
 
 class LogsResponse(BaseModel):

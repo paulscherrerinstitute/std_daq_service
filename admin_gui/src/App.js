@@ -64,7 +64,7 @@ function App() {
         <AcquisitionLog />
       </Grid>
       <Grid item xs={3}>
-        <DaqStats state={state.config.config} />
+        <DaqStats />
         <DaqConfig state={state.config.config} />
         <DaqDeployment/>
         <SimulatorControl/>
