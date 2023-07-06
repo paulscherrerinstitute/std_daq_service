@@ -7,7 +7,7 @@ import requests
 from starlette.responses import FileResponse, JSONResponse, StreamingResponse
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
-from std_daq_service.rest_v2.rest_models import WriterResponse, SimResponse, ConfigResponse, StatsResponse, \
+from std_daq_service.rest_v2.rest_models import WriterResponse, SimulatorResponse, ConfigResponse, StatsResponse, \
     LogsResponse, DeploymentStatusResponse, ConfigRequest, WriteRequest
 from std_daq_service.udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
 from std_daq_service.rest_v2.daq import DaqRestManager
@@ -123,7 +123,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
         return {"status": "ok", "message": "Writing stopped.",
                 'writer': writer_status}
 
-    @app.get(SIM_STATUS_ENDPOINT, response_model=SimResponse)
+    @app.get(SIM_STATUS_ENDPOINT, response_model=SimulatorResponse)
     def get_sim_status_request():
         try:
             status = requests.get(f'{sim_url_base}{STATUS_ENDPOINT}').json()
@@ -132,13 +132,13 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
             _logger.debug(f"Cannot communicate with simulator API on {sim_url_base}")
             return {'status': 'error', 'message': f'Cannot communicate with API on {sim_url_base}.'}
 
-    @app.post(SIM_START_ENDPOINT, response_model=SimResponse)
+    @app.post(SIM_START_ENDPOINT, response_model=SimulatorResponse)
     def start_sim_request():
         request_logger.info(f'Start simulation')
         requests.post(f'{sim_url_base}{START_ENDPOINT}', data={}).json()
         return get_sim_status_request()
 
-    @app.post(SIM_STOP_ENDPOINT, response_model=SimResponse)
+    @app.post(SIM_STOP_ENDPOINT, response_model=SimulatorResponse)
     def stop_sim_request():
         request_logger.info(f'Stop simulation')
         requests.post(f'{sim_url_base}{STOP_ENDPOINT}', data={}).json()

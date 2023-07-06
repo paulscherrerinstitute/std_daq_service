@@ -92,8 +92,23 @@ class WriterResponse(BaseModel):
     writer: WriterStatus = Field(..., description="Status of the writer.")
 
 
-class SimResponse(BaseModel):
-    pass
+class SimulationStats(BaseModel):
+    n_generated_images: int = Field(..., description='Number of generated images in last (or still running) simulation.')
+
+
+class SimulatorStatus(BaseModel):
+    status: str = Field(..., description="Status of the simulation. Either READY or STREAMING.", example="READY")
+    stats: SimulationStats = Field(..., description="Statistics about the simulation.")
+
+
+class SimulatorResponse(BaseModel):
+    status: ApiStatus = Field(..., description='Api request status.'
+                                               'OK: The request completed without API errors.'
+                                               'ERROR: An error occurred in the API. Check message for details.',
+                              example='ok')
+    message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
+                         example='DAQ configuration changed.')
+    simulator: Optional[SimulatorStatus] = Field(None, description="Status of the simulator.")
 
 
 class SubmoduleInfo(BaseModel):
