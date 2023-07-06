@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from collections import OrderedDict
 
 import cv2
 import h5py as h5py
@@ -96,7 +97,8 @@ def start_validator(config_file, redis_url):
             if not response:
                 continue
             _, response_data = response[0]
-            last_log_id, status = response_data[0][0].decode(), json.loads(response_data[0][1][b'json'])
+            last_log_id, status = response_data[0][0].decode(), json.loads(response_data[0][1][b'json'],
+                                                                           object_pairs_hook=OrderedDict)
 
             report, gif_bytes = validate_file(status, writer_user_id, detector_name)
             _logger.info(f"File {status['info']['output_file']} validated: {report}.")

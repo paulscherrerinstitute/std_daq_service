@@ -49,7 +49,7 @@ def start_manager(server_name, config_file, redis_url):
 
                 # Writing to the config file will cause all the services to be restarted.
                 with open(config_file, 'w') as f:
-                    json.dump(daq_config, f, indent=4)
+                    json.dump(daq_config, f, indent=2)
 
                 storage.set_deployment_status(config_id=config_id, server_name=server_name, message='Done')
 

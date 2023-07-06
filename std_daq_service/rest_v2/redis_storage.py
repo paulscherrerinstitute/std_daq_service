@@ -26,7 +26,7 @@ class StdDaqRedisStorage(object):
         # Fails before a beamline is configured for the first time.
         if response:
             config_id = response[0][0].decode('utf8')
-            daq_config = json.loads(response[0][1][FIELD_DAQ_JSON])
+            daq_config = json.loads(response[0][1][FIELD_DAQ_JSON], object_pairs_hook=OrderedDict)
             return config_id, daq_config
         else:
             return None, None
@@ -127,7 +127,7 @@ class StdDaqRedisStorage(object):
         logs_bytes = self.redis.xrevrange(self.KEY_LOG, count=n_acquisitions)
         logs_dict = OrderedDict()
         for log_id, log_data in logs_bytes:
-            logs_dict[log_id.decode()] = json.loads(log_data[FIELD_DAQ_JSON])
+            logs_dict[log_id.decode()] = json.loads(log_data[FIELD_DAQ_JSON], object_pairs_hook=OrderedDict)
 
         return logs_dict
 
@@ -141,7 +141,7 @@ class StdDaqRedisStorage(object):
         response = self.redis.xrevrange(self.KEY_STAT, count=1)
         # Fails before a beamline is configured for the first time.
         if response:
-            stat = json.loads(response[0][1][FIELD_DAQ_JSON])
+            stat = json.loads(response[0][1][FIELD_DAQ_JSON], object_pairs_hook=OrderedDict)
             return stat
         else:
             return None
@@ -153,7 +153,7 @@ class StdDaqRedisStorage(object):
 
     def get_reports(self, log_id):
         reports_bytes = self.redis.xrange(self._get_report_key(log_id))
-        reports = [json.loads(x[1][FIELD_DAQ_JSON]) for x in reports_bytes]
+        reports = [json.loads(x[1][FIELD_DAQ_JSON], object_pairs_hook=OrderedDict) for x in reports_bytes]
         return reports
 
     def add_gif(self, log_id, gif_bytes):
@@ -167,7 +167,7 @@ class StdDaqRedisStorage(object):
         log_bytes = self.redis.xrange(self.KEY_LOG, min=log_id, max=log_id)
         if log_bytes:
             # It can return at max 1 record.
-            log = json.loads(log_bytes[0][1][FIELD_DAQ_JSON])
+            log = json.loads(log_bytes[0][1][FIELD_DAQ_JSON], object_pairs_hook=OrderedDict)
             return log
 
         raise RuntimeError(f"Cannot find log with log_id{log_id}.")
