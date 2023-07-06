@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 from time import time_ns
-from typing import List, Optional, Dict
+from typing import List, Optional, OrderedDict
 from pydantic import BaseModel, Field, validator
 
 
@@ -148,9 +148,10 @@ class DeploymentStatus(BaseModel):
                                      example="1685090990182-0")
     status: DeploymentStatusEnum = Field(..., description="Current status of the deployment.", example="SUCCESS")
     message: str = Field(..., description="User displayable message", example="Deployment successful")
-    servers: Optional[Dict[str, str]] = Field(None,
-                                              description="Dictionary of server that replied to the config change.",
-                                              example={"xbl-daq-28": "Done", "xbl-daq-29": "Done"})
+    servers: Optional[OrderedDict[str, str]] = Field(None,
+                                                     description="Dictionary of server that replied "
+                                                                 "to the config change.",
+                                                     example={"xbl-daq-28": "Done", "xbl-daq-29": "Done"})
     stats: Optional[DeploymentStats] = Field(None, description="Statistics regarding the deployment")
 
     class Config:
