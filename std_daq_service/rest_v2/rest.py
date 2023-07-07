@@ -257,8 +257,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.get(DAQ_STATS_ENDPOINT, response_model=StatsResponse)
     def get_daq_stats_request():
         stats = daq_manager.get_stats()
-        return {"status": "ok", "message": f"DAQ statistics",
-                'stats': stats}
+        return {"status": "ok", "message": f"DAQ statistics", 'stats': stats}
 
     @app.get(DAQ_LOGS_ENDPOINT, response_model=LogsResponse)
     def get_daq_logs_request(n_logs: int):

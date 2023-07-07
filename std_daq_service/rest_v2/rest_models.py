@@ -43,12 +43,12 @@ class AcquisitionState(str, Enum):
 class AcquisitionLog(BaseModel):
     state: AcquisitionState = Field(..., example="FINISHED",
                                     description=(
-                                        "State of the acquisition."
-                                        "FINISHED: The acquisition has finished successfully. "
-                                        "FAILED: The acquisition has failed. "
-                                        "WRITING: Currently receiving and writing images. "
-                                        "WAITING_IMAGES: Writer is ready and waiting for images. "
-                                        "ACQUIRING_IMAGES: DAQ is receiving images but writer is not writing them yet. "
+                                        "State of the acquisition.\n"
+                                        "FINISHED: The acquisition has finished successfully.\n"
+                                        "FAILED: The acquisition has failed.\n"
+                                        "WRITING: Currently receiving and writing images.\n"
+                                        "WAITING_IMAGES: Writer is ready and waiting for images.\n"
+                                        "ACQUIRING_IMAGES: DAQ is receiving images, writer is not writing them yet.\n"
                                         "FLUSHING_IMAGES: All needed images acquired, writer is flushing the buffer.")
                                     )
     message: str = Field(..., description="User displayable message from the writer "
@@ -67,9 +67,9 @@ class WriterStatus(BaseModel):
     state: WriterState = Field(
         ...,
         description=(
-            "State of the writer. "
-            "READY: DAQ is ready to start writing. "
-            "WRITING: DAQ is writing at the moment. Wait for it to finish or call Stop to interrupt. "
+            "State of the writer.\n"
+            "READY: DAQ is ready to start writing.\n"
+            "WRITING: DAQ is writing at the moment. Wait for it to finish or call Stop to interrupt.\n"
             "UNKNOWN: The DAQ is in an unknown state (usually after reboot). Call Stop to reset."
         )
     )
