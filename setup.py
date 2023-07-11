@@ -11,6 +11,7 @@ setup(
     name='std_daq_service',
     packages=['std_daq_service'],
     version=version,
+    include_package_data=True,
     install_requires=[
         'std-buffer',
         'pyzmq',
