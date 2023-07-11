@@ -155,7 +155,10 @@ class ConfigResponse(BaseModel):
                               example='ok')
     message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
                          example='DAQ configuration changed.')
-    config: ConfigStatus = Field(..., description="DAQ configuration status.")
+    config: Optional[ConfigStatus] = Field(None, description="Current DAQ configuration. "
+                                                             "None if no configuration deployed.")
+    config_id: Optional[str] = Field(None, description="ID of the deployed configuration."
+                                                       "None if no configuration deployed.")
 
 
 class StreamStats(BaseModel):
@@ -175,7 +178,7 @@ class StatsResponse(BaseModel):
                               example='ok')
     message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
                          example='DAQ configuration changed.')
-    stats: DaqStats = Field(..., description="DAQ statistics.")
+    stats: Optional[DaqStats] = Field(None, description="DAQ statistics, None if no statistics available.")
 
 
 class LogsResponse(BaseModel):
