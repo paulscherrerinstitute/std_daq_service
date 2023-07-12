@@ -19,6 +19,7 @@ const FileViewer = ({ log_id, isOpen, onClose }) => {
           setMetadata(response.data.file_metadata);
         });
     }
+    setImageIndex(0);
   }, [log_id, isOpen]);
 
   const handleSliderChange = (event, newValue) => {

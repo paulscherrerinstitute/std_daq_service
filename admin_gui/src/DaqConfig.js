@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import SettingsIcon from '@material-ui/icons/Settings'
 import EditDaqConfigModal from './DaqConfigEdit';
-import {Grid, Paper, Typography, Button, Alert} from '@mui/material';
+import CalendarViewMonthIcon from '@mui/icons-material/CalendarViewMonth';
+import {Grid, Paper, Typography, Button, Alert, ButtonGroup} from '@mui/material';
 import axios from "axios";
+import ModuleMapDialog from "./ModuleMapDialog";
 
 function DaqConfig() {
   const [daqConfig, setDaqConfig] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModuleMapOpen, setIsModuleMapOpen] = useState(false);
 
   useEffect(() => {
      const fetchData = async () => {
@@ -37,15 +40,24 @@ function DaqConfig() {
     setIsModalOpen(true);
   };
 
+  const handleViewModuleMapClick = () => {
+      setIsModuleMapOpen(true);
+  }
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  const handleCloseModuleMap = () => {
+      setIsModuleMapOpen(false);
+  }
 
   let no_config = !daqConfig
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
         <EditDaqConfigModal isOpen={isModalOpen} onClose={handleCloseModal} init_config={daqConfig} />
+        <ModuleMapDialog open={isModuleMapOpen} handleClose={handleCloseModuleMap} log_id={"live"} i_image={0} />
       <Typography variant="h6" gutterBottom>DAQ config</Typography>
         {no_config ? (
            <Alert severity="error">No config available. Create one by using the Edit button below.</Alert>
@@ -77,9 +89,14 @@ function DaqConfig() {
           </Grid>
         </div>
             )}
-
+<Grid container alignItems="center" spacing={2}>
+    <Grid item>
       <Button variant="contained" onClick={handleEditButtonClick} endIcon={<SettingsIcon/>}>Edit</Button>
-
+        </Grid>
+   <Grid item>
+        <Button variant="contained" onClick={handleViewModuleMapClick} endIcon={<CalendarViewMonthIcon/>}>View module map</Button>
+       </Grid>
+    </Grid>
     </Paper>
   );
 }

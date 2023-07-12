@@ -4,6 +4,7 @@ from logging import getLogger
 from typing import Optional
 
 import cv2
+import numpy as np
 import requests
 from starlette.responses import FileResponse, JSONResponse, StreamingResponse
 
@@ -64,11 +65,14 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     @app.get(FILE_IMAGE)
     def get_file_image(acquisition_id: str, i_image: int, module_map: Optional[int] = 0, gaps: Optional[int] = 0):
         _, daq_config = daq_manager.get_config()
-        user_id = daq_config['writer_user_id']
+        image_pixel_height = daq_config['image_pixel_height']
+        image_pixel_width = daq_config['image_pixel_width']
 
-        frame = daq_manager.get_image_data(acquisition_id, i_image, user_id)
-        image_pixel_height = frame.shape[0]
-        image_pixel_width = frame.shape[1]
+        if acquisition_id == 'live':
+            frame = np.zeros(shape=[image_pixel_height, image_pixel_width], dtype='uint8')
+        else:
+            user_id = daq_config['writer_user_id']
+            frame = daq_manager.get_image_data(acquisition_id, i_image, user_id)
 
         image = cv2.resize(frame, (image_pixel_width, image_pixel_height))
         image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
