@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
 import { Paper, Typography, Alert } from '@mui/material';
 
-function DaqStats(props) {
-  const { state } = props;
+function DaqStats() {
   const [isVideoLoaded, setIsVideoLoaded] = useState(true);
 
   const handleVideoLoadError = () => {

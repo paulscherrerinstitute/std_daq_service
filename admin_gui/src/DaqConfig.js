@@ -2,10 +2,37 @@ import React, {useState} from 'react';
 import SettingsIcon from '@material-ui/icons/Settings'
 import EditDaqConfigModal from './DaqConfigEdit';
 import {Grid, Paper, Typography, Button, Alert} from '@mui/material';
+import {useEffect} from "@types/react";
+import axios from "axios";
 
 function DaqConfig(props) {
-  const { state } = props;
+  const [daqConfig, setDaqConfig] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+     const fetchData = async () => {
+       try {
+         const result = await axios.get('/daq/config');
+
+         if (result.data.status === 'ok') {
+           setDaqConfig(result.data.config);
+         } else {
+             setDaqConfig(null);
+           console.log("[DaqConfig:fetchData]", result.data);
+         }
+
+       } catch (error) {
+         setDaqConfig(null);
+         console.log("[DaqConfig:fetchData]", error);
+       }
+     }
+
+     const interval = setInterval(() => {
+       fetchData();
+     }, 500);
+
+     return () => clearInterval(interval);
+   }, []);
 
   const handleEditButtonClick = () => {
     setIsModalOpen(true);
@@ -15,7 +42,7 @@ function DaqConfig(props) {
     setIsModalOpen(false);
   };
 
-  let no_config = !state
+  let no_config = !daqConfig
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>

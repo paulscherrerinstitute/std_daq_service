@@ -24,11 +24,7 @@ function App() {
         info: {n_images: 0, output_file: "...", run_id: "..."},
         stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
       }
-    },
-    config: { config:{
-      detector_type: 'eiger', detector_name: '...', bit_depth: 0, image_pixel_height: 0, image_pixel_width: 0,
-      n_modules: 0, writer_user_id: 0, start_udp_port: 0, module_positions: {} }}
-  });
+    });
 
 
   useEffect(() => {
@@ -60,12 +56,12 @@ function App() {
         <AcquisitionStatus state={state.writer.acquisition} />
       </Grid>
       <Grid item xs={6}>
-        <LiveStream state={state.config.config} />
+        <LiveStream />
         <AcquisitionLog />
       </Grid>
       <Grid item xs={3}>
         <DaqStats />
-        <DaqConfig state={state.config.config} />
+        <DaqConfig />
         <DaqDeployment/>
         <SimulatorControl/>
       </Grid>
