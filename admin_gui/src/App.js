@@ -24,7 +24,7 @@ function App() {
         info: {n_images: 0, output_file: "...", run_id: "..."},
         stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
       }
-    });
+    }});
 
 
   useEffect(() => {
