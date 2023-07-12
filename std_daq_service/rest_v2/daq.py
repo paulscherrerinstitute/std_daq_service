@@ -42,7 +42,7 @@ class DaqRestManager(object):
 
     def get_image_data(self, log_id, i_image, user_id):
         log = self.storage.get_log(log_id)
-        filename = log['info']['output_filename']
+        filename = log['info']['output_file']
 
         with SwitchUser(user_id):
             file = h5py.File(filename)
@@ -53,7 +53,7 @@ class DaqRestManager(object):
 
     def get_file_metadata(self, log_id, user_id):
         log = self.storage.get_log(log_id)
-        filename = log['info']['output_filename']
+        filename = log['info']['output_file']
 
         with SwitchUser(user_id):
             file_stats = os.stat(filename)
