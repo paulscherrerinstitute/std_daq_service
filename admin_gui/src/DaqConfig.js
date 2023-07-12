@@ -5,7 +5,7 @@ import {Grid, Paper, Typography, Button, Alert} from '@mui/material';
 import {useEffect} from "@types/react";
 import axios from "axios";
 
-function DaqConfig(props) {
+function DaqConfig() {
   const [daqConfig, setDaqConfig] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false);
 
