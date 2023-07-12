@@ -48,7 +48,7 @@ function WriterControl() {
 
   const state = writerState || defaultState;
 
-  switch (state.state) {
+  switch (state.status) {
     case 'READY':
       status_chip = <Chip variant="outlined" label="Ready" color="success" />;
       start_button_disabled = false;
@@ -134,9 +134,9 @@ function WriterControl() {
   };
 
   const handleCopyOutputFolder = () => {
-  if (state.acquisition && state.acquisition.info) {
-      if (state.acquisition.info.output_file) {
-            const fullPath = state.acquisition.info.output_file;
+  if (state.writer.acquisition && state.writer.acquisition.info) {
+      if (state.writer.acquisition.info.output_file) {
+            const fullPath = state.writer.acquisition.info.output_file;
             const lastSlashIndex = fullPath.lastIndexOf('/');
             const folderPath = fullPath.substring(0, lastSlashIndex + 1);
 
@@ -190,44 +190,24 @@ function WriterControl() {
         <AccordionDetails>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <TextField
-                label="Number of Images"
-                type="number"
-                value={numImages}
-                onChange={handleNumImagesChange}
-                fullWidth
-              />
+              <TextField label="Number of Images" type="number" value={numImages} onChange={handleNumImagesChange}
+                fullWidth />
             </Grid>
             <Grid item xs={12} md={12}>
-              <TextField
-                label="Output Folder"
-                type="text"
-                value={outputFolder}
-                onChange={handleOutputFolderChange}
-                fullWidth
-                InputProps={{ 
-                    endAdornment: (
+              <TextField label="Output Folder" type="text" value={outputFolder} onChange={handleOutputFolderChange}
+                fullWidth InputProps={{ endAdornment: (
                       <InputAdornment position="end">
                         <IconButton onClick={handleCopyOutputFolder} title="Load last used output folder">
                             <RotateLeftIcon />
                         </IconButton>
                     </InputAdornment>),}}
               />
-      <FormControlLabel
-                  control={
-                                    <Switch
-                                      checked={enablePrefix}
-                                      onChange={handlePrefixToggle}
-                                      color="primary"
-                                    />
-                                  }
-                  label="Prefix filename with timestamp"
-                />
+      <FormControlLabel control={ <Switch checked={enablePrefix} onChange={handlePrefixToggle} color="primary" /> }
+                  label="Prefix filename with timestamp" />
             </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
-
 
       <Dialog open={open} onClose={handleCloseErrorDialog}>
         <DialogTitle>Error</DialogTitle>
