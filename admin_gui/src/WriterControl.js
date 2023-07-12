@@ -22,7 +22,7 @@ function WriterControl() {
        try {
          const result = await axios.get('/writer/status');
          if (result.data.status === 'ok') {
-           setWriterState(result.data);
+           setWriterState(result.data.writer);
          } else {
            setWriterState(null);
            console.log("[WriterControl:fetchData]", result.data);
@@ -48,7 +48,7 @@ function WriterControl() {
 
   const state = writerState || defaultState;
 
-  switch (state.status) {
+  switch (state.state) {
     case 'READY':
       status_chip = <Chip variant="outlined" label="Ready" color="success" />;
       start_button_disabled = false;
@@ -134,9 +134,9 @@ function WriterControl() {
   };
 
   const handleCopyOutputFolder = () => {
-  if (state.writer.acquisition && state.writer.acquisition.info) {
-      if (state.writer.acquisition.info.output_file) {
-            const fullPath = state.writer.acquisition.info.output_file;
+  if (state.acquisition && state.acquisition.info) {
+      if (state.acquisition.info.output_file) {
+            const fullPath = state.acquisition.info.output_file;
             const lastSlashIndex = fullPath.lastIndexOf('/');
             const folderPath = fullPath.substring(0, lastSlashIndex + 1);
 

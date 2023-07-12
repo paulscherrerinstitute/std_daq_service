@@ -12,7 +12,7 @@ function AcquisitionStatus() {
        try {
          const result = await axios.get('/writer/status');
          if (result.data.status === 'ok') {
-           setAcqState(result.data.acquisition);
+           setAcqState(result.data.writer.acquisition);
          } else {
            setAcqState(null);
            console.log("[DaqConfig:fetchData]", result.data);
@@ -102,7 +102,7 @@ function AcquisitionStatus() {
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
-      <Typography variant="h6" gutterBottom>Last acquisition</Typography>
+      <Typography variant="h6" gutterBottom>Acquisition Status</Typography>
 
       <Grid container alignItems="center" spacing={1}>
         <Grid item> <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Status:</Typography></Grid>
