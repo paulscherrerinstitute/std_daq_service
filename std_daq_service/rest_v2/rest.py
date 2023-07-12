@@ -50,7 +50,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
     def react_app(_):
         return FileResponse(f'{static_folder_path}/index.html')
 
-    @app.route(FILE_METADATA)
+    @app.get(FILE_METADATA)
     def get_file_metadata(acquisition_id: int):
         _, daq_config = daq_manager.get_config()
         user_id = daq_config['writer_user_id']
@@ -61,7 +61,7 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
                 "message": "Metadata retrieved.",
                 'file_metadata': file_metadata}
 
-    @app.route(FILE_IMAGE)
+    @app.get(FILE_IMAGE)
     def get_file_image(acquisition_id: int, i_image: int, module_map: Optional[int] = 0, gaps: Optional[int] = 0):
         _, daq_config = daq_manager.get_config()
         user_id = daq_config['writer_user_id']

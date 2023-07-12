@@ -170,4 +170,4 @@ class StdDaqRedisStorage(object):
             log = json.loads(log_bytes[0][1][FIELD_DAQ_JSON], object_pairs_hook=OrderedDict)
             return log
 
-        raise RuntimeError(f"Cannot find log with log_id{log_id}.")
+        raise RuntimeError(f"Cannot find log with log_id={log_id}.")
