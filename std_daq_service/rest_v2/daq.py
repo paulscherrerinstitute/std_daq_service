@@ -65,10 +65,10 @@ class DaqRestManager(object):
             return OrderedDict({
                 'filename': filename,
                 'file_size': file_stats.st_size,
-                'acquisition_id': log_id,
+                'log_id': log_id,
                 'dataset_name': dataset_name,
                 'n_images': dataset.shape[0],
                 'image_pixel_height': dataset.shape[1],
                 'image_pixel_width': dataset.shape[2],
-                'dtype': dataset.dtype
+                'dtype': str(dataset.dtype)
             })
