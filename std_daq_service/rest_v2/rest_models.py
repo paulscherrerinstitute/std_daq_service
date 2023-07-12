@@ -21,6 +21,8 @@ class WriteRequest(BaseModel):
         if not re.compile(path_validator).match(output_file):
             raise RuntimeError(f'Invalid output_file={output_file}. Must be a valid posix path.')
 
+        return output_file
+
 
 class AcquisitionStats(BaseModel):
     n_write_completed: int = Field(..., description="Number of completed writes", example=100)
