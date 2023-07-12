@@ -116,12 +116,12 @@ function AcquisitionLog() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {acqs.map((acq, index) => (
-              <TableRow key={index}>
+            {Object.entries(acqs).map(([log_id, acq]) => (
+              <TableRow key={log_id}>
                <TableCell style={{ width: '50px' }}>
                   <Tooltip title={<Typography variant="body2">Open file</Typography>}>
                     <AttachFileIcon fontSize="small" style={{cursor: 'pointer'}}
-                                    onClick={() => openFileViewer(acq.info.run_id)}/>
+                                    onClick={() => openFileViewer(log_id)}/>
                   </Tooltip>
                  <Tooltip title={
                    <div>
