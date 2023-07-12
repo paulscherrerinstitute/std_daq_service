@@ -1,8 +1,7 @@
-import React from 'react';
+import {useEffect, useState} from "react";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {Chip, Grid, Paper, LinearProgress, Typography, Accordion, AccordionDetails, AccordionSummary,} from '@mui/material';
-import {useEffect, useState} from "@types/react";
 import axios from "axios";
 
 function AcquisitionStatus() {
