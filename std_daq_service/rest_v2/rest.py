@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 from logging import getLogger
 from typing import Optional
@@ -61,7 +62,10 @@ def read_file_metadata(output_file):
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
                             sim_url_base: str, streamer, storage: StdDaqRedisStorage):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+    script_dir = os.path.dirname(__file__)
+    static_folder_path = os.path.join(script_dir, "static/")
+    app.mount("/static", StaticFiles(directory=static_folder_path), name="static")
 
     @app.route('/')
     def react_app(_):
