@@ -75,7 +75,7 @@ const EditDaqConfigModal = ({ isOpen, onClose, init_config }) => {
         <Modal open={isOpen} onClose={onClose}>
           <Box
             sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper',
-              boxShadow: 24, p: 4, maxWidth: '90%', maxHeight: '90%', overflow: 'auto', width: '480px' }} >
+              boxShadow: 24, p: 4, maxWidth: '90%', maxHeight: '90%', overflow: 'none' }} >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h5" component="h2"> Edit DAQ Config </Typography>
                 <Button variant="outlined" color="info" onClick={handleRefresh} startIcon={<RefreshIcon />}> Refresh </Button>
