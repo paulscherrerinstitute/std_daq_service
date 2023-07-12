@@ -1,12 +1,11 @@
-import React, {useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import SettingsIcon from '@material-ui/icons/Settings'
 import EditDaqConfigModal from './DaqConfigEdit';
 import {Grid, Paper, Typography, Button, Alert} from '@mui/material';
-import {useEffect} from "@types/react";
 import axios from "axios";
 
 function DaqConfig() {
-  const [daqConfig, setDaqConfig] = useState(null)
+  const [daqConfig, setDaqConfig] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
