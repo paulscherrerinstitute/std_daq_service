@@ -2,9 +2,31 @@ import React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {Chip, Grid, Paper, LinearProgress, Typography, Accordion, AccordionDetails, AccordionSummary,} from '@mui/material';
+import {useEffect, useState} from "@types/react";
+import axios from "axios";
 
-function AcquisitionStatus(props) {
-  const { input_state } = props;
+function AcquisitionStatus() {
+  const [acqState, setAcqState] = useState(null);
+
+  useEffect(() => {
+     const fetchData = async () => {
+       try {
+         const result = await axios.get('/writer/status');
+         if (result.data.status === 'ok') {
+           setDaqConfig(result.data.acquisition);
+         } else {
+           setAcqState(null);
+           console.log("[DaqConfig:fetchData]", result.data);
+         }
+
+       } catch (error) {
+         setAcqState(null);
+         console.log("[AcquisitionStatus:fetchData]", error);
+       }
+     }
+     const interval = setInterval(() => { fetchData();}, 500);
+     return () => clearInterval(interval);
+   }, []);
 
   const defaultState = {
     stats: {
@@ -22,7 +44,7 @@ function AcquisitionStatus(props) {
     state: "..."
   };
 
-  const state = input_state || defaultState;
+  const state = acqState || defaultState;
 
   let progress = (state.stats.n_write_completed / state.info.n_images) * 100;
   if (!progress) {
