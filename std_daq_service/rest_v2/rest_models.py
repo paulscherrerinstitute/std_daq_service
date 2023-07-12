@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 from time import time_ns
-from typing import List, Optional, OrderedDict, Dict
+from typing import List, Optional, OrderedDict, Dict, Any
 from pydantic import BaseModel, Field, validator
 
 
@@ -42,6 +42,10 @@ class AcquisitionState(str, Enum):
     FLUSHING_IMAGES = "FLUSHING_IMAGES"
 
 
+class AcquisitionReport(BaseModel):
+    __root__: Any
+
+
 class AcquisitionLog(BaseModel):
     state: AcquisitionState = Field(..., example="FINISHED",
                                     description=(
@@ -57,6 +61,7 @@ class AcquisitionLog(BaseModel):
                                           "(Completed., Interrupted., ERROR:...)", example="Completed.")
     info: WriteRequest = Field(..., description="Write request that generated this acquisition")
     stats: AcquisitionStats = Field(..., description="Stats of the acquisition")
+    reports: List[AcquisitionReport] = Field(..., description="Reports regarding this acquisition.")
 
 
 class WriterState(str, Enum):
