@@ -6,7 +6,7 @@
     "image_pixel_height": 3264,
     "image_pixel_width": 3106,
     "start_udp_port": 50020,
-    "writer_user_id": 19782,
+    "writer_user_id": 0,
     "submodule_info": [
         {
             "hostname": "beb101",
