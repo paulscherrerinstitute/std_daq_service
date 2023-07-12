@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import AcquisitionStatus from './AcquisitionStatus'
 
-import {
-  Grid
-} from '@mui/material';
+import { Grid } from '@mui/material';
 import WriterControl from "./WriterControl";
 import DaqConfig from "./DaqConfig";
 import DaqStats from "./DaqStats";
@@ -12,41 +8,13 @@ import LiveStream from "./LiveStream";
 import AcquisitionLog from "./AcquisitionLog";
 import DaqDeployment from "./DaqDeployment";
 import SimulatorControl from "./SimulatorControl";
-import FileViewer from "./FileViewer";
 
 function App() {
-  const [state, setState] = useState({
-    status: "...",
-    message: "...",
-    writer: {
-      state: "...",
-      acquisition: {
-        info: {n_images: 0, output_file: "...", run_id: "..."},
-        stats: {n_write_completed: 0, n_write_requested: 0, start_time: null, stop_time: null}
-      }
-    }});
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios(
-        '/writer/status'
-      );
-      setState(result);
-    };
-
-    const interval = setInterval(() => {
-      fetchData();
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <Grid container spacing={2}>
       <Grid item xs={3}>
-        <WriterControl state={state.writer} />
-        <AcquisitionStatus state={state.writer.acquisition} />
+        <WriterControl/>
+        <AcquisitionStatus/>
       </Grid>
       <Grid item xs={6}>
         <LiveStream />
