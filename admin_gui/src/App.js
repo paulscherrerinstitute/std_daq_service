@@ -32,14 +32,7 @@ function App() {
       const result = await axios(
         '/writer/status'
       );
-
-      const result_config = await axios(
-        '/daq/config'
-      );
-
-      let new_data = result.data;
-      new_data.config = result_config.data;
-      setState(new_data);
+      setState(result);
     };
 
     const interval = setInterval(() => {

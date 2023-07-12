@@ -61,7 +61,7 @@ class AcquisitionLog(BaseModel):
                                           "(Completed., Interrupted., ERROR:...)", example="Completed.")
     info: WriteRequest = Field(..., description="Write request that generated this acquisition")
     stats: AcquisitionStats = Field(..., description="Stats of the acquisition")
-    reports: List[AcquisitionReport] = Field(..., description="Reports regarding this acquisition.")
+    reports: Optional[List[AcquisitionReport]] = Field(None, description="Reports regarding this acquisition.")
 
 
 class WriterState(str, Enum):
