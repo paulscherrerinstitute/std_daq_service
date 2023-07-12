@@ -195,7 +195,7 @@ class LogsResponse(BaseModel):
                               example='ok')
     message: str = Field(..., description="Human readable result of API action. Exception message in case of ERROR.",
                          example='DAQ configuration changed.')
-    logs: List[AcquisitionLog] = Field(..., description="List of logs. The number equals to the requested number."
+    logs: Dict[str, AcquisitionLog] = Field(..., description="List of logs. The number equals to the requested number."
                                                         "Empty list if no logs exist.")
 
 
