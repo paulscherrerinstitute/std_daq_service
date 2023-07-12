@@ -3,6 +3,7 @@ import os
 from collections import OrderedDict
 
 import h5py
+import numpy as np
 
 from std_daq_service.rest_v2.utils import update_config, SwitchUser
 
@@ -45,10 +46,17 @@ class DaqRestManager(object):
         filename = log['info']['output_file']
 
         with SwitchUser(user_id):
-            file = h5py.File(filename)
+            file = h5py.File(filename, 'r')
             dataset_name = list(file)[0]
             dataset = file[dataset_name + '/data']
             data = dataset[i_image]
+
+            # Scale image to 8 bits with full range.
+            min_val = data.min()
+            max_val = data.max() or 1
+
+            data = ((data - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
+
             return data
 
     def get_file_metadata(self, log_id, user_id):
