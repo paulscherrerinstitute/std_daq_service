@@ -76,7 +76,7 @@ const FileViewer = ({ log_id, isOpen, onClose }) => {
                   <Slider defaultValue={0} step={1} marks min={0} max={metadata ? metadata.n_images-1 : 0}
                           value={imageIndex} onChange={handleSliderChange} />
                   <Typography>i_image={imageIndex}</Typography>
-                  <img src={`/file/${log_id}/${imageIndex}`} alt={`Image ${imageIndex}`} style={{ width: '100%', height: 'auto' }} />
+                  <img src={`/file/${log_id}/${imageIndex}`} alt={`Image ${imageIndex}`} style={{ width: '90%', height: '500px' }} />
               </Box>
             <Box mt={4}>
                 <Button variant="contained" color="primary" onClick={showModuleMap} sx={{ ml: 2 }} >Overlay module map</Button>
