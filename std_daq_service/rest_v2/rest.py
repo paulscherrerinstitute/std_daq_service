@@ -52,7 +52,10 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(FILE_METADATA)
     def get_file_metadata(acquisition_id: int):
-        file_metadata = daq_manager.get_file_metadata(acquisition_id)
+        _, daq_config = daq_manager.get_config()
+        user_id = daq_config['writer_user_id']
+
+        file_metadata = daq_manager.get_file_metadata(acquisition_id, user_id)
 
         return {"status": "ok",
                 "message": "Metadata retrieved.",
