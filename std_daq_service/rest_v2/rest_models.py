@@ -43,7 +43,7 @@ class AcquisitionState(str, Enum):
 
 
 class AcquisitionReport(BaseModel):
-    __root__: Any
+    pass
 
 
 class AcquisitionLog(BaseModel):
