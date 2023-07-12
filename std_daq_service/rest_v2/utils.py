@@ -34,22 +34,10 @@ def get_image_n_bytes(image_meta: ImageMetadata):
 
 
 def validate_output_file(output_file, user_id):
-    try:
-        # Set user_id for checking the directory permissions.
-        if user_id > 0:
-            _logger.info(f"Setting effective user_id to {user_id}.")
-            os.seteuid(user_id)
-        else:
-            _logger.info(f"Using process user_id.")
-
+    with SwitchUser(user_id):
         path_folder = os.path.dirname(output_file)
         if not os.path.exists(path_folder):
             raise RuntimeError(f'Output file folder {path_folder} does not exist. Please create it first.')
-    finally:
-        # In case you set the user_id, revert back to original.
-        if user_id > 0:
-            _logger.info(f"Returning effective user_id to {os.getuid()}.")
-            os.seteuid(os.getuid())
 
 
 def update_config(old_config, config_updates):
@@ -115,3 +103,21 @@ def set_ipc_rights(ipc_path):
         additional_p = stat.S_IWGRP | stat.S_IWOTH
         _logger.info(f"Relax permission on {filename}.")
         os.chmod(filename, current_p | additional_p)
+
+
+class SwitchUser(object):
+    def __init__(self, user_id):
+        self.user_id = user_id
+
+    def __enter__(self):
+        if self.user_id > 0:
+            _logger.info(f"Setting effective user_id to {self.user_id}.")
+            os.seteuid(self.user_id)
+        else:
+            _logger.info(f"Using process user_id.")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # In case you set the user_id, revert back to original.
+        if self.user_id > 0:
+            _logger.info(f"Returning effective user_id to {os.getuid()}.")
+            os.seteuid(os.getuid())

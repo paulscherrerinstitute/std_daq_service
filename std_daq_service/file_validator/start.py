@@ -12,6 +12,7 @@ import imageio
 from io import BytesIO
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
+from std_daq_service.rest_v2.utils import SwitchUser
 
 _logger = logging.getLogger("FileValidator")
 
@@ -49,14 +50,7 @@ def validate_file(log, user_id, detector_name):
     n_images = None
     image_id_range = None
 
-    try:
-        # Switch to writer user.
-        if user_id > 0:
-            _logger.info(f'Switching to user_id {user_id}.')
-            os.seteuid(user_id)
-        else:
-            _logger.info(f'Keeping original user_id.')
-
+    with SwitchUser(user_id):
         with h5py.File(output_file, 'r') as out_f:
             readable = True
             data_shape = out_f[source_id]['data'].shape
@@ -65,11 +59,6 @@ def validate_file(log, user_id, detector_name):
             image_id_range = [int(out_f[source_id]['image_id'][0]), int(out_f[source_id]['image_id'][-1])]
 
             gif_bytes = create_gif(out_f[source_id]['data'], N_GIF_IMAGES)
-    finally:
-        # Switch back to original process user.
-        if user_id > 0:
-            _logger.info(f'Switching back to user_id {os.getuid()}')
-            os.seteuid(os.getuid())
 
     return {
         'readable': readable,
