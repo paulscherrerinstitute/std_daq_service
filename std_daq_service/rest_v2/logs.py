@@ -28,7 +28,7 @@ class LogsLogger(object):
             try:
                 status = receiver.recv_json()
                 acq_status = status['acquisition']
-                if acq_status['state'] == 'FINISHED' and acq_status['stats']['start_time'] is not None:
+                if acq_status and acq_status['state'] == 'FINISHED' and acq_status['stats']['start_time'] is not None:
                     self.storage.add_log(acq_status)
             except Again:
                 pass
