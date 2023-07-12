@@ -1,4 +1,4 @@
-import React from 'react';
+import {useEffect, useState} from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'; 
 import axios from 'axios';
@@ -18,19 +18,27 @@ import {
     Switch, FormControlLabel
 } from '@mui/material';
 
-function WriterControl(props) {
-  const { state } = props;
-  const [numImages, setNumImages] = React.useState(100);
-  const [outputFolder, setOutputFolder] = React.useState('/tmp/');
-  const [open, setOpen] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const [filename_suffix, setFilenameSuffix] = React.useState('eiger');
-  const [enablePrefix, setEnablePrefix] = React.useState(true);
-  const [filename_example, setFilenameExample] = React.useState(generate_filename(enablePrefix, filename_suffix));
+function WriterControl() {
+  const [writerState, setWriterState] = useState(null);
+  const [numImages, setNumImages] = useState(100);
+  const [outputFolder, setOutputFolder] = useState('/tmp/');
+  const [open, setOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [filename_suffix, setFilenameSuffix] = useState('eiger');
+  const [enablePrefix, setEnablePrefix] = useState(true);
+  const [filename_example, setFilenameExample] = useState(generate_filename(enablePrefix, filename_suffix));
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios('/writer/status');
+      setState(result);
+    };
+
+    const interval = setInterval(() => {fetchData();},500);
+    return () => clearInterval(interval);
+  }, []);
 
   let status_chip;
-
-
   let start_button_disabled = true;
   let stop_button_disabled = true;
 
