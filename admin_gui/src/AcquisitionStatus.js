@@ -12,7 +12,7 @@ function AcquisitionStatus() {
        try {
          const result = await axios.get('/writer/status');
          if (result.data.status === 'ok') {
-           setDaqConfig(result.data.acquisition);
+           setAcqState(result.data.acquisition);
          } else {
            setAcqState(null);
            console.log("[DaqConfig:fetchData]", result.data);

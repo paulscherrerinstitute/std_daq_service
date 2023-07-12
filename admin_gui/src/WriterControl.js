@@ -136,7 +136,7 @@ function WriterControl() {
   const handleCopyOutputFolder = () => {
   if (state.acquisition && state.acquisition.info) {
       if (state.acquisition.info.output_file) {
-            const fullPath = acquisition.info.output_file;
+            const fullPath = state.acquisition.info.output_file;
             const lastSlashIndex = fullPath.lastIndexOf('/');
             const folderPath = fullPath.substring(0, lastSlashIndex + 1);
 
