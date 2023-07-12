@@ -18,7 +18,7 @@ function LinearProgressWithLabel(props) {
   );
 }
 
-export default function ModuleMapDialog({ open, handleClose, filename, i_image }) {
+export default function ModuleMapDialog({ open, handleClose, log_id, i_image }) {
   const [buffer, setBuffer] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -27,7 +27,7 @@ export default function ModuleMapDialog({ open, handleClose, filename, i_image }
     if (open) {
       axios({
         method: 'get',
-        url: 'http://localhost:5000/file/1/1?module_map=1',
+        url: `/file/${log_id}/${i_image}?module_map=1`,
         responseType: 'arraybuffer',
         onDownloadProgress: function (progressEvent) {
           setProgress((progressEvent.loaded / progressEvent.total) * 100);
@@ -44,7 +44,7 @@ export default function ModuleMapDialog({ open, handleClose, filename, i_image }
   return (
     <Dialog open={open} fullScreen>
       <DialogTitle>
-        <b>Module map </b> filename={filename} i_image={i_image}
+        <b>Module map </b> i_image={i_image}
         <IconButton edge="end" color="inherit" onClick={handleClose} aria-label="close">
           <CloseIcon />
         </IconButton>

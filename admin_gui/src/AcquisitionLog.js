@@ -179,7 +179,7 @@ function AcquisitionLog() {
           </Box>
         </Modal>
 
-        <FileViewer acquisition_id={currentAcquisitionId} isOpen={isFileViewerOpen} onClose={closeFileViewer} />
+        <FileViewer log_id={currentAcquisitionId} isOpen={isFileViewerOpen} onClose={closeFileViewer} />
         </div>
   )
 }
