@@ -125,12 +125,14 @@ class WriterStatusTracker(object):
     def _log_stop_status(self, status):
         with self.status_lock:
             self.status['state'] = 'READY'
-            self.status['acquisition']['state'] = 'FINISHED'
-            self.status['acquisition']['stats']['stop_time'] = time()
-            self.status['acquisition']['message'] = status.error_message
-            if status.error_message.startswith("ERROR:"):
-                self.status['acquisition']['stats']['start_time'] = self.status['acquisition']['stats']['stop_time']
-                self.status['acquisition']['state'] = 'FAILED'
+
+            if self.status['acquisition']:
+                self.status['acquisition']['state'] = 'FINISHED'
+                self.status['acquisition']['stats']['stop_time'] = time()
+                self.status['acquisition']['message'] = status.error_message
+                if status.error_message.startswith("ERROR:"):
+                    self.status['acquisition']['stats']['start_time'] = self.status['acquisition']['stats']['stop_time']
+                    self.status['acquisition']['state'] = 'FAILED'
 
         self._current_run_id = None
 
