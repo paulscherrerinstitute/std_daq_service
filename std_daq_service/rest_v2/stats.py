@@ -86,16 +86,17 @@ class StatsLogger(object):
                     writer_status = writer_receiver.recv_json(flags=zmq.NOBLOCK)
                     self.storage.add_writer_status(writer_status)
 
-                    n_written = writer_status['acquisition']['stats']['n_write_completed']
+                    if writer_status['acquisition']:
+                        n_written = writer_status['acquisition']['stats']['n_write_completed']
 
-                    # Start of a new write
-                    if n_written == 0:
-                        last_n_write_completed = 0
+                        # Start of a new write
+                        if n_written == 0:
+                            last_n_write_completed = 0
 
-                    new_images_writer = n_written - last_n_write_completed
-                    last_n_write_completed = n_written
+                        new_images_writer = n_written - last_n_write_completed
+                        last_n_write_completed = n_written
 
-                    new_bytes_writer = image_n_bytes * new_images_writer
+                        new_bytes_writer = image_n_bytes * new_images_writer
             except Again:
                 self.stats = copy.deepcopy(EMPTY_STATS)
                 continue
