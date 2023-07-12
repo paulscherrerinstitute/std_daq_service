@@ -3,19 +3,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'; 
 import axios from 'axios';
 
-import {
-  Chip,
-  Grid,
-  Paper,
-  Typography,
-    Accordion,
-  AccordionDetails,
-  AccordionSummary,
-    TextField,
-    Button,
-    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-    InputAdornment, IconButton,
-    Switch, FormControlLabel
+import { Chip, Grid, Paper, Typography, Accordion, AccordionDetails, AccordionSummary, TextField, Button, Dialog,
+  DialogTitle, DialogContent, DialogContentText, DialogActions, InputAdornment, IconButton, Switch, FormControlLabel
 } from '@mui/material';
 
 function WriterControl() {
@@ -28,19 +17,36 @@ function WriterControl() {
   const [enablePrefix, setEnablePrefix] = useState(true);
   const [filename_example, setFilenameExample] = useState(generate_filename(enablePrefix, filename_suffix));
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios('/writer/status');
-      setState(result);
-    };
+    useEffect(() => {
+     const fetchData = async () => {
+       try {
+         const result = await axios.get('/writer/status');
+         if (result.data.status === 'ok') {
+           setWriterState(result.data);
+         } else {
+           setWriterState(null);
+           console.log("[WriterControl:fetchData]", result.data);
+         }
 
-    const interval = setInterval(() => {fetchData();},500);
-    return () => clearInterval(interval);
-  }, []);
+       } catch (error) {
+         setWriterState(null);
+         console.log("[WriterControl:fetchData]", error);
+       }
+     }
+     const interval = setInterval(() => { fetchData();}, 500);
+     return () => clearInterval(interval);
+   }, []);
 
   let status_chip;
   let start_button_disabled = true;
   let stop_button_disabled = true;
+
+  const defaultState = {
+    message: "...",
+    state: "UNKNOWN"
+  };
+
+  const state = writerState || defaultState;
 
   switch (state.state) {
     case 'READY':
@@ -128,9 +134,9 @@ function WriterControl() {
   };
 
   const handleCopyOutputFolder = () => {
-  if (props.state.acquisition && props.state.acquisition.info) {
-      if (props.state.acquisition.info.output_file) {
-            const fullPath = props.state.acquisition.info.output_file;
+  if (state.acquisition && state.acquisition.info) {
+      if (state.acquisition.info.output_file) {
+            const fullPath = acquisition.info.output_file;
             const lastSlashIndex = fullPath.lastIndexOf('/');
             const folderPath = fullPath.substring(0, lastSlashIndex + 1);
 
@@ -162,14 +168,8 @@ function WriterControl() {
           >
             Start
           </Button>
-          <Button
-            variant="contained"
-            onClick={handleStopClick}
-            disabled={stop_button_disabled}
-            sx={{ ml: 2, bgcolor: 'error.main', color: 'white' }}
-          >
-            Stop
-          </Button>
+          <Button variant="contained" onClick={handleStopClick} disabled={stop_button_disabled}
+                  sx={{ ml: 2, bgcolor: 'error.main', color: 'white' }} >Stop</Button>
         </Grid>
       </Grid>
 
