@@ -45,7 +45,7 @@ function DaqConfig() {
 
   return (
     <Paper sx={{ p: 2 }} elevation={3}>
-        <EditDaqConfigModal isOpen={isModalOpen} onClose={handleCloseModal} init_config={state} />
+        <EditDaqConfigModal isOpen={isModalOpen} onClose={handleCloseModal} init_config={daqConfig} />
       <Typography variant="h6" gutterBottom>DAQ config</Typography>
         {no_config ? (
            <Alert severity="error">No config available. Create one by using the Edit button below.</Alert>
@@ -53,27 +53,27 @@ function DaqConfig() {
           <div>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Detector type:</Typography></Grid>
-            <Grid item> {state.detector_type} </Grid>
+            <Grid item> {daqConfig.detector_type} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Detector name:</Typography></Grid>
-            <Grid item> {state.detector_name} </Grid>
+            <Grid item> {daqConfig.detector_name} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Image shape:</Typography></Grid>
-            <Grid item> [{state.image_pixel_height}, {state.image_pixel_width}] (height, width)</Grid>
+            <Grid item> [{daqConfig.image_pixel_height}, {daqConfig.image_pixel_width}] (height, width)</Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Bit depth:</Typography></Grid>
-            <Grid item> {state.bit_depth} bits/pixel </Grid>
+            <Grid item> {daqConfig.bit_depth} bits/pixel </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Number of modules:</Typography></Grid>
-            <Grid item> {state.n_modules} </Grid>
+            <Grid item> {daqConfig.n_modules} </Grid>
           </Grid>
           <Grid container alignItems="center" spacing={1}>
             <Grid item> <Typography variant="subtitle2">Start UDP port:</Typography></Grid>
-            <Grid item> {state.start_udp_port} </Grid>
+            <Grid item> {daqConfig.start_udp_port} </Grid>
           </Grid>
         </div>
             )}
