@@ -1,7 +1,10 @@
 import logging
+import os
+from collections import OrderedDict
 
-from std_daq_service.rest_v2.utils import update_config
+import h5py
 
+from std_daq_service.rest_v2.utils import update_config, SwitchUser
 
 _logger = logging.getLogger("DaqRestManager")
 # milliseconds
@@ -36,3 +39,36 @@ class DaqRestManager(object):
 
     def get_deployment_status(self):
         return self.storage.get_deployment_status()
+
+    def get_image_data(self, log_id, i_image, user_id):
+        log = self.storage.get_log(log_id)
+        filename = log['info']['output_filename']
+
+        with SwitchUser(user_id):
+            file = h5py.File(filename)
+            dataset_name = list(file)[0]
+            dataset = file[dataset_name + '/data']
+            data = dataset[i_image]
+            return data
+
+    def get_file_metadata(self, log_id, user_id):
+        log = self.storage.get_log(log_id)
+        filename = log['info']['output_filename']
+
+        with SwitchUser(user_id):
+            file_stats = os.stat(filename)
+
+            file = h5py.File(filename)
+            dataset_name = list(file)[0]
+            dataset = file[dataset_name + '/data']
+
+            return OrderedDict({
+                'filename': filename,
+                'file_size': file_stats.st_size,
+                'acquisition_id': log_id,
+                'dataset_name': dataset_name,
+                'n_images': dataset.shape[0],
+                'image_pixel_height': dataset.shape[1],
+                'image_pixel_width': dataset.shape[2],
+                'dtype': dataset.dtype
+            })

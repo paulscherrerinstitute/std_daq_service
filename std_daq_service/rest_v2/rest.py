@@ -4,7 +4,6 @@ from logging import getLogger
 from typing import Optional
 
 import cv2
-import numpy as np
 import requests
 from starlette.responses import FileResponse, JSONResponse, StreamingResponse
 
@@ -13,7 +12,7 @@ from std_daq_service.rest_v2.rest_models import WriterResponse, SimulatorRespons
     LogsResponse, DeploymentStatusResponse, ConfigRequest, WriteRequest
 from std_daq_service.udp_simulator.start_rest import STATUS_ENDPOINT, START_ENDPOINT, STOP_ENDPOINT
 from std_daq_service.rest_v2.daq import DaqRestManager
-from std_daq_service.rest_v2.utils import validate_output_file
+from std_daq_service.rest_v2.utils import validate_output_file, draw_module_map
 from std_daq_service.rest_v2.writer import WriterRestManager
 from fastapi.staticfiles import StaticFiles
 
@@ -34,30 +33,10 @@ DAQ_LOGS_ENDPOINT = '/daq/logs/{n_logs}'
 DAQ_DEPLOYMENT_STATUS_ENDPOINT = '/daq/deployment'
 
 FILE_METADATA = '/file/{acquisition_id}'
-FILE_IMAGE = '/fileview/{acquisition_id}/{i_image}'
+FILE_IMAGE = '/file/{acquisition_id}/{i_image}'
 
 request_logger = getLogger('request_log')
 _logger = getLogger('rest')
-
-
-def get_font_scale(target_height_in_pixels: int):
-    # Set a base scale
-    scale = 1.0
-    # Use a typical text
-    text = "Test text"
-    # Get the size of the text box
-    ((text_width, text_height), _) = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)
-    # Calculate the target font scale
-    target_font_scale = target_height_in_pixels / text_height
-    return target_font_scale
-
-def read_file_metadata(output_file):
-    return {
-        'n_files': 100,
-        'image_pixel_width': 2016,
-        'image_pixel_height': 2016,
-        'dtype': 'uint16'
-    }
 
 
 def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager: DaqRestManager,
@@ -73,98 +52,29 @@ def register_rest_interface(app, writer_manager: WriterRestManager, daq_manager:
 
     @app.route(FILE_METADATA)
     def get_file_metadata(acquisition_id: int):
-        log = storage.get_log(log_id=acquisition_id)
+        file_metadata = daq_manager.get_file_metadata(acquisition_id)
 
         return {"status": "ok",
                 "message": "Metadata retrieved.",
-                'file_metadata': {
-                    "log_info": log['info'],
-                    "file_info": read_file_metadata(log['info']['output_file'])
-                }}
+                'file_metadata': file_metadata}
 
-    @app.get('/file/{acquisition_id}/{i_image}')
+    @app.route(FILE_IMAGE)
     def get_file_image(acquisition_id: int, i_image: int, module_map: Optional[int] = 0, gaps: Optional[int] = 0):
         _, daq_config = daq_manager.get_config()
-        image_pixel_width = daq_config['image_pixel_width']
-        image_pixel_height = daq_config['image_pixel_height']
+        user_id = daq_config['writer_user_id']
 
-        rectangle_color = (0, 255, 0)  # Green
-        rectangle_thickness = 2  # Pixels
-        text_color = (0, 255, 0)  # Green
-
-        frame = np.random.randint(low=0, high=256, size=(image_pixel_height, image_pixel_width), dtype=np.uint8)
+        frame = daq_manager.get_image_data(acquisition_id, i_image, user_id)
+        image_pixel_height = frame.shape[0]
+        image_pixel_width = frame.shape[1]
 
         image = cv2.resize(frame, (image_pixel_width, image_pixel_height))
         image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
 
         if module_map == 1:
-            for key, (x_start, y_start, x_end, y_end) in daq_config['module_positions'].items():
-                # Draw the rectangle
-                cv2.rectangle(image, (x_start, y_start), (x_end, y_end), rectangle_color, rectangle_thickness)
-
-                # Draw the text for the module and its submodules
-                text_start_y = y_start if y_start < y_end else y_end
-                size_y = abs(y_end - y_start) + 20
-                gap_y = size_y // 5
-                font_scale = get_font_scale(30)
-                y_smaller = y_start if y_start < y_end else y_end
-                y_bigger = y_end if y_end > y_start else y_start
-
-                submodule_info = next((item for item in daq_config['submodule_info'] if item["submodule"] == int(key)), None)
-                if submodule_info:
-                    cv2.putText(image, f"module_id: {key}", (x_start + rectangle_thickness + 20,
-                                                             text_start_y + (1*gap_y)),
-                                cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_color, rectangle_thickness)
-                    cv2.putText(image, f"hostname: {submodule_info['hostname']}",
-                                (x_start + rectangle_thickness + 20, text_start_y + (2*gap_y)),
-                                cv2.FONT_HERSHEY_SIMPLEX, font_scale,
-                                text_color, rectangle_thickness)
-                    cv2.putText(image, f"port: {submodule_info['port']}",
-                                (x_start + rectangle_thickness + 20, text_start_y + (3*gap_y)),
-                                cv2.FONT_HERSHEY_SIMPLEX, font_scale,
-                                text_color, rectangle_thickness)
-                    cv2.putText(image, f"row: {submodule_info['row']}, column: {submodule_info['column']}",
-                        (x_start + rectangle_thickness + 20, text_start_y + (4 * gap_y)), cv2.FONT_HERSHEY_SIMPLEX,
-                        font_scale,
-                        text_color, rectangle_thickness)
-
-                arrow_color = (0, 255, 0)  # Red
-                arrow_thickness = 20  # Pixels
-                arrow_line_length = 100  # Length of the arrow's line
-                arrow_tip_length = 30  # Length of the two lines that make the arrow tip
-
-                arrow_start_x = x_end - 35  # adjust these as needed
-
-                if y_start > y_end:  # if true, arrow points upwards
-                    arrow_start_y = y_smaller + arrow_line_length + 20  # adjust these as needed
-                    arrow_end_y = arrow_start_y - arrow_line_length
-                    # Draw the arrow line
-                    cv2.line(image, (arrow_start_x, arrow_start_y), (arrow_start_x, arrow_end_y), arrow_color,
-                             arrow_thickness)
-                    # Draw the arrow tip
-                    cv2.line(image, (arrow_start_x, arrow_end_y),
-                             (arrow_start_x - arrow_tip_length // 2, arrow_end_y + arrow_tip_length), arrow_color,
-                             arrow_thickness)
-                    cv2.line(image, (arrow_start_x, arrow_end_y),
-                             (arrow_start_x + arrow_tip_length // 2, arrow_end_y + arrow_tip_length), arrow_color,
-                             arrow_thickness)
-                else:  # arrow points downwards
-                    arrow_start_y = y_bigger - 120  # adjust these as needed
-                    arrow_end_y = arrow_start_y + arrow_line_length
-                    # Draw the arrow line
-                    cv2.line(image, (arrow_start_x, arrow_start_y), (arrow_start_x, arrow_end_y), arrow_color,
-                             arrow_thickness)
-                    # Draw the arrow tip
-                    cv2.line(image, (arrow_start_x, arrow_end_y),
-                             (arrow_start_x - arrow_tip_length // 2, arrow_end_y - arrow_tip_length), arrow_color,
-                             arrow_thickness)
-                    cv2.line(image, (arrow_start_x, arrow_end_y),
-                             (arrow_start_x + arrow_tip_length // 2, arrow_end_y - arrow_tip_length), arrow_color,
-                             arrow_thickness)
+            draw_module_map(image, daq_config)
 
         _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 50])
         image_bytes = buffer.tobytes()
-
         img_io = BytesIO(image_bytes)
 
         return StreamingResponse(img_io, media_type='image/jpeg', headers={'Content-Length': str(len(image_bytes))})
