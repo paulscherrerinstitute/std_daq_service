@@ -12,7 +12,7 @@ from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
 
 DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
                      'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
-                     'writer_user_id', 'module_positions', 'submodule_info']
+                     'writer_user_id', 'module_positions', 'submodule_info', 'deactivate']
 
 DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
                          'writer_user_id']
