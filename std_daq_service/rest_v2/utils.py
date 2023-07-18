@@ -1,21 +1,10 @@
 import logging
 import os
-import re
 import stat
-from collections import OrderedDict
-from time import time_ns
-
 import cv2
 import numpy as np
 import zmq
 from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataDtype
-
-DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
-                     'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
-                     'writer_user_id', 'module_positions', 'submodule_info']
-
-DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
-                         'writer_user_id']
 
 
 _logger = logging.getLogger("utils")
@@ -38,33 +27,6 @@ def validate_output_file(output_file, user_id):
         path_folder = os.path.dirname(output_file)
         if not os.path.exists(path_folder):
             raise RuntimeError(f'Output file folder {path_folder} does not exist. Please create it first.')
-
-
-def update_config(old_config, config_updates):
-    if old_config is not None:
-        new_config = OrderedDict({param: config_updates.dict().get(param, old_config[param])
-                                  for param in DAQ_CONFIG_FIELDS})
-    else:
-        new_config = config_updates
-
-    validate_config(new_config)
-
-    return new_config
-
-
-def validate_config(new_config):
-    error_message = ""
-    for field_name in DAQ_CONFIG_FIELDS:
-        if field_name not in new_config:
-            error_message += f' missing {field_name},'
-        elif field_name in DAQ_CONFIG_INT_FIELDS:
-            try:
-                new_config[field_name] = int(new_config[field_name])
-            except ValueError:
-                error_message += f' non-int value {field_name};'
-
-    if error_message:
-        raise RuntimeError(f"Config errors:{error_message}")
 
 
 def generate_mjpg_image_stream(ctx, image_stream_url):
