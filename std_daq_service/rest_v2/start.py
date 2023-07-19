@@ -8,16 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from redis.client import Redis
 from uvicorn import run
 
+from std_daq_service.config import load_daq_config, get_stream_addresses
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.logs import LogsLogger
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import StatsLogger
-from std_daq_service.rest_v2.utils import validate_config
-from std_daq_service.writer_driver.start_stop_driver import WriterDriver
+from std_daq_service.writer_driver.writer_driver import WriterDriver
 from std_daq_service.rest_v2.writer import WriterRestManager, StatusLogger
 from std_daq_service.rest_v2.rest import register_rest_interface
-from std_daq_service.writer_driver.utils import get_stream_addresses
 
 
 _logger = logging.getLogger(__name__)
@@ -33,10 +32,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
     try:
         _logger.info(f'Starting Start Stop REST for file: {config_file} (rest_port={rest_port}).')
 
-        with open(config_file, 'r') as input_file:
-            daq_config = json.load(input_file)
-        validate_config(daq_config)
-
+        daq_config = load_daq_config(config_file)
         detector_name = daq_config['detector_name']
 
         command_address, in_status_address, out_status_address, image_metadata_address = \

@@ -7,6 +7,8 @@ DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
 DAQ_CONFIG_INT_FIELDS = ['bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
                          'writer_user_id']
 
+IPC_BASE = "ipc:///tmp"
+
 
 def load_daq_config(config_file):
     with open(config_file, 'r') as input_file:
@@ -44,3 +46,13 @@ def validate_config(new_config):
 
     if error_message:
         raise RuntimeError(f"Config errors:{error_message}")
+
+
+def get_stream_addresses(detector_name):
+
+    command_address = f'{IPC_BASE}/{detector_name}-writer'
+    in_status_address = f'{IPC_BASE}/{detector_name}-writer-status-sync'
+    out_status_address = f'{IPC_BASE}/{detector_name}-writer-status'
+    image_metadata_address = f'{IPC_BASE}/{detector_name}-image'
+
+    return command_address, in_status_address, out_status_address, image_metadata_address
