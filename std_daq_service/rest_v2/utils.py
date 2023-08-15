@@ -76,7 +76,7 @@ class SwitchUser(object):
             _logger.info(f"Setting effective user_id to {self.user_id}.")
             os.seteuid(self.user_id)
         else:
-            _logger.info(f"Using process user_id.")
+            _logger.debug(f"Using process user_id.")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # In case you set the user_id, revert back to original.

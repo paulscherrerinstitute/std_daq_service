@@ -33,21 +33,6 @@ def validate_config(new_config):
         raise RuntimeError(f"Config errors:{error_message}")
 
 
-def validate_config(new_config):
-    error_message = ""
-    for field_name in DAQ_CONFIG_FIELDS:
-        if field_name not in new_config:
-            error_message += f' missing {field_name},'
-        elif field_name in DAQ_CONFIG_INT_FIELDS:
-            try:
-                new_config[field_name] = int(new_config[field_name])
-            except ValueError:
-                error_message += f' non-int value {field_name};'
-
-    if error_message:
-        raise RuntimeError(f"Config errors:{error_message}")
-
-
 def get_stream_addresses(detector_name):
 
     command_address = f'{IPC_BASE}/{detector_name}-writer'

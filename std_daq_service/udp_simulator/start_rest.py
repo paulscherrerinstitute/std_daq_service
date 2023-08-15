@@ -5,8 +5,8 @@ import logging
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+from std_daq_service.config import validate_config
 from std_daq_service.udp_simulator.sim import SimulationRestManager
-from std_daq_service.rest_v2.utils import validate_config
 
 _logger = logging.getLogger("DetectorSimulator")
 request_logger = logging.getLogger('request_log')
