@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 
 DAQ_CONFIG_FIELDS = ['detector_name', 'detector_type',
                      'bit_depth', 'image_pixel_height', 'image_pixel_width', 'n_modules', 'start_udp_port',
@@ -41,3 +42,15 @@ def get_stream_addresses(detector_name):
     image_metadata_address = f'{IPC_BASE}/{detector_name}-image'
 
     return command_address, in_status_address, out_status_address, image_metadata_address
+
+
+def update_config(old_config, config_updates):
+    if old_config is not None:
+        new_config = OrderedDict({param: config_updates.get(param, old_config[param])
+                                  for param in DAQ_CONFIG_FIELDS})
+    else:
+        new_config = config_updates
+
+    validate_config(new_config)
+
+    return new_config

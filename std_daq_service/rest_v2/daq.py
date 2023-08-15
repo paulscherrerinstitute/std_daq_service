@@ -5,7 +5,8 @@ from collections import OrderedDict
 import h5py
 import numpy as np
 
-from std_daq_service.rest_v2.utils import update_config, SwitchUser
+from std_daq_service.config import update_config
+from std_daq_service.rest_v2.utils import SwitchUser
 
 _logger = logging.getLogger("DaqRestManager")
 # milliseconds
