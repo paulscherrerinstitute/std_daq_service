@@ -6,7 +6,7 @@ import zmq
 from zmq import Again
 
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
-from std_daq_service.writer_driver.writer_driver import WriterDriver
+from std_daq_service.writer_driver import WriterDriver
 
 _logger = logging.getLogger("WriterRestManager")
 
