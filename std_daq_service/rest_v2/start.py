@@ -14,10 +14,9 @@ from std_daq_service.rest_v2.logs import LogsLogger
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
 from std_daq_service.rest_v2.redis_storage import StdDaqRedisStorage
 from std_daq_service.rest_v2.stats import StatsLogger
-from std_daq_service.writer_driver.writer_driver import WriterDriver
 from std_daq_service.rest_v2.writer import WriterRestManager, StatusLogger
 from std_daq_service.rest_v2.rest import register_rest_interface
-
+from std_daq_service.writer_driver import WriterDriver
 
 _logger = logging.getLogger(__name__)
 
