@@ -24,6 +24,11 @@ class GFUdpPacketGenerator(object):
         else:
             self.image = self._generate_default_image()
 
+        if (image_pixel_height, image_pixel_width) != self.image.shape:
+            raise RuntimeError(f"Wrong dimensions of provided image. "
+                               f"Expected size [{image_pixel_height}, {image_pixel_width}], "
+                               f"but got {self.image.shape}")
+
         # Scale image to 12 bits - (2 ** 12 - 1)
         self.image = np.multiply(self.image, (2 ** 12 - 1) / self.image.max(), casting='unsafe').astype('uint16')
 
