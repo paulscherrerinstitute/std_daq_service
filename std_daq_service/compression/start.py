@@ -1,9 +1,12 @@
 import argparse
 import logging
+from time import sleep
+
 from std_buffer.image_metadata_pb2 import ImageMetadata
 import zmq
 
 from std_daq_service.config import load_daq_config
+from std_daq_service.image_simulator.start import N_RAM_BUFFER_SLOTS
 from std_daq_service.ram_buffer import RamBuffer
 
 _logger = logging.getLogger("Compression")
@@ -11,29 +14,29 @@ _logger = logging.getLogger("Compression")
 
 def start_compression(config_file):
     daq_config = load_daq_config(config_file)
-    image_metadata_address = "ipc:///tmp/metadata"
-    detector_name = 'test_detector'
-    image_n_bytes = 512 * 1024 * 2 * 16
-    N_RAM_BUFFER_SLOTS = 10000
+    detector_name = daq_config['detector_name']
+    image_n_bytes = daq_config['bit_depth'] * daq_config['image_pixel_height'] * daq_config['image_pixel_width']
+
+    image_metadata_address = f"ipc:///tmp/{detector_name}-compressed"
 
     # Receive the image metadata stream from the detector.
     ctx = zmq.Context()
     image_metadata_receiver = ctx.socket(zmq.SUB)
+    image_metadata_receiver.setsockopt(zmq.CONFLATE, 1)
     image_metadata_receiver.connect(image_metadata_address)
+    image_metadata_receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
-    buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
+    # buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
 
     image_meta = ImageMetadata()
     while True:
         try:
             meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
-            image_meta.ParseFromString(meta_raw)
+            if meta_raw:
+                image_meta.ParseFromString(meta_raw)
+                print(image_meta)
 
-            uncompressed_data = buffer.get_data(image_meta.image_id)
-
-            # compressed_data....
-
-            buffer.write(image_meta.image_id, compressed_data)
+            sleep(0.1)
 
         except KeyboardInterrupt:
             break
