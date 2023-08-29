@@ -37,9 +37,9 @@ def start_compression(config_file):
                 image_meta.ParseFromString(meta_raw)
                 print(image_meta)
 
-            sleep(0.1)
+            sleep(1)
         except Again:
-            sleep(0.1)
+            sleep(1)
         except KeyboardInterrupt:
             break
         except Exception:
