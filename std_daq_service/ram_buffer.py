@@ -6,7 +6,7 @@ _logger = logging.getLogger("RamBuffer")
 class RamBuffer:
     def __init__(self, channel_name, data_n_bytes, n_slots, compression=None):
         compression_text = 'image' if compression is None else 'compressed'
-        self.buffer_name = f'///tmp/{channel_name}-{compression_text}'
+        self.buffer_name = f'/tmp/{channel_name}-{compression_text}'
 
         self.n_slots = n_slots
         self.data_bytes = data_n_bytes
