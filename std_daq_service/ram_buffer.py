@@ -3,10 +3,11 @@ from multiprocessing.shared_memory import SharedMemory
 
 _logger = logging.getLogger("RamBuffer")
 
-
 class RamBuffer:
-    def __init__(self, channel_name, data_n_bytes, n_slots):
-        self.buffer_name = channel_name
+    def __init__(self, channel_name, data_n_bytes, n_slots, compression=None):
+        compression_text = 'image' if compression is None else 'compressed'
+        self.buffer_name = f'///tmp/{channel_name}-{compression_text}'
+
         self.n_slots = n_slots
         self.data_bytes = data_n_bytes
         self.buffer_bytes = self.data_bytes * self.n_slots
@@ -20,9 +21,10 @@ class RamBuffer:
             _logger.error("SharedMemory failed: %s not found", self.buffer_name)
             raise
 
-        self.buffer = bytearray(self.shm.buf)
+        self.buffer = memoryview(self.shm.buf)
 
     def __del__(self):
+        self.buffer.release()
         self.shm.close()
         self.shm.unlink()
 
@@ -37,3 +39,5 @@ class RamBuffer:
         start = slot_id * self.data_bytes
         end = start + self.data_bytes
         return self.buffer[start:end]
+
+
