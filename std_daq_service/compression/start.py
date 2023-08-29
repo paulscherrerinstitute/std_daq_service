@@ -27,7 +27,7 @@ def start_compression(config_file):
     image_metadata_receiver.connect(image_metadata_address)
     image_metadata_receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
-    # buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
+    buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
 
     image_meta = ImageMetadata()
     while True:
@@ -35,7 +35,8 @@ def start_compression(config_file):
             meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
             if meta_raw:
                 image_meta.ParseFromString(meta_raw)
-                print(image_meta)
+                compressed_data = buffer.get_data(image_meta.image_id())
+                print(image_meta, '\n', compressed_data)
 
             sleep(1)
         except Again:
