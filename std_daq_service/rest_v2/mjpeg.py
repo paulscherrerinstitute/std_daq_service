@@ -1,6 +1,7 @@
 import argparse
 import logging
 from time import sleep
+import blosc2
 
 import zmq
 import json
@@ -38,11 +39,16 @@ class MJpegLiveStream(object):
 
         _logger.info("Live stream started.")
         n_timeouts = 0
+
+        def uncompress(data):
+            return blosc2.decompress(data)
+
         while True:
             try:
                 raw_meta, raw_data = receiver.recv_multipart()
                 meta = json.loads(raw_meta.decode('utf-8'))
-                new_frame = np.frombuffer(raw_data, dtype=meta['type']).reshape(meta['shape'])
+                uncompressed_data = uncompress(raw_data)
+                new_frame = np.frombuffer(uncompressed_data, dtype=meta['type']).reshape(meta['shape'])
 
                 # Flip the image vertically.
                 new_frame = cv2.flip(new_frame, 0)
