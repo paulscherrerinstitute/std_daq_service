@@ -42,7 +42,7 @@ def start_compression(config_file):
                 compressed_data = buffer.get_data(image_meta.image_id)
                 data = bitshuffle.decompress_lz4(np.array(compressed_data),
                                                  shape=[image_meta.height, image_meta.width],
-                                                 dtype='uint16')
+                                                 dtype=np.uint16)
 
                 print(data)
 
