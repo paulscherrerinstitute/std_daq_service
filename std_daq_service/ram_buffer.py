@@ -24,9 +24,12 @@ class RamBuffer:
         self.buffer = memoryview(self.shm.buf)
 
     def __del__(self):
-        self.buffer.release()
-        self.shm.close()
-        self.shm.unlink()
+        if self.buffer:
+            self.buffer.release()
+
+        if self.shm:
+            self.shm.close()
+            self.shm.unlink()
 
     def write(self, image_id, src_data):
         dst_data = self.get_data(image_id)
