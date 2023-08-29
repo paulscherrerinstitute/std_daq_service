@@ -36,7 +36,7 @@ def start_compression(config_file):
             meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
             if meta_raw:
                 image_meta.ParseFromString(meta_raw)
-                compressed_data = buffer.get_data(image_meta.image_id())
+                compressed_data = buffer.get_data(image_meta.image_id)
                 print(image_meta, '\n', compressed_data)
 
                 compressed_data = compressed_data.tobytes()
