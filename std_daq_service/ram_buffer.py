@@ -15,6 +15,9 @@ class RamBuffer:
         _logger.info(f"Opening buffer_name {self.buffer_name} with n_slots {self.n_slots} "
                      f"for data_bytes {self.data_bytes}")
 
+        self.shm = None
+        self.buffer = None
+
         try:
             self.shm = SharedMemory(name=self.buffer_name, create=False, size=self.buffer_bytes)
         except FileNotFoundError:
