@@ -2,7 +2,8 @@ import argparse
 import logging
 from time import sleep
 
-import blosc2
+import bitshuffle
+import numpy as np
 from std_buffer.image_metadata_pb2 import ImageMetadata
 import zmq
 from zmq import Again
@@ -37,15 +38,13 @@ def start_compression(config_file):
             meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
             if meta_raw:
                 image_meta.ParseFromString(meta_raw)
-                compressed_data = buffer.get_data(image_meta.image_id)
-                print(image_meta, '\n', compressed_data)
 
-                compressed_data = compressed_data.tobytes()
-                if compressed_data:
-                    decompressed_data = blosc2.decompress(compressed_data)
-                    print(decompressed_data)
-                else:
-                    print("Cannot decompress.")
+                compressed_data = buffer.get_data(image_meta.image_id)
+                data = bitshuffle.decompress_lz4(compressed_data,
+                                                 shape=[image_meta.height, image_meta.width],
+                                                 dtype='uint16')
+
+                print(data)
 
             sleep(1)
         except Again:
