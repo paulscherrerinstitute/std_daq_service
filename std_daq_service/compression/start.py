@@ -4,6 +4,7 @@ from time import sleep
 
 from std_buffer.image_metadata_pb2 import ImageMetadata
 import zmq
+from zmq import Again
 
 from std_daq_service.config import load_daq_config
 from std_daq_service.image_simulator.start import N_RAM_BUFFER_SLOTS
@@ -37,7 +38,8 @@ def start_compression(config_file):
                 print(image_meta)
 
             sleep(0.1)
-
+        except Again:
+            sleep(0.1)
         except KeyboardInterrupt:
             break
         except Exception:
