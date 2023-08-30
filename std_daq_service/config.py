@@ -46,7 +46,7 @@ def get_stream_addresses(detector_name):
 
 def update_config(old_config, config_updates):
     if old_config is not None:
-        new_config = OrderedDict({param: config_updates.get(param, old_config[param])
+        new_config = OrderedDict({param: getattr(config_updates, param, old_config[param])
                                   for param in DAQ_CONFIG_FIELDS})
     else:
         new_config = config_updates
