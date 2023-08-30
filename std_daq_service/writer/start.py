@@ -40,14 +40,12 @@ def start_writing(config_file, output_file, n_images):
     file = h5py.File(output_file, 'w')
     # block_size = 0 let Bitshuffle choose its value
     block_size = 0
+    dtype = f'uint{daq_config["bit_depth"]}'
     image_shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
-    dataset = file.create_dataset(detector_name,
-                                  tuple([n_images] + image_shape),
+    dataset = file.create_dataset(detector_name, tuple([n_images] + image_shape),
                                   compression=bitshuffle.h5.H5FILTER,
                                   compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
-                                  dtype=f'uint{daq_config["bit_depth"]}',
-                                  chunks=tuple([1] + image_shape)
-                                  )
+                                  dtype=dtype, chunks=tuple([1] + image_shape) )
 
     i_image = 0
     while True:
@@ -56,12 +54,11 @@ def start_writing(config_file, output_file, n_images):
             if meta_raw:
                 image_meta.ParseFromString(meta_raw)
 
-                dataset[i_image] = buffer.get_data(image_meta.image_id)
+                dataset[i_image] = np.frombuffer(buffer.get_data(image_meta.image_id), dtype=dtype).reshape(image_shape)
                 i_image += 1
 
-            sleep(1)
         except Again:
-            sleep(1)
+            continue
         except KeyboardInterrupt:
             break
         except Exception:
