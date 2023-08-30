@@ -1,7 +1,7 @@
 import argparse
 import logging
 import os
-from time import sleep
+from time import sleep, time
 
 import bitshuffle
 import bitshuffle.h5
@@ -50,9 +50,14 @@ def start_writing(config_file, output_file, n_images):
                                           dtype=dtype, chunks=tuple([1] + shape))
 
             i_image = 0
+            start_time = time()
             while True:
                 if i_image == n_images:
                     break
+
+                if time() - start_time > 1:
+                    start_time = time()
+                    print(i_image)
 
                 try:
                     meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
