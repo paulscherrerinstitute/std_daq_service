@@ -34,11 +34,6 @@ class RamBuffer:
             self.shm.close()
 
     def write(self, image_id, data):
-        if data.shape != self.shape or data.dtype != self.dtype:
-            _logger.error(f"Data shape or dtype mismatch. Expected shape: {self.shape}, dtype: {self.dtype}. "
-                          f"Received shape: {data.shape}, dtype: {data.dtype}")
-            return
-
         offset = (image_id % self.n_slots) * self.data_bytes
         np_array = np.ndarray(self.shape, dtype=self.dtype, buffer=self.shm.buf, offset=offset)
         np_array[:] = data
