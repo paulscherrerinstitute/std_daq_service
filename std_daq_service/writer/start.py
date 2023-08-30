@@ -37,7 +37,7 @@ def start_writing(config_file, output_file, n_images):
     image_metadata_receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
     buffer = RamBuffer(channel_name=detector_name, shape=shape, dtype=dtype,
-                       data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
+                       data_n_bytes=image_n_bytes, n_slots=1000)
 
     image_meta = ImageMetadata()
     try:
