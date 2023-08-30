@@ -9,6 +9,7 @@ import zmq
 from zmq import Again
 
 from std_daq_service.config import load_daq_config
+from std_daq_service.ram_buffer import RamBuffer
 
 _logger = logging.getLogger("Compression")
 
