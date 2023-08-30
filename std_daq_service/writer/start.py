@@ -49,28 +49,33 @@ def start_writing(config_file, output_file, n_images):
                                   compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
                                   dtype=dtype, chunks=tuple([1] + shape))
 
-    i_image = 0
-    while True:
-        try:
-            meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
-            if meta_raw:
-                image_meta.ParseFromString(meta_raw)
-                data = buffer.get_data(image_meta.image_id)
-                print(data)
-                dataset[i_image] = data
-                i_image += 1
+    try:
+        # Initialize HDF5 file and dataset here.
+        with h5py.File(output_file, 'w') as file:
+            dataset = file.create_dataset(detector_name, tuple([n_images] + shape),
+                                          compression=bitshuffle.h5.H5FILTER,
+                                          compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
+                                          dtype=dtype, chunks=tuple([1] + shape))
 
-        except Again:
-            continue
-        except KeyboardInterrupt:
-            break
-        except Exception:
-            _logger.exception("Error in validator loop.")
-            break
-        finally:
-            file.close()
-
-    os.seteuid(0)
+            i_image = 0
+            while True:
+                try:
+                    meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
+                    if meta_raw:
+                        image_meta.ParseFromString(meta_raw)
+                        dataset[i_image] = buffer.get_data(image_meta.image_id)
+                        i_image += 1
+                except Again:
+                    continue
+                except KeyboardInterrupt:
+                    break
+                except Exception:
+                    _logger.exception("Error in validator loop.")
+                    break
+    except Exception as e:
+        _logger.exception(f"Failed to write to file: {e}")
+    finally:
+        os.seteuid(0)
 
 
 def main():
