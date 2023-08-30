@@ -1,6 +1,6 @@
 import argparse
 import logging
-from time import sleep
+from time import sleep, time
 
 import bitshuffle
 import numpy as np
@@ -36,16 +36,32 @@ def start_compression(config_file):
                        data_n_bytes=image_n_bytes, n_slots=1000)
 
     image_meta = ImageMetadata()
+    compressed_bytes = 0
+    uncompressed_bytes = 0
+    start_time = time()
     while True:
         try:
             meta_raw = image_metadata_receiver.recv()
             image_meta.ParseFromString(meta_raw)
 
             data = buffer.get_data(image_meta.image_id)
+            uncompressed_bytes += data.nbytes
+
             compressed_data = bitshuffle.compress_lz4(data, block_size)
+            compressed_bytes += compressed_data.nbytes
+
+            end_time = time()
+            if end_time - start_time > 1:
+                start_time = end_time
+
+                print(f'Uncompressed {uncompressed_bytes/1024/1024} MB/s; '
+                      f'Compressed {compressed_bytes/1024/1024}MB/s; '
+                      f'Ratio {compressed_bytes/uncompressed_bytes}')
+                uncompressed_bytes = 0
+                compressed_bytes = 0
 
         except Again:
-            sleep(1)
+            continue
         except KeyboardInterrupt:
             break
         except Exception:
