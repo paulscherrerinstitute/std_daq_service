@@ -23,7 +23,8 @@ def start_writing(config_file, output_file, n_images):
     detector_name = daq_config['detector_name']
     shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
     dtype = f'uint{daq_config["bit_depth"]}'
-    image_n_bytes = daq_config['bit_depth'] / 8 * daq_config['image_pixel_height'] * daq_config['image_pixel_width']
+    image_n_bytes = int(daq_config['bit_depth'] / 8 *
+                        daq_config['image_pixel_height'] * daq_config['image_pixel_width'])
 
     image_metadata_address = f"ipc:///tmp/{detector_name}-image"
 
