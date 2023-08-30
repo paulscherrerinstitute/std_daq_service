@@ -1,12 +1,17 @@
 import logging
 from multiprocessing.shared_memory import SharedMemory
 
+import numpy as np
+
 _logger = logging.getLogger("RamBuffer")
 
 class RamBuffer:
-    def __init__(self, channel_name, data_n_bytes, n_slots, compression=None):
+    def __init__(self, channel_name, shape, dtype, data_n_bytes, n_slots, compression=None):
         compression_text = 'image' if compression is None else 'compressed'
         self.buffer_name = f'{channel_name}-{compression_text}'
+
+        self.shape = tuple(shape)
+        self.dtype = dtype
 
         self.n_slots = n_slots
         self.data_bytes = data_n_bytes
@@ -24,14 +29,8 @@ class RamBuffer:
             _logger.error("SharedMemory failed: %s not found", self.buffer_name)
             raise
 
-        self.buffer = memoryview(self.shm.buf)
-
     def __del__(self):
-        if self.buffer:
-            self.buffer.release()
-
         if self.shm:
-            self.shm.close()
             self.shm.unlink()
 
     def write(self, image_id, src_data):
@@ -41,9 +40,5 @@ class RamBuffer:
             dst_data[:len(src_data)] = src_data
 
     def get_data(self, image_id):
-        slot_id = image_id % self.n_slots
-        start = slot_id * self.data_bytes
-        end = start + self.data_bytes
-        return self.buffer[start:end]
-
-
+        offset = (image_id % self.n_slots) * self.data_bytes
+        return np.ndarray(self.shape, dtype=self.dtype, buffer=self.shm.buf, offset=offset)

@@ -21,7 +21,9 @@ _logger = logging.getLogger("Compression")
 def start_writing(config_file, output_file, n_images):
     daq_config = load_daq_config(config_file)
     detector_name = daq_config['detector_name']
-    image_n_bytes = daq_config['bit_depth'] * daq_config['image_pixel_height'] * daq_config['image_pixel_width']
+    shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
+    dtype = f'uint{daq_config["bit_depth"]}'
+    image_n_bytes = daq_config['bit_depth'] / 8 * daq_config['image_pixel_height'] * daq_config['image_pixel_width']
 
     image_metadata_address = f"ipc:///tmp/{detector_name}-image"
 
@@ -32,7 +34,8 @@ def start_writing(config_file, output_file, n_images):
     image_metadata_receiver.connect(image_metadata_address)
     image_metadata_receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
-    buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
+    buffer = RamBuffer(channel_name=detector_name, shape=shape, dtype=dtype,
+                       data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
 
     image_meta = ImageMetadata()
 
@@ -40,12 +43,10 @@ def start_writing(config_file, output_file, n_images):
     file = h5py.File(output_file, 'w')
     # block_size = 0 let Bitshuffle choose its value
     block_size = 0
-    dtype = f'uint{daq_config["bit_depth"]}'
-    image_shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
-    dataset = file.create_dataset(detector_name, tuple([n_images] + image_shape),
+    dataset = file.create_dataset(detector_name, tuple([n_images] + shape),
                                   compression=bitshuffle.h5.H5FILTER,
                                   compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
-                                  dtype=dtype, chunks=tuple([1] + image_shape) )
+                                  dtype=dtype, chunks=tuple([1] + shape))
 
     i_image = 0
     while True:
@@ -54,7 +55,7 @@ def start_writing(config_file, output_file, n_images):
             if meta_raw:
                 image_meta.ParseFromString(meta_raw)
 
-                dataset[i_image] = np.frombuffer(buffer.get_data(image_meta.image_id), dtype=dtype).reshape(image_shape)
+                dataset[i_image] = buffer.get_data(image_meta.image_id)
                 i_image += 1
 
         except Again:
