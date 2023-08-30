@@ -40,5 +40,5 @@ class RamBuffer:
             dst_data[:len(src_data)] = src_data
 
     def get_data(self, image_id):
-        offset = (image_id % self.n_slots) * self.data_bytes
+        offset = int((image_id % self.n_slots) * self.data_bytes)
         return np.ndarray(self.shape, dtype=self.dtype, buffer=self.shm.buf, offset=offset)
