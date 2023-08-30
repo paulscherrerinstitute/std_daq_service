@@ -65,9 +65,11 @@ def start_writing(config_file, output_file, n_images):
             break
         except Exception:
             _logger.exception("Error in validator loop.")
-            raise
+            break
         finally:
             file.close()
+
+    os.seteuid(0)
 
 
 def main():
