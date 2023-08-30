@@ -51,6 +51,8 @@ def start_compression(config_file):
             compressed_data = bitshuffle.compress_lz4(data, block_size)
             compressed_bytes += compressed_data.nbytes
 
+            n_compressions += 1
+
             end_time = time()
             if end_time - start_time > 1:
                 start_time = end_time
