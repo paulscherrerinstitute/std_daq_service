@@ -35,10 +35,8 @@ def start_compression(config_file):
     image_metadata_sender = ctx.socket(zmq.PUB)
     image_metadata_sender.bind(compressed_metadata_address)
 
-    input_buffer = RamBuffer(channel_name=detector_name, shape=shape, dtype=dtype,
-                             data_n_bytes=image_n_bytes, n_slots=1000)
-    output_buffer = RamBuffer(channel_name=detector_name, shape=shape, dtype=dtype,
-                              data_n_bytes=image_n_bytes, n_slots=1000)
+    input_buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=1000)
+    output_buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=1000)
 
     image_meta = ImageMetadata()
     compressed_bytes = 0
@@ -51,7 +49,7 @@ def start_compression(config_file):
             image_meta.ParseFromString(meta_raw)
 
             # Compress data into output buffer.
-            data = input_buffer.get_data(image_meta.image_id)
+            data = input_buffer.get_data(image_meta.image_id, shape=shape, dtype=dtype)
             compressed_data = bitshuffle.compress_lz4(data, block_size)
             output_buffer.write(image_meta.image_id, compressed_data)
 

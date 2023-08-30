@@ -7,12 +7,9 @@ _logger = logging.getLogger("RamBuffer")
 
 
 class RamBuffer:
-    def __init__(self, channel_name, shape, dtype, data_n_bytes, n_slots, compression=None):
+    def __init__(self, channel_name, data_n_bytes, n_slots, compression=None):
         compression_text = 'image' if compression is None else 'compressed'
         self.buffer_name = f'{channel_name}-{compression_text}'
-
-        self.shape = tuple(shape)
-        self.dtype = dtype
 
         self.n_slots = n_slots
         self.data_bytes = data_n_bytes
@@ -38,6 +35,6 @@ class RamBuffer:
         output_buffer = np.ndarray(data.shape, dtype=data.dtype, buffer=self.shm.buf, offset=offset)
         output_buffer[:] = data
 
-    def get_data(self, image_id):
+    def get_data(self, image_id, shape, dtype):
         offset = (image_id % self.n_slots) * self.data_bytes
-        return np.ndarray(self.shape, dtype=self.dtype, buffer=self.shm.buf, offset=offset)
+        return np.ndarray(shape, dtype=dtype, buffer=self.shm.buf, offset=offset)
