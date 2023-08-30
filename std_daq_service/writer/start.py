@@ -44,8 +44,8 @@ def start_writing(config_file, output_file, n_images):
         # Initialize HDF5 file and dataset here.
         with h5py.File(output_file, 'w') as file:
             dataset = file.create_dataset(detector_name, tuple([n_images] + shape),
-                                          compression=bitshuffle.h5.H5FILTER,
-                                          compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
+                                          # compression=bitshuffle.h5.H5FILTER,
+                                          # compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
                                           dtype=dtype, chunks=tuple([1] + shape))
 
             i_image = 0
@@ -58,15 +58,12 @@ def start_writing(config_file, output_file, n_images):
                     start_time = time()
                     print(i_image)
 
-
-
                 try:
                     meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
                     if meta_raw:
                         image_meta.ParseFromString(meta_raw)
                         data = buffer.get_data(image_meta.image_id)
-                        compressed_data = bitshuffle.compress_lz4(data, 0)
-                        # dataset[i_image] = data
+                        dataset.id.write_direct_chunk((i_image, 0, 0), data)
                         i_image += 1
 
                 except Again:
