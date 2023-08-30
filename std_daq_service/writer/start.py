@@ -25,6 +25,7 @@ def start_writing(config_file, output_file, n_images):
     dtype = f'uint{daq_config["bit_depth"]}'
     image_n_bytes = int(daq_config['bit_depth'] / 8 *
                         daq_config['image_pixel_height'] * daq_config['image_pixel_width'])
+    block_size = 0
 
     image_metadata_address = f"ipc:///tmp/{detector_name}-image"
 
