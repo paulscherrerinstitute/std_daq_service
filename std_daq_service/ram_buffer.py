@@ -21,7 +21,6 @@ class RamBuffer:
                      f"for data_bytes {self.data_bytes}")
 
         self.shm = None
-        self.buffer = None
 
         try:
             self.shm = SharedMemory(name=self.buffer_name, create=False, size=self.buffer_bytes)
