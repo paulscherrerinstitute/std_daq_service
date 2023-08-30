@@ -42,12 +42,12 @@ def start_writing(config_file, output_file, n_images):
     block_size = 0
     image_shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
     dataset = file.create_dataset(detector_name,
-        [n_images] + image_shape,
-        compression=bitshuffle.h5.H5FILTER,
-        compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
-        dtype=f'uint{daq_config["bit_depth"]}',
-        chunks=[1] + image_shape
-    )
+                                  tuple([n_images] + image_shape),
+                                  compression=bitshuffle.h5.H5FILTER,
+                                  compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
+                                  dtype=f'uint{daq_config["bit_depth"]}',
+                                  chunks=tuple([1] + image_shape)
+                                  )
 
     i_image = 0
     while True:
