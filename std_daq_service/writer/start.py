@@ -4,6 +4,7 @@ import os
 from time import sleep
 
 import bitshuffle
+import bitshuffle.h5
 import h5py
 import numpy as np
 from std_buffer.image_metadata_pb2 import ImageMetadata
