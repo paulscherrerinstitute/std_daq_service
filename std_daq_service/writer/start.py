@@ -39,17 +39,8 @@ def start_writing(config_file, output_file, n_images):
                        data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS)
 
     image_meta = ImageMetadata()
-
-    os.seteuid(daq_config['writer_user_id'])
-    file = h5py.File(output_file, 'w')
-    # block_size = 0 let Bitshuffle choose its value
-    block_size = 0
-    dataset = file.create_dataset(detector_name, tuple([n_images] + shape),
-                                  compression=bitshuffle.h5.H5FILTER,
-                                  compression_opts=(block_size, bitshuffle.h5.H5_COMPRESS_LZ4),
-                                  dtype=dtype, chunks=tuple([1] + shape))
-
     try:
+        os.seteuid(daq_config['writer_user_id'])
         # Initialize HDF5 file and dataset here.
         with h5py.File(output_file, 'w') as file:
             dataset = file.create_dataset(detector_name, tuple([n_images] + shape),
