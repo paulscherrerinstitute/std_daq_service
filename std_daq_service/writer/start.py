@@ -63,7 +63,7 @@ def start_writing(config_file, output_file, n_images):
                     if meta_raw:
                         image_meta.ParseFromString(meta_raw)
                         data = buffer.get_data(image_meta.image_id)
-                        dataset.id.write_direct_chunk((i_image, 0, 0), data)
+                        dataset.id.write_direct_chunk((i_image, 0, 0), bitshuffle.compress_lz4(data, block_size))
                         i_image += 1
 
                 except Again:
