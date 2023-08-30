@@ -5,6 +5,7 @@ import numpy as np
 
 _logger = logging.getLogger("RamBuffer")
 
+
 class RamBuffer:
     def __init__(self, channel_name, shape, dtype, data_n_bytes, n_slots, compression=None):
         compression_text = 'image' if compression is None else 'compressed'
@@ -27,10 +28,6 @@ class RamBuffer:
         except FileNotFoundError:
             _logger.error("SharedMemory failed: %s not found", self.buffer_name)
             raise
-
-    def __del__(self):
-        if self.shm:
-            self.shm.unlink()
 
     def write(self, image_id, src_data):
         dst_data = self.get_data(image_id)
