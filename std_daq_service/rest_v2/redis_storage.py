@@ -32,7 +32,8 @@ class StdDaqRedisStorage(object):
             return None, None
 
     def set_config(self, daq_config):
-        daq_config = dict(daq_config)
+        # TODO: Figure out how to do it properly.
+        daq_config['submodule_info'] = dict(daq_config['submodule_info'])
 
         _logger.info(f"Set config {daq_config} to key {self.KEY_CONFIG}")
         config_id = self.redis.xadd(self.KEY_CONFIG, {FIELD_DAQ_JSON: json.dumps(daq_config)}).decode('utf8')
