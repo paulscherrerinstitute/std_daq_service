@@ -7,7 +7,7 @@ _logger = logging.getLogger("RamBuffer")
 
 
 class RamBuffer:
-    def __init__(self, channel_name, data_n_bytes, n_slots, compression=None):
+    def __init__(self, channel_name, data_n_bytes, n_slots, compression=None, create=False):
         compression_text = 'image' if compression is None else 'compressed'
         self.buffer_name = f'{channel_name}-{compression_text}'
 
@@ -21,7 +21,7 @@ class RamBuffer:
         self.shm = None
 
         try:
-            self.shm = SharedMemory(name=self.buffer_name, create=False, size=self.buffer_bytes)
+            self.shm = SharedMemory(name=self.buffer_name, create=create, size=self.buffer_bytes)
         except FileNotFoundError:
             _logger.error("SharedMemory failed: %s not found", self.buffer_name)
             raise

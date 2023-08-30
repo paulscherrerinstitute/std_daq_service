@@ -36,7 +36,8 @@ def start_compression(config_file):
     image_metadata_sender.bind(compressed_metadata_address)
 
     input_buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=1000)
-    output_buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=1000, compression=True)
+    output_buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=1000,
+                              compression=True, create=True)
 
     image_meta = ImageMetadata()
     compressed_bytes = 0
