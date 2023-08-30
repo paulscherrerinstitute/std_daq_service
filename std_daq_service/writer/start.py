@@ -20,7 +20,7 @@ _logger = logging.getLogger("Compression")
 def start_writing(config_file, output_file, n_images):
     daq_config = load_daq_config(config_file)
     detector_name = daq_config['detector_name']
-    shape = (daq_config['image_pixel_height'], daq_config['image_pixel_width'])
+    shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
     dtype = f'uint{daq_config["bit_depth"]}'
     image_n_bytes = int(daq_config['bit_depth'] / 8 *
                         daq_config['image_pixel_height'] * daq_config['image_pixel_width'])
