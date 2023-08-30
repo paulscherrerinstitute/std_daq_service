@@ -38,6 +38,7 @@ def start_compression(config_file):
     image_meta = ImageMetadata()
     compressed_bytes = 0
     uncompressed_bytes = 0
+    n_compressions = 0
     start_time = time()
     while True:
         try:
@@ -55,10 +56,12 @@ def start_compression(config_file):
                 start_time = end_time
 
                 print(f'Uncompressed {uncompressed_bytes/1024/1024} MB/s; '
-                      f'Compressed {compressed_bytes/1024/1024}MB/s; '
-                      f'Ratio {compressed_bytes/uncompressed_bytes}')
+                      f'Compressed {compressed_bytes/1024/1024} MB/s; '
+                      f'Ratio {compressed_bytes/uncompressed_bytes}; '
+                      f'Frequency {n_compressions} Hz')
                 uncompressed_bytes = 0
                 compressed_bytes = 0
+                n_compressions = 0
 
         except Again:
             continue
