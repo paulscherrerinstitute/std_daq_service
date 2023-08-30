@@ -54,8 +54,9 @@ def start_writing(config_file, output_file, n_images):
             meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
             if meta_raw:
                 image_meta.ParseFromString(meta_raw)
-
-                dataset[i_image] = buffer.get_data(image_meta.image_id)
+                data = buffer.get_data(image_meta.image_id)
+                print(data)
+                dataset[i_image] = data
                 i_image += 1
 
         except Again:
