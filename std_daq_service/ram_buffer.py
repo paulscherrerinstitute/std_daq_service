@@ -35,8 +35,8 @@ class RamBuffer:
 
     def write(self, image_id, data):
         offset = (image_id % self.n_slots) * self.data_bytes
-        np_array = np.ndarray(self.shape, dtype=self.dtype, buffer=self.shm.buf, offset=offset)
-        np_array[:] = data
+        output_buffer = np.ndarray(data.shape, dtype=data.dtype, buffer=self.shm.buf, offset=offset)
+        output_buffer[:] = data
 
     def get_data(self, image_id):
         offset = (image_id % self.n_slots) * self.data_bytes
