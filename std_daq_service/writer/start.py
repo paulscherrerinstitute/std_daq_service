@@ -12,7 +12,6 @@ import zmq
 from zmq import Again
 
 from std_daq_service.config import load_daq_config
-from std_daq_service.image_simulator.start import N_RAM_BUFFER_SLOTS
 from std_daq_service.ram_buffer import RamBuffer
 
 _logger = logging.getLogger("Compression")
@@ -59,11 +58,15 @@ def start_writing(config_file, output_file, n_images):
                     start_time = time()
                     print(i_image)
 
+
+
                 try:
                     meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
                     if meta_raw:
                         image_meta.ParseFromString(meta_raw)
-                        dataset[i_image] = buffer.get_data(image_meta.image_id)
+                        data = buffer.get_data(image_meta.image_id)
+                        compressed_data = bitshuffle.compress_lz4(data, 0)
+                        dataset[i_image] = data
                         i_image += 1
 
                 except Again:
