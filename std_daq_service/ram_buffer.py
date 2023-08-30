@@ -29,11 +29,19 @@ class RamBuffer:
             _logger.error("SharedMemory failed: %s not found", self.buffer_name)
             raise
 
-    def write(self, image_id, src_data):
-        dst_data = self.get_data(image_id)
+    def __del__(self):
+        if self.shm:
+            self.shm.close()
 
-        if src_data is not None:
-            dst_data[:len(src_data)] = src_data
+    def write(self, image_id, data):
+        if data.shape != self.shape or data.dtype != self.dtype:
+            _logger.error(f"Data shape or dtype mismatch. Expected shape: {self.shape}, dtype: {self.dtype}. "
+                          f"Received shape: {data.shape}, dtype: {data.dtype}")
+            return
+
+        offset = (image_id % self.n_slots) * self.data_bytes
+        np_array = np.ndarray(self.shape, dtype=self.dtype, buffer=self.shm.buf, offset=offset)
+        np_array[:] = data
 
     def get_data(self, image_id):
         offset = (image_id % self.n_slots) * self.data_bytes
