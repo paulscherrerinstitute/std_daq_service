@@ -10,3 +10,6 @@ redis
 std-buffer
 fastapi
 uvicorn
+sniffio
+pydantic
+h5py
