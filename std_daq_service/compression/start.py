@@ -9,8 +9,6 @@ import zmq
 from zmq import Again
 
 from std_daq_service.config import load_daq_config
-from std_daq_service.image_simulator.start import N_RAM_BUFFER_SLOTS
-from std_daq_service.ram_buffer import RamBuffer
 
 _logger = logging.getLogger("Compression")
 
@@ -18,35 +16,33 @@ _logger = logging.getLogger("Compression")
 def start_compression(config_file):
     daq_config = load_daq_config(config_file)
     detector_name = daq_config['detector_name']
-    image_n_bytes = daq_config['bit_depth'] * daq_config['image_pixel_height'] * daq_config['image_pixel_width']
+    shape = [daq_config['image_pixel_height'], daq_config['image_pixel_width']]
+    dtype = f'uint{daq_config["bit_depth"]}'
+    image_n_bytes = int(daq_config['bit_depth'] / 8 *
+                        daq_config['image_pixel_height'] * daq_config['image_pixel_width'])
+    block_size = 0
 
-    image_metadata_address = f"ipc:///tmp/{detector_name}-compressed"
+    image_metadata_address = f"ipc:///tmp/{detector_name}-image"
 
     # Receive the image metadata stream from the detector.
     ctx = zmq.Context()
     image_metadata_receiver = ctx.socket(zmq.SUB)
-    image_metadata_receiver.setsockopt(zmq.CONFLATE, 1)
     image_metadata_receiver.connect(image_metadata_address)
     image_metadata_receiver.setsockopt_string(zmq.SUBSCRIBE, "")
+    image_metadata_receiver.setsockopt(zmq.RCVTIMEO, 200)
 
-    buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS,
-                       compression=True)
+    buffer = RamBuffer(channel_name=detector_name, shape=shape, dtype=dtype,
+                       data_n_bytes=image_n_bytes, n_slots=1000)
 
     image_meta = ImageMetadata()
     while True:
         try:
-            meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
-            if meta_raw:
-                image_meta.ParseFromString(meta_raw)
+            meta_raw = image_metadata_receiver.recv()
+            image_meta.ParseFromString(meta_raw)
 
-                compressed_data = buffer.get_data(image_meta.image_id)
-                data = bitshuffle.decompress_lz4(np.array(compressed_data),
-                                                 shape=[image_meta.height, image_meta.width],
-                                                 dtype=np.uint16)
+            data = buffer.get_data(image_meta.image_id)
+            compressed_data = bitshuffle.compress_lz4(data, block_size)
 
-                print(data)
-
-            sleep(1)
         except Again:
             sleep(1)
         except KeyboardInterrupt:
