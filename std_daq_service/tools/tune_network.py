@@ -40,8 +40,10 @@ def get_module_id_to_irq_map(interface):
 def set_irq_to_core(irq, core_id):
     irq_file = f"/proc/irq/{irq}/smp_affinity_list"
 
+    # TODO: Convert to bitmask format
+    core_text = str(core_id)
     with open(irq_file, 'w') as output_file:
-        output_file.write(str(core_id))
+        output_file.write(core_text)
 
 
 def tune(machine_config, interface, start_udp_port):
@@ -50,6 +52,7 @@ def tune(machine_config, interface, start_udp_port):
     map_module_to_cpu = get_module_id_to_cpu_id_map(machine_config=machine_config)
     map_module_id_to_irq = get_module_id_to_irq_map(interface)
 
+    # Delete all present rules.
     cmd = f"ethtool -u {interface} | grep Filter: | awk '{{print $2}}' | xargs -L1 ethtool -U {interface} delete"
     subprocess.run(cmd, shell=True)
 

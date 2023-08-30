@@ -6,7 +6,7 @@ import logging
 import zmq
 from tifffile import tifffile
 
-from std_daq_service.image_simulator.ram_buffer import RamBuffer
+from std_daq_service.ram_buffer import RamBuffer
 from std_daq_service.rest_v2.utils import set_ipc_rights
 from std_buffer.image_metadata_pb2 import ImageMetadata, ImageMetadataStatus, GFImageMetadata, JFImageMetadata, EGImageMetadata
 
