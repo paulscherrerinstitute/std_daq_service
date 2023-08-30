@@ -51,12 +51,16 @@ def start_writing(config_file, output_file, n_images):
 
             i_image = 0
             while True:
+                if i_image == n_images:
+                    break
+
                 try:
                     meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
                     if meta_raw:
                         image_meta.ParseFromString(meta_raw)
                         dataset[i_image] = buffer.get_data(image_meta.image_id)
                         i_image += 1
+
                 except Again:
                     continue
                 except KeyboardInterrupt:
