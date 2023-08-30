@@ -66,7 +66,7 @@ def start_writing(config_file, output_file, n_images):
                         image_meta.ParseFromString(meta_raw)
                         data = buffer.get_data(image_meta.image_id)
                         compressed_data = bitshuffle.compress_lz4(data, 0)
-                        dataset[i_image] = data
+                        # dataset[i_image] = data
                         i_image += 1
 
                 except Again:
