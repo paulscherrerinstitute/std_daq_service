@@ -52,7 +52,7 @@ def start_compression(config_file):
 
                 frame = ((data - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
                 frame = cv2.flip(frame, 0)
-                image = cv2.resize(frame, 800, 600)
+                image = cv2.resize(frame, (800, 600))
                 # apply a color scheme to the grayscale image
                 image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
 
