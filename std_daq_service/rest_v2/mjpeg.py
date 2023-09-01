@@ -45,15 +45,13 @@ class MJpegLiveStream(object):
                 meta = json.loads(raw_meta.decode('utf-8'))
                 new_frame = np.frombuffer(raw_data, dtype=meta['type']).reshape(meta['shape'])
 
-                # Flip the image vertically.
-                new_frame = cv2.flip(new_frame, 0)
-
                 # Scale image to 8 bits with full range.
                 min_val = new_frame.min()
                 max_val = new_frame.max() or 1
 
                 frame = ((new_frame - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
                 image_id = meta["frame"]
+                frame = cv2.flip(frame, 0)
 
                 n_timeouts = 0
 
