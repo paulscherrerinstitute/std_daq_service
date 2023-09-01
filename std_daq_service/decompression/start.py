@@ -40,7 +40,7 @@ def start_compression(config_file):
                 image_meta.ParseFromString(meta_raw)
 
                 compressed_data = buffer.get_data(image_meta.image_id, (image_meta.size,), 'uint8')
-                data = bitshuffle.decompress_lz4(np.array(compressed_data),
+                data = bitshuffle.decompress_lz4(compressed_data,
                                                  shape=[image_meta.height, image_meta.width],
                                                  dtype=np.uint16)
 
