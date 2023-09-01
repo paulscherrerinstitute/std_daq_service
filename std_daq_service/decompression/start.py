@@ -18,7 +18,7 @@ _logger = logging.getLogger("Compression")
 def start_compression(config_file):
     daq_config = load_daq_config(config_file)
     detector_name = daq_config['detector_name']
-    image_n_bytes = daq_config['bit_depth'] * daq_config['image_pixel_height'] * daq_config['image_pixel_width']
+    image_n_bytes = daq_config['bit_depth'] * daq_config['image_pixel_height'] * daq_config['image_pixel_width'] / 8
 
     image_metadata_address = f"ipc:///tmp/{detector_name}-compressed"
 
