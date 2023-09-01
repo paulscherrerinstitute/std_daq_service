@@ -3,6 +3,7 @@ import logging
 from time import sleep
 
 import bitshuffle
+import cv2
 import numpy as np
 from std_buffer.image_metadata_pb2 import ImageMetadata
 import zmq
@@ -34,6 +35,7 @@ def start_compression(config_file):
 
     image_meta = ImageMetadata()
     while True:
+        written = False
         try:
             meta_raw = image_metadata_receiver.recv(flags=zmq.NOBLOCK)
             if meta_raw:
@@ -41,10 +43,25 @@ def start_compression(config_file):
 
                 compressed_data = buffer.get_data(image_meta.image_id, (image_meta.size,), 'uint8')
                 data = bitshuffle.decompress_lz4(compressed_data,
-                                                 shape=[image_meta.height, image_meta.width],
-                                                 dtype=np.uint16)
+                                                 shape=(image_meta.height, image_meta.width),
+                                                 dtype=np.dtype('uint16'))
 
-                print(data)
+                # Scale image to 8 bits with full range.
+                min_val = data.min()
+                max_val = data.max() or 1
+
+                frame = ((data - min_val) * (255.0 / (max_val - min_val))).clip(0, 255).astype(np.uint8)
+                frame = cv2.flip(frame, 0)
+                image = cv2.resize(frame, 800, 600)
+                # apply a color scheme to the grayscale image
+                image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
+
+                _, buffer = cv2.imencode('.jpg', image)
+                image_bytes = buffer.tobytes()
+                if not written:
+                    with open('output.jpg', 'bw') as output_file:
+                        output_file.write(image_bytes)
+                    written = True
 
             sleep(1)
         except Again:
