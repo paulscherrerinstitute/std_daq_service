@@ -29,7 +29,7 @@ def start_compression(config_file):
     image_metadata_receiver.connect(image_metadata_address)
     image_metadata_receiver.setsockopt_string(zmq.SUBSCRIBE, "")
 
-    buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=N_RAM_BUFFER_SLOTS,
+    buffer = RamBuffer(channel_name=detector_name, data_n_bytes=image_n_bytes, n_slots=1000,
                        compression=True)
 
     image_meta = ImageMetadata()
