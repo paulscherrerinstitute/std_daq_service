@@ -41,6 +41,7 @@ setup(
         std_daq_image_simulator=std_daq_service.image_simulator.start:main
         std_daq_file_validator=std_daq_service.file_validator.start:main
         std_daq_stream_compressed=std_daq_service.compression.start:main
+        std_daq_stream_decompressed=std_daq_service.decompression.start:main
         std_daq_writer=std_daq_service.writer.start:main
         
         std_cli_tune_network=std_daq_service.tools.tune_network:main
