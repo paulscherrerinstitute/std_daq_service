@@ -56,11 +56,12 @@ def start_compression(config_file):
                 # apply a color scheme to the grayscale image
                 image = cv2.applyColorMap(image, cv2.COLORMAP_HOT)
 
-                _, buffer = cv2.imencode('.jpg', image)
-                image_bytes = buffer.tobytes()
+                _, buffer_io = cv2.imencode('.jpg', image)
+                image_bytes = buffer_io.tobytes()
                 if not written:
                     with open('output.jpg', 'bw') as output_file:
                         output_file.write(image_bytes)
+                    nonlocal written
                     written = True
 
             sleep(1)
