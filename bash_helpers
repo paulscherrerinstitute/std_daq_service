@@ -3,11 +3,14 @@ alias std_service_list="ls /etc/systemd/system/std_*.service | xargs -n 1 basena
 alias std_service_logs_writer="ls /etc/systemd/system/std_det_writer* | xargs basename | xargs journalctl -n30 -fu"
 alias std_service_logs_rest="ls /etc/systemd/system/std_daq_rest* | xargs basename | xargs journalctl -n 30 -fu"
 alias std_service_logs_live="ls /etc/systemd/system/std_live_stream* | xargs basename | xargs journalctl -n30 -fu"
-alias std_service_logs_sim_udp="ls /etc/systemd/system/std_daq_udp_simulator* | xargs basename | xargs journalctl -n30 -fu"
+alias std_service_logs_udp_sim="ls /etc/systemd/system/std_daq_udp_simulator* | xargs basename | xargs journalctl -n30 -fu"
 alias std_service_logs_file_validator="ls /etc/systemd/system/std_daq_file_validator* | xargs basename | xargs journalctl -n30 -fu"
+alias std_service_logs_compress="ls /etc/systemd/system/std_data_compress* | xargs basename | xargs journalctl -n30 -fu"
 
 alias std_service_restart_all="ls /etc/systemd/system/std_*service | grep -v 'watcher' | xargs -n 1 basename | xargs sudo systemctl restart"
 alias std_service_restart_rest="ls /etc/systemd/system/std_daq_rest* | xargs basename | xargs sudo systemctl restart"
 alias std_service_restart_writer="ls /etc/systemd/system/std_det_writer* | xargs basename | xargs sudo systemctl restart"
 alias std_service_restart_live="ls /etc/systemd/system/std_live_stream* | xargs basename | xargs sudo systemctl restart"
-alias std_service_restart_sim_udp="ls /etc/systemd/system/std_daq_udp_simulator* | xargs basename | xargs sudo systemctl restart"
+alias std_service_restart_udp_sim="ls /etc/systemd/system/std_daq_udp_simulator* | xargs basename | xargs sudo systemctl restart"
+alias std_service_restart_udp_recv="ls /etc/systemd/system/std_udp_recv*.service | grep -v 'watcher' | xargs -n 1 basename | xargs sudo systemctl restart"
+
