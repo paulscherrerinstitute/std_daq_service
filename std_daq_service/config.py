@@ -43,6 +43,9 @@ def get_stream_addresses(detector_name):
 
     return command_address, in_status_address, out_status_address, image_metadata_address
 
+def get_compressed_stream_address(detector_name):
+    return f'{IPC_BASE}/{detector_name}-compressed'
+
 
 def update_config(old_config, config_updates):
     if old_config is not None:

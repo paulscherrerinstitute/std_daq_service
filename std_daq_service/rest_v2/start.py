@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from redis.client import Redis
 from uvicorn import run
 
-from std_daq_service.config import load_daq_config, get_stream_addresses
+from std_daq_service.config import load_daq_config, get_stream_addresses, get_compressed_stream_address
 from std_daq_service.rest_v2.daq import DaqRestManager
 from std_daq_service.rest_v2.logs import LogsLogger
 from std_daq_service.rest_v2.mjpeg import MJpegLiveStream
@@ -36,6 +36,7 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
 
         command_address, in_status_address, out_status_address, image_metadata_address = \
             get_stream_addresses(detector_name)
+        compressed_image_metadata_address =  get_compressed_stream_address(detector_name)
 
         redis_host, redis_port = redis_url.split(':')
         _logger.info(f"Connecting to Redis {redis_host}:{redis_port}")
@@ -56,10 +57,11 @@ def start_api(config_file, rest_port, sim_url_base, redis_url, live_stream_url):
         ctx = zmq.Context()
 
         writer_driver = WriterDriver(ctx, command_address, in_status_address, out_status_address,
-                                     image_metadata_address)
+                                     compressed_image_metadata_address)
         writer_manager = WriterRestManager(writer_driver=writer_driver)
 
         status_logger = StatusLogger(ctx=ctx, storage=storage, writer_status_url=out_status_address)
+        # TODO: Add stats about compression.
         stats_logger = StatsLogger(ctx, storage=storage, image_stream_url=image_metadata_address,
                                    writer_status_url=out_status_address)
         logs_logger = LogsLogger(ctx, writer_driver.out_status_address, storage)
