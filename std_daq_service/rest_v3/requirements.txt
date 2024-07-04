@@ -1,0 +1,6 @@
+fastapi==0.70.0
+uvicorn==0.15.0
+jsonschema==4.2.1
+requests==2.26.0
+pyzmq==22.3.0
+
