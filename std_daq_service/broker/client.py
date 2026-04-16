@@ -11,8 +11,8 @@ _logger = getLogger("BrokerClient")
 
 
 class BrokerClient(BrokerClientBase):
-    def __init__(self, broker_url, tag, status_callback=None):
-        super().__init__(broker_url, tag)
+    def __init__(self, broker_url, tag, status_callback=None, **kwargs):
+        super().__init__(broker_url, tag, **kwargs)
 
         self.bind_queue(STATUS_EXCHANGE, tag, self._status_callback, True)
 
