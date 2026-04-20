@@ -13,9 +13,9 @@ from std_daq_service.start_utils import default_service_setup
 _logger = logging.getLogger("RestProxyService")
 
 
-def start_rest_api(service_name, broker_url, tag, config_file):
+def start_rest_api(service_name, broker_url, broker_username, broker_password, tag, config_file):
     app = Flask(service_name)
-    manager = RestManager(broker_url=broker_url, tag=tag)
+    manager = RestManager(broker_url=broker_url, broker_username=broker_username, broker_password=broker_password, tag=tag)
 
     @app.route("/write_sync", methods=['POST'])
     def write_sync_request():
@@ -80,15 +80,23 @@ if __name__ == "__main__":
     parser.add_argument("tag", type=str, help="Tag on which the proxy listens to statuses and sends requests.")
     parser.add_argument("--broker_url", default=TEST_BROKER_URL,
                         help="Address of the broker to connect to.")
+    parser.add_argument("--broker_username", default=None,
+                        help="User name for broker authentication")
+    parser.add_argument("--broker_password", default=None,
+                        help="Password for broker authentication")
 
     service_name, config, args = default_service_setup(parser)
     broker_url = args.broker_url
+    broker_username = args.broker_username
+    broker_password = args.broker_password
     tag = args.tag
 
     _logger.info(f'Service {service_name} connecting to {broker_url}.')
 
     start_rest_api(service_name=service_name,
                    broker_url=args.broker_url,
+                   broker_username=broker_username,
+                   broker_password=broker_password,
                    tag=args.tag,
                    config_file=args.json_config_file)
 

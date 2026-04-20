@@ -39,9 +39,9 @@ class StdDaqAPIError(NoTraceBackWithLineNumber):
     pass
 
 
-def start_rest_api(service_name, broker_url, tag, config_file):
+def start_rest_api(service_name, broker_url, broker_username, broker_password, tag, config_file):
     app = Flask(service_name)
-    manager = RestManager(broker_url=broker_url, tag=tag)
+    manager = RestManager(broker_url=broker_url, broker_username=broker_username, broker_password=broker_password, tag=tag)
 
     @app.route("/alive", methods=["GET"])
     def alive():
@@ -123,8 +123,22 @@ if __name__ == "__main__":
         help="Address of the broker to connect to.",
     )
 
+    parser.add_argument(
+        "--broker_username",
+        default=None,
+        help="User name for broker authentication"
+    )
+
+    parser.add_argument(
+        "--broker_password",
+        default=None,
+        help="Password for broker authentication"
+    )
+
     service_name, config, args = default_service_setup(parser)
     broker_url = args.broker_url
+    broker_username = args.broker_username
+    broker_password = args.broker_password
     tag = args.tag
 
     _logger.info(f"Service {service_name} connecting to {broker_url}.")
@@ -132,6 +146,8 @@ if __name__ == "__main__":
     start_rest_api(
         service_name=service_name,
         broker_url=args.broker_url,
+        broker_username=broker_username,
+        broker_password=broker_password,
         tag=args.tag,
         config_file=args.json_config_file,
     )
