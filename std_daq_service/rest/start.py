@@ -68,7 +68,7 @@ def start_rest_api(service_name, broker_url, broker_username, broker_password, t
                     response = make_response(jsonify(get_eiger_status()),200,)
                 else:
                     response = make_response(jsonify({'response':'Eiger command not found.'}),200,)
-            
+
             response.headers["Content-Type"] = "application/json"
             return response
 
@@ -94,10 +94,10 @@ if __name__ == "__main__":
     _logger.info(f'Service {service_name} connecting to {broker_url}.')
 
     start_rest_api(service_name=service_name,
-                   broker_url=args.broker_url,
+                   broker_url=broker_url,
                    broker_username=broker_username,
                    broker_password=broker_password,
-                   tag=args.tag,
+                   tag=tag,
                    config_file=args.json_config_file)
 
-    _logger.info(f'Service {args.service_name} stopping.')
+    _logger.info(f'Service {service_name} stopping.')

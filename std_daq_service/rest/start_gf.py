@@ -145,11 +145,11 @@ if __name__ == "__main__":
 
     start_rest_api(
         service_name=service_name,
-        broker_url=args.broker_url,
+        broker_url=broker_url,
         broker_username=broker_username,
         broker_password=broker_password,
-        tag=args.tag,
+        tag=tag,
         config_file=args.json_config_file,
     )
 
-    _logger.info(f"Service {args.service_name} stopping.")
+    _logger.info(f"Service {service_name} stopping.")
