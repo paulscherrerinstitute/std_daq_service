@@ -18,7 +18,7 @@ class BrokerClient(BrokerClientBase):
 
         self.user_status_callback = status_callback
 
-        _logger.info(f"Broker client starting.")
+        _logger.info("Broker client starting.")
 
         self.start()
 
