@@ -84,11 +84,17 @@ def main():
     parser.add_argument("--agg", action="store_true", help="Aggregate status reporting.")
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
+    parser.add_argument("--broker_username", type=str, help="User name for broker authentication",
+                        default=os.environ.get("BROKER_USERNAME"))
+    parser.add_argument("--broker_password", type=str, help="Password for broker authentication",
+                        default=os.environ.get("BROKER_PASSWORD"))
     parser.add_argument("--tag", type=str, help="Tag on which to send the request.", default="#")
 
     args = parser.parse_args()
 
     broker_url = args.broker_url
+    broker_username = args.broker_username
+    broker_password = args.broker_password
     tag = args.tag
     aggregate_output = args.agg
 
@@ -101,7 +107,7 @@ def main():
     else:
         f_on_status_message = print_to_console_raw
 
-    client = BrokerClient(broker_url=broker_url, tag=tag, status_callback=f_on_status_message)
+    client = BrokerClient(broker_url=broker_url, username=broker_username, password=broker_password, tag=tag, status_callback=f_on_status_message)
 
     print("Connected. Waiting for messages.")
 

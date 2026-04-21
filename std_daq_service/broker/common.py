@@ -2,7 +2,7 @@ import uuid
 from logging import getLogger
 from threading import Thread
 
-from pika import BlockingConnection, ConnectionParameters
+from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 
 _logger = getLogger("broker_utils")
 
@@ -23,10 +23,11 @@ ACTION_REQUEST_FAIL = "request_fail"
 
 
 class BrokerClientBase(object):
-    def __init__(self, broker_url, tag):
+    def __init__(self, broker_url, tag, username=None, password=None):
         self.tag = tag
 
-        self.connection = BlockingConnection(ConnectionParameters(broker_url))
+        credentials = PlainCredentials(username, password) if username else ConnectionParameters.DEFAULT_CREDENTIALS
+        self.connection = BlockingConnection(ConnectionParameters(broker_url, credentials=credentials))
         self.channel = self.connection.channel()
         self.channel.basic_qos(prefetch_count=1)
 

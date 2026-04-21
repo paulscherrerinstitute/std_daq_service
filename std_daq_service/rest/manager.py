@@ -3,9 +3,10 @@ from std_daq_service.broker.status_aggregator import StatusAggregator
 
 
 class RestManager(object):
-    def __init__(self, broker_url, tag):
+    def __init__(self, broker_url, tag, broker_username=None, broker_password=None):
         self.status_aggregator = StatusAggregator()
         self.broker_client = BrokerClient(broker_url, tag,
+                                          username=broker_username, username=broker_password,
                                           status_callback=self.status_aggregator.on_status_message)
 
     def write_sync(self, message):

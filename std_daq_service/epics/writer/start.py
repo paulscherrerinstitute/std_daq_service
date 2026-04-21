@@ -9,12 +9,14 @@ from std_daq_service.start_utils import default_service_setup
 _logger = logging.getLogger("EpicsWriter")
 
 
-def start_epics_writer(service_name, broker_url, redis_host, redis_port, tag):
+def start_epics_writer(service_name, broker_url, broker_username, broker_password, redis_host, redis_port, tag):
     _logger.info(f'Epics buffer writer {service_name} listening on broker {broker_url} on buffer {redis_host}.')
 
     service = EpicsWriterService(redis_host=redis_host, redis_port=redis_port)
 
     listener = PrimaryBrokerService(broker_url=broker_url,
+                                    username=broker_username,
+                                    password=broker_password,
                                     service_name=service_name,
                                     tag=tag,
                                     request_callback=service.on_request,
@@ -27,6 +29,10 @@ def main():
     parser = argparse.ArgumentParser(description='Epics buffer writer service')
     parser.add_argument("--broker_url", type=str, help="Host of broker instance.",
                         default=os.environ.get("BROKER_HOST", '127.0.0.1'))
+    parser.add_argument("--broker_username", type=str, help="User name for broker authentication",
+                        default=os.environ.get("BROKER_USERNAME"))
+    parser.add_argument("--broker_password", type=str, help="Password for broker authentication",
+                        default=os.environ.get("BROKER_PASSWORD"))
     parser.add_argument("--redis_host", type=str, help="Host of redis instance.",
                         default=os.environ.get("REDIS_HOST", "localhost"))
     parser.add_argument("--redis_port", type=int, help='Port of redis instance',
@@ -36,11 +42,13 @@ def main():
     service_name, config, args = default_service_setup(parser)
 
     broker_url = args.broker_url
+    broker_username = args.broker_username
+    broker_password = args.broker_password
     redis_host = args.redis_host
     redis_port = args.redis_port
     tag = args.tag
 
-    service, listener = start_epics_writer(service_name, broker_url, redis_host, redis_port, tag)
+    service, listener = start_epics_writer(service_name, broker_url, broker_username, broker_password, redis_host, redis_port, tag)
 
     try:
         listener.block()
